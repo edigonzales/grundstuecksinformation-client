@@ -43,7 +43,7 @@ public class MapPresets {
 
         
         ImageWmsParams imageWMSParams = OLFactory.createOptions();
-        imageWMSParams.setLayers("Fixpunkte,Hoheitsgrenzen,Nomenklatur,Rohrleitungen,Gebaeudeadressen,Liegenschaften,SOOBJ,SOPT,SOLI,SOSF,LCOBJ,LCSFPROJ,LCSF");
+        imageWMSParams.setLayers("LCSF,LCSFPROJ,LCOBJ,SOSF,SOOBJ,SOLI,SOPT,Liegenschaften,Gebaeudeadressen,Nomenklatur,Rohrleitungen,Hoheitsgrenzen,Fixpunkte");
         imageWMSParams.set("FORMAT", "image/jpeg");
         imageWMSParams.set("TRANSPARENT", "false");
         
