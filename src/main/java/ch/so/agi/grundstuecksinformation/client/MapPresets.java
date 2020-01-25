@@ -51,7 +51,7 @@ public class MapPresets {
         
         TileWmsParams imageWMSParams = OLFactory.createOptions();
         imageWMSParams.setLayers("LCSF,LCSFPROJ,LCOBJ,SOSF,SOOBJ,SOLI,SOPT,Liegenschaften,Gebaeudeadressen,Nomenklatur,Rohrleitungen,Hoheitsgrenzen,Fixpunkte");
-        imageWMSParams.set("FORMAT", "image/jpeg");
+        imageWMSParams.set("FORMAT", "image/png; mode=8bit");
         imageWMSParams.set("TRANSPARENT", "false");
 
         //ImageWmsOptions imageWMSOptions = OLFactory.createOptions();
