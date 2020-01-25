@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -43,6 +44,11 @@ public class EgridServiceImpl extends RemoteServiceServlet implements EgridServi
             "https://geo.so.ch/api/oereb/")
             .collect(Collectors.toList());    
     
+    private List<String> wfsUrlTemplateList = Stream.of(
+            "https://wfs.geodienste.ch/av/deu?&VERSION=1.0.0&SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:DPRSF&Filter=<Filter><PropertyIsEqualTo><PropertyName>EGRIS_EGRID</PropertyName><Literal>%s</Literal></PropertyIsEqualTo></Filter>", 
+            "https://wfs.geodienste.ch/av/deu?&VERSION=1.0.0&SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:RESF&Filter=<Filter><PropertyIsEqualTo><PropertyName>EGRIS_EGRID</PropertyName><Literal>%s</Literal></PropertyIsEqualTo></Filter>")
+            .collect(Collectors.toList());    
+        
     // see:
     // https://stackoverflow.com/questions/51874785/gwt-spring-boot-autowired-is-not-working
     @Override
@@ -92,11 +98,28 @@ public class EgridServiceImpl extends RemoteServiceServlet implements EgridServi
             egridObj.setEgrid(egridXmlList.get(i).getValue());
             egridObj.setNumber(egridXmlList.get(i+1).getValue());
             egridObj.setIdentDN(egridXmlList.get(i+2).getValue());
-            logger.info(egridObj.toString());
             
+            // Does not work either since RESF (Liegenschaften) are
+            // too slow to query.
+            // No index on EGRIS_EGRID?
+            /*
+            for (String wfsUrlTemplate : wfsUrlTemplateList) {
+                String wfsUrl = String.format(wfsUrlTemplate, egridObj.getEgrid());
+                logger.info("wfs url: " + wfsUrl);
+                
+                URL url = new URL(wfsUrl);
+                String content;
+                try (Scanner scanner = new Scanner(url.openStream(), String.valueOf("UTF-8"))) {
+                    content = scanner.useDelimiter("\\A").next();
+                }
+                logger.info(content);
+            }
+            */
+
+            logger.info(egridObj.toString());
             egridList.add(egridObj);
         }
-        
+
         EgridResponse response = new EgridResponse();
         response.setEgrid(egridList);
         return response;

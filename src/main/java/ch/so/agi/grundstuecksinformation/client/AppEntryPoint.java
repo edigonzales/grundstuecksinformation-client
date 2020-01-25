@@ -1,28 +1,22 @@
 package ch.so.agi.grundstuecksinformation.client;
 
-import org.jboss.gwt.elemento.core.Elements;
-import static org.jboss.gwt.elemento.core.Elements.b;
-import static org.jboss.gwt.elemento.core.Elements.div;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.dominokit.domino.ui.Typography.Strong;
-import org.dominokit.domino.ui.alerts.Alert;
-import org.dominokit.domino.ui.loaders.Loader;
-import org.dominokit.domino.ui.loaders.LoaderEffect;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsonUtils;
+import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
 
 import ch.so.agi.grundstuecksinformation.shared.EgridResponse;
 import ch.so.agi.grundstuecksinformation.shared.EgridService;
@@ -30,6 +24,7 @@ import ch.so.agi.grundstuecksinformation.shared.EgridServiceAsync;
 import ch.so.agi.grundstuecksinformation.shared.SettingsResponse;
 import ch.so.agi.grundstuecksinformation.shared.SettingsService;
 import ch.so.agi.grundstuecksinformation.shared.SettingsServiceAsync;
+import ch.so.agi.grundstuecksinformation.shared.models.Egrid;
 import elemental2.core.Global;
 import elemental2.dom.CSSProperties;
 import elemental2.dom.HTMLDivElement;
@@ -44,6 +39,13 @@ import ol.format.GeoJson;
 import static elemental2.dom.DomGlobal.fetch;
 import static elemental2.dom.DomGlobal.console;
 import elemental2.dom.Response;
+import gwt.material.design.addins.client.window.MaterialWindow;
+import gwt.material.design.client.constants.Color;
+import gwt.material.design.client.ui.MaterialIcon;
+import gwt.material.design.client.ui.MaterialLoader;
+import gwt.material.design.client.ui.MaterialPanel;
+import gwt.material.design.client.ui.MaterialRow;
+import gwt.material.design.client.ui.html.Div;
 
 public class AppEntryPoint implements EntryPoint {
     private MainMessages messages = GWT.create(MainMessages.class);
@@ -54,6 +56,8 @@ public class AppEntryPoint implements EntryPoint {
     
     private NumberFormat fmtDefault = NumberFormat.getDecimalFormat();
     private NumberFormat fmtPercent = NumberFormat.getFormat("#0.0");
+    
+    private MaterialWindow realEstateWindow;
     
     private String identifyRequestTemplate = "https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=%s,%s&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=%s,%s,%s,%s&returnGeometry=true&sr=2056&tolerance=10";
 
@@ -75,16 +79,20 @@ public class AppEntryPoint implements EntryPoint {
     private void init() {                        
         GWT.log("fubar");
         
-        //HTMLElement el = Elements.div().style("background-color: hotpink; width: 600px; height: 700px;").element();
-        HTMLElement el = Elements.div().element();
-        el.setAttribute("id", "map");
-        Elements.body().add(el);
-        
-        //Map map = MapPresets.getBlackAndWhiteMap(el.getAttribute("id"));
-        Map map = MapPresets.getCadastralSurveyingWms(el.getAttribute("id"));
-        map.addSingleClickListener(new MapSingleClickListener());
+        Div mapDiv = new Div();
+        mapDiv.setId("map");
 
-        //Loader loader = Loader.create(el, LoaderEffect.PULSE).start();
+        RootPanel.get().add(mapDiv);
+        
+        //Map map = MapPresets.getBlackAndWhiteMap(mapDiv.getId());
+        Map map = MapPresets.getCadastralSurveyingWms(mapDiv.getId());
+        map.addSingleClickListener(new MapSingleClickListener());
+    }
+    
+    private void resetGui() {
+        if (realEstateWindow != null) {
+            realEstateWindow.removeFromParent();
+        }
     }
     
     private void sendCoordinateToServer(String XY, MapBrowserEvent event) {
@@ -108,27 +116,65 @@ public class AppEntryPoint implements EntryPoint {
             @Override
             public void onSuccess(EgridResponse result) {
                 GWT.log("SUCCESS!!!!"); 
+                resetGui();
                 
-                
-                GWT.log(result.getEgrid().get(0).getEgrid());
-                
-                
-                Alert alert = Alert.success()
-                .appendChild(Strong.of("Well done! "))
-                .appendChild("You successfully read this important alert message.")
-                .dismissible();
-                
-                
-                alert.style().cssText("position: absolute !important; top:20px !important;");
-                
-//                alert.element().clientHeight = 500;
-//                alert.element().clientWidth = 500;
-//                alert.element().clientTop = 20;
-//                alert.element().clientLeft = 20;
-                
-                Elements.body().add(alert);
-                
-                
+                String egrid;
+                List<Egrid> egridList = result.getEgrid();
+                if (egridList.size() > 1) {
+                    realEstateWindow = new MaterialWindow();
+                    realEstateWindow.setTitle(messages.realEstatePlural());
+                    realEstateWindow.setFontSize("16px");
+                    realEstateWindow.setMarginLeft(0);
+                    realEstateWindow.setMarginRight(0);
+                    realEstateWindow.setWidth("300px");
+                    realEstateWindow.setToolbarColor(Color.GREEN_LIGHTEN_1);
+
+                    MaterialIcon maximizeIcon = realEstateWindow.getIconMaximize();
+                    maximizeIcon.getElement().getStyle().setProperty("visibility", "hidden");
+
+                    realEstateWindow.setMaximize(false);
+                    realEstateWindow.setTop(event.getPixel().getY());
+                    realEstateWindow.setLeft(event.getPixel().getX());
+  
+                    MaterialPanel realEstatePanel = new MaterialPanel();
+
+                    for (Egrid egridObj : egridList) {
+                        egrid = (String) egridObj.getEgrid();                        
+                        String number = egridObj.getNumber();
+
+                        MaterialRow row = new MaterialRow();
+                        row.setId(egrid);
+                        row.setMarginBottom(0);
+                        row.setPadding(5);
+                        row.add(new Label(messages.realEstateAbbreviation() + ": " + number + " (unknown...)"));
+
+                        row.addClickHandler(event -> {
+                            realEstateWindow.removeFromParent();
+                            GWT.log("get extract from click for (multiple result): " + row.getId());
+
+                            MaterialLoader.loading(true);
+//                            sendEgridToServer(row.getId());
+                        });
+
+                        row.addMouseOverHandler(event -> {
+                            row.setBackgroundColor(Color.GREY_LIGHTEN_3);
+                            row.getElement().getStyle().setCursor(Cursor.POINTER);
+//                            ol.layer.Vector vlayer = createRealEstateVectorLayer(feature.getGeometry());
+//                            map.addLayer(vlayer);
+                        });
+
+                        row.addMouseOutHandler(event -> {
+                            row.setBackgroundColor(Color.WHITE);
+                            row.getElement().getStyle().setCursor(Cursor.DEFAULT);
+//                            removeRealEstateVectorLayer();
+                        });
+                        
+                        realEstatePanel.add(row);
+                    }
+                    
+                    realEstateWindow.add(realEstatePanel);
+                    realEstateWindow.open();
+                }                
             }
         });
     }
@@ -190,11 +236,12 @@ public class AppEntryPoint implements EntryPoint {
         }
     }
     
-
+    // Update the URL in the browser without reloading the page.
     private static native void updateURLWithoutReloading(String newUrl) /*-{
         $wnd.history.pushState(newUrl, "", newUrl);
     }-*/;
     
+    // String.format() is not available in GWT.
     public static String format(final String format, final String... args) {
         String[] split = format.split("%s");
         final StringBuffer msg = new StringBuffer();

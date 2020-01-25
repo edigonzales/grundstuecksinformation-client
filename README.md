@@ -31,3 +31,12 @@ Testrequests:
 - https://oereb.geo.sh.ch/oereb/extract/reduced/pdf/CH330871542766 
 - https://oereb.geo.sh.ch/oereb/getegrid/xml/?XY=2688777,1283230
  
+
+
+```
+https://wfs.geodienste.ch/av/deu?&VERSION=1.0.0&SERVICE=WFS&REQUEST=DescribeFeatureType&TYPENAME=ms:DPRSF
+
+https://wfs.geodienste.ch/av/deu?&VERSION=1.0.0&SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:DPRSF&Filter=<Filter><ogc:Intersect><PropertyName>ms:msGeometry</PropertyName><gml:Point srsName="EPSG:2056"><gml:coordinates>2610925.833,1230102.086</gml:coordinates></gml:Point></ogc:Intersect></Filter>
+
+https://wfs.geodienste.ch/av/deu?&VERSION=1.0.0&SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:DPRSF&Filter=<Filter><PropertyIsEqualTo><PropertyName>EGRIS_EGRID</PropertyName><Literal>CH484832069937</Literal></PropertyIsEqualTo></Filter>
+``` 

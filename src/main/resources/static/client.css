@@ -11,6 +11,13 @@ body /*, html*/ {
     height: 100%;
 }
 
+/* This is a bit a hack... */
+/* Color and opacity while loading... */
+body .black{
+    background-color: rgba(255, 255, 255, 1) !important;
+    opacity: 0.75 !important;
+}
+
 .waitMe {
     background: rgba(255, 255, 255, 0.75) !important;
 }
