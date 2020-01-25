@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.dominokit.domino.ui.Typography.Strong;
+import org.dominokit.domino.ui.alerts.Alert;
 import org.dominokit.domino.ui.loaders.Loader;
 import org.dominokit.domino.ui.loaders.LoaderEffect;
 
@@ -22,6 +24,9 @@ import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
+import ch.so.agi.grundstuecksinformation.shared.EgridResponse;
+import ch.so.agi.grundstuecksinformation.shared.EgridService;
+import ch.so.agi.grundstuecksinformation.shared.EgridServiceAsync;
 import ch.so.agi.grundstuecksinformation.shared.SettingsResponse;
 import ch.so.agi.grundstuecksinformation.shared.SettingsService;
 import ch.so.agi.grundstuecksinformation.shared.SettingsServiceAsync;
@@ -43,12 +48,15 @@ import elemental2.dom.Response;
 public class AppEntryPoint implements EntryPoint {
     private MainMessages messages = GWT.create(MainMessages.class);
     private final SettingsServiceAsync settingsService = GWT.create(SettingsService.class);
-    
+    private final EgridServiceAsync egridService = GWT.create(EgridService.class);
+
     private String MY_VAR;
     
     private NumberFormat fmtDefault = NumberFormat.getDecimalFormat();
     private NumberFormat fmtPercent = NumberFormat.getFormat("#0.0");
     
+    private String identifyRequestTemplate = "https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=%s,%s&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=%s,%s,%s,%s&returnGeometry=true&sr=2056&tolerance=10";
+
     public void onModuleLoad() {
         settingsService.settingsServer(new AsyncCallback<SettingsResponse>() {
             @Override
@@ -79,16 +87,68 @@ public class AppEntryPoint implements EntryPoint {
         //Loader loader = Loader.create(el, LoaderEffect.PULSE).start();
     }
     
+    private void sendCoordinateToServer(String XY, MapBrowserEvent event) {
+        egridService.egridServer(XY, new AsyncCallback<EgridResponse>() {
+            @Override
+            public void onFailure(Throwable caught) {
+                //MaterialLoader.loading(false);
+
+                if (caught.getMessage().equalsIgnoreCase("204")) {
+                    //MaterialToast.fireToast(messages.responseError204(egrid));
+                } else if (caught.getMessage().equalsIgnoreCase("500")) {
+                    //MaterialToast.fireToast(messages.responseError500());
+                    //MaterialToast.fireToast(caught.getMessage());
+                } else {
+                    //MaterialToast.fireToast(messages.responseError500());
+                    //MaterialToast.fireToast(caught.getMessage());
+                }
+                GWT.log("error: " + caught.getMessage());
+            }
+
+            @Override
+            public void onSuccess(EgridResponse result) {
+                GWT.log("SUCCESS!!!!"); 
+                
+                
+                GWT.log(result.getEgrid().get(0).getEgrid());
+                
+                
+                Alert alert = Alert.success()
+                .appendChild(Strong.of("Well done! "))
+                .appendChild("You successfully read this important alert message.")
+                .dismissible();
+                
+                
+                alert.style().cssText("position: absolute !important; top:20px !important;");
+                
+//                alert.element().clientHeight = 500;
+//                alert.element().clientWidth = 500;
+//                alert.element().clientTop = 20;
+//                alert.element().clientLeft = 20;
+                
+                Elements.body().add(alert);
+                
+                
+            }
+        });
+    }
+    
     public final class MapSingleClickListener implements EventListener<MapBrowserEvent> {
         @Override
         public void onEvent(MapBrowserEvent event) {
             Coordinate coordinate = event.getCoordinate();
-
+            sendCoordinateToServer(coordinate.toStringXY(3), event);
+            
+            
+            
+            // does not return egrid :(
+            /*
             //https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=2607381.2857129965,1228422.772096185&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=2607182.461501755,1228369.7490333454,2607507.9384982456,1228510.9109666548&returnGeometry=true&sr=2056&tolerance=10
             //String requestUrl = "https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=2607381.2857129965,1228422.772096185&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=2607182.461501755,1228369.7490333454,2607507.9384982456,1228510.9109666548&returnGeometry=true&sr=2056&tolerance=10";
-            String requestUrl = "https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=2607389.224071799,1228423.0556600185&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=2607182.461501755,1228369.7490333454,2607507.9384982456,1228510.9109666548&returnGeometry=true&sr=2056&tolerance=10";
-
-            fetch(requestUrl)
+            //String requestUrl = "https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=2607389.224071799,1228423.0556600185&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=2607182.461501755,1228369.7490333454,2607507.9384982456,1228510.9109666548&returnGeometry=true&sr=2056&tolerance=10";
+            String identifyRequest = format(identifyRequestTemplate, String.valueOf(coordinate.getX()), String.valueOf(coordinate.getY()), String.valueOf(coordinate.getX()), String.valueOf(coordinate.getY()), String.valueOf(coordinate.getX()), String.valueOf(coordinate.getY()));
+            
+            fetch(identifyRequest)
             .then(Response::json)
             .then(data -> {
                 // Create a valid GeoJSON from returned JSON. 
@@ -125,9 +185,8 @@ public class AppEntryPoint implements EntryPoint {
             catch_(error -> {
                 console.log(error);
                 return null;
-            });
-
-            
+            }); 
+            */ 
         }
     }
     
@@ -135,4 +194,15 @@ public class AppEntryPoint implements EntryPoint {
     private static native void updateURLWithoutReloading(String newUrl) /*-{
         $wnd.history.pushState(newUrl, "", newUrl);
     }-*/;
+    
+    public static String format(final String format, final String... args) {
+        String[] split = format.split("%s");
+        final StringBuffer msg = new StringBuffer();
+        for (int pos = 0; pos < split.length - 1; pos += 1) {
+            msg.append(split[pos]);
+            msg.append(args[pos]);
+        }
+        msg.append(split[split.length - 1]);
+        return msg.toString();
+    }   
 }

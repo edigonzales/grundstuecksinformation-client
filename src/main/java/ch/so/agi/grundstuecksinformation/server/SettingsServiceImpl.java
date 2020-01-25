@@ -14,6 +14,7 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import ch.so.agi.grundstuecksinformation.shared.SettingsResponse;
 import ch.so.agi.grundstuecksinformation.shared.SettingsService;
 
+@SuppressWarnings("serial")
 public class SettingsServiceImpl extends RemoteServiceServlet implements SettingsService {
 
     @Value("${app.myVar}")
