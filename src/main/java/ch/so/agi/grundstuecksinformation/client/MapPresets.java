@@ -18,6 +18,9 @@ import ol.proj.ProjectionOptions;
 import ol.source.ImageWms;
 import ol.source.ImageWmsOptions;
 import ol.source.ImageWmsParams;
+import ol.source.TileWms;
+import ol.source.TileWmsOptions;
+import ol.source.TileWmsParams;
 import ol.source.Wmts;
 import ol.source.WmtsOptions;
 import ol.tilegrid.TileGrid;
@@ -41,23 +44,31 @@ public class MapPresets {
         
         Projection projection = new Projection(projectionOptions);
 
-        ImageWmsParams imageWMSParams = OLFactory.createOptions();
+//        ImageWmsParams imageWMSParams = OLFactory.createOptions();
+//        imageWMSParams.setLayers("LCSF,LCSFPROJ,LCOBJ,SOSF,SOOBJ,SOLI,SOPT,Liegenschaften,Gebaeudeadressen,Nomenklatur,Rohrleitungen,Hoheitsgrenzen,Fixpunkte");
+//        imageWMSParams.set("FORMAT", "image/jpeg");
+//        imageWMSParams.set("TRANSPARENT", "false");
+        
+        TileWmsParams imageWMSParams = OLFactory.createOptions();
         imageWMSParams.setLayers("LCSF,LCSFPROJ,LCOBJ,SOSF,SOOBJ,SOLI,SOPT,Liegenschaften,Gebaeudeadressen,Nomenklatur,Rohrleitungen,Hoheitsgrenzen,Fixpunkte");
         imageWMSParams.set("FORMAT", "image/jpeg");
         imageWMSParams.set("TRANSPARENT", "false");
-        
-        ImageWmsOptions imageWMSOptions = OLFactory.createOptions();
+
+        //ImageWmsOptions imageWMSOptions = OLFactory.createOptions();
+        TileWmsOptions imageWMSOptions = OLFactory.createOptions();
         //imageWMSOptions.setUrl("http://wms.geo.admin.ch/");
         imageWMSOptions.setUrl("https://wfs.geodienste.ch/av/deu");
         imageWMSOptions.setParams(imageWMSParams);
-        imageWMSOptions.setRatio(1.5f);
+        //imageWMSOptions.setRatio(1.5f); // ImageWmsOptions
 
-        ImageWms imageWMSSource = new ImageWms(imageWMSOptions);
+//        ImageWms imageWMSSource = new ImageWms(imageWMSOptions);
+        TileWms imageWMSSource = new TileWms(imageWMSOptions);
 
         LayerOptions layerOptions = OLFactory.createOptions();
         layerOptions.setSource(imageWMSSource);
 
-        ol.layer.Image wmsLayer = new ol.layer.Image(layerOptions);
+//        ol.layer.Image wmsLayer = new ol.layer.Image(layerOptions);
+        ol.layer.Tile wmsLayer = new ol.layer.Tile(layerOptions);
 
         ViewOptions viewOptions = OLFactory.createOptions();
         viewOptions.setProjection(projection);

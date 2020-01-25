@@ -152,7 +152,7 @@ public class AppEntryPoint implements EntryPoint {
                             realEstateWindow.removeFromParent();
                             GWT.log("get extract from click for (multiple result): " + row.getId());
 
-                            MaterialLoader.loading(true);
+//                            MaterialLoader.loading(true);
 //                            sendEgridToServer(row.getId());
                         });
 
