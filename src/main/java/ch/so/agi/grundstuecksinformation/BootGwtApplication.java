@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import ch.so.agi.grundstuecksinformation.server.EgridServiceImpl;
+import ch.so.agi.grundstuecksinformation.server.ExtractServiceImpl;
 import ch.so.agi.grundstuecksinformation.server.SettingsServiceImpl;
 
 @ServletComponentScan
@@ -23,7 +24,14 @@ public class BootGwtApplication {
         ServletRegistrationBean bean = new ServletRegistrationBean(new EgridServiceImpl(), "/module1/egrid");
         bean.setLoadOnStartup(1);
         return bean;
-    }    
+    }  
+    
+    @Bean
+    public ServletRegistrationBean extractServletBean() {
+        ServletRegistrationBean bean = new ServletRegistrationBean(new ExtractServiceImpl(), "/module1/extract");
+        bean.setLoadOnStartup(1);
+        return bean;
+    }     
     
     @Bean
     public ServletRegistrationBean settingsServletBean() {

@@ -9,6 +9,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.dom.client.Style.Cursor;
+import com.google.gwt.dom.client.Style.FontStyle;
+import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -18,9 +21,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
+import ch.qos.logback.classic.Logger;
 import ch.so.agi.grundstuecksinformation.shared.EgridResponse;
 import ch.so.agi.grundstuecksinformation.shared.EgridService;
 import ch.so.agi.grundstuecksinformation.shared.EgridServiceAsync;
+import ch.so.agi.grundstuecksinformation.shared.ExtractResponse;
+import ch.so.agi.grundstuecksinformation.shared.ExtractService;
+import ch.so.agi.grundstuecksinformation.shared.ExtractServiceAsync;
 import ch.so.agi.grundstuecksinformation.shared.SettingsResponse;
 import ch.so.agi.grundstuecksinformation.shared.SettingsService;
 import ch.so.agi.grundstuecksinformation.shared.SettingsServiceAsync;
@@ -41,6 +48,8 @@ import static elemental2.dom.DomGlobal.console;
 import elemental2.dom.Response;
 import gwt.material.design.addins.client.window.MaterialWindow;
 import gwt.material.design.client.constants.Color;
+import gwt.material.design.client.ui.MaterialCard;
+import gwt.material.design.client.ui.MaterialCardContent;
 import gwt.material.design.client.ui.MaterialIcon;
 import gwt.material.design.client.ui.MaterialLoader;
 import gwt.material.design.client.ui.MaterialPanel;
@@ -51,14 +60,20 @@ public class AppEntryPoint implements EntryPoint {
     private MainMessages messages = GWT.create(MainMessages.class);
     private final SettingsServiceAsync settingsService = GWT.create(SettingsService.class);
     private final EgridServiceAsync egridService = GWT.create(EgridService.class);
+    private final ExtractServiceAsync extractService = GWT.create(ExtractService.class);
 
     private String MY_VAR;
     
     private NumberFormat fmtDefault = NumberFormat.getDecimalFormat();
     private NumberFormat fmtPercent = NumberFormat.getFormat("#0.0");
-    
+  
+    private Map map;
+    private MaterialCard searchCard;  
+    private MaterialCard resultCard;    
+    private MaterialCardContent searchCardContent;   
+    private MaterialCardContent resultCardContent;    
     private MaterialWindow realEstateWindow;
-    
+
     private String identifyRequestTemplate = "https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=%s,%s&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=%s,%s,%s,%s&returnGeometry=true&sr=2056&tolerance=10";
 
     public void onModuleLoad() {
@@ -79,14 +94,53 @@ public class AppEntryPoint implements EntryPoint {
     private void init() {                        
         GWT.log("fubar");
         
+        // Add the allmighty map.
         Div mapDiv = new Div();
         mapDiv.setId("map");
 
         RootPanel.get().add(mapDiv);
         
-        //Map map = MapPresets.getBlackAndWhiteMap(mapDiv.getId());
-        Map map = MapPresets.getCadastralSurveyingWms(mapDiv.getId());
+        map = MapPresets.getCadastralSurveyingWms(mapDiv.getId());
         map.addSingleClickListener(new MapSingleClickListener());
+        
+        // Search card on in the top left corner.
+        searchCard = new MaterialCard();
+        searchCard.setId("searchCard");
+
+        searchCardContent = new MaterialCardContent();
+        searchCardContent.setId("searchCardContent");
+     
+        MaterialRow titleRow = new MaterialRow();
+        Label titleLabel = new Label();
+        titleLabel.getElement().getStyle().setFontSize(1.4, Unit.EM);
+        titleLabel.getElement().getStyle().setFontStyle(FontStyle.OBLIQUE);
+        titleLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        titleLabel.setText("Grundstücksinformation");
+        titleRow.add(titleLabel);
+        
+        MaterialRow searchRow = new MaterialRow();
+        searchRow.setId("searchRow");
+
+        searchCardContent.add(titleRow);
+        searchCardContent.add(searchRow);
+        searchCardContent.add(new Label("Search will be placed here."));
+        searchCard.add(searchCardContent);
+        
+        RootPanel.get().add(searchCard);
+        
+        // Card that shows the results from the extracts.
+        resultCard = new MaterialCard();
+        resultCard.setId("resultCard");
+
+        resultCardContent = new MaterialCardContent();
+        resultCardContent.setId("resultCardContent");
+        resultCard.add(resultCardContent);
+        
+        Div fadeoutBottomDiv = new Div();
+        fadeoutBottomDiv.setId("fadeoutBottomDiv");
+        resultCard.add(fadeoutBottomDiv);
+        
+        RootPanel.get().add(resultCard);
     }
     
     private void resetGui() {
@@ -119,6 +173,7 @@ public class AppEntryPoint implements EntryPoint {
                 resetGui();
                 
                 String egrid;
+                String oerebServiceBaseUrl;
                 List<Egrid> egridList = result.getEgrid();
                 if (egridList.size() > 1) {
                     realEstateWindow = new MaterialWindow();
@@ -139,7 +194,8 @@ public class AppEntryPoint implements EntryPoint {
                     MaterialPanel realEstatePanel = new MaterialPanel();
 
                     for (Egrid egridObj : egridList) {
-                        egrid = (String) egridObj.getEgrid();                        
+                        egrid = (String) egridObj.getEgrid(); 
+                        oerebServiceBaseUrl = (String) egridObj.getOerebServiceBaseUrl();
                         String number = egridObj.getNumber();
 
                         MaterialRow row = new MaterialRow();
@@ -150,7 +206,8 @@ public class AppEntryPoint implements EntryPoint {
 
                         row.addClickHandler(event -> {
                             realEstateWindow.removeFromParent();
-                            GWT.log("get extract from click for (multiple result): " + row.getId());
+                            GWT.log("Get extract from a map click (multiple click result): " + row.getId());
+//                            Egrid  = new Egrid();
 
 //                            MaterialLoader.loading(true);
 //                            sendEgridToServer(row.getId());
@@ -174,10 +231,35 @@ public class AppEntryPoint implements EntryPoint {
                     
                     realEstateWindow.add(realEstatePanel);
                     realEstateWindow.open();
-                }                
+                } else {
+                    GWT.log("Get extract from a map click (single click result): " + egridList.get(0).getEgrid());
+                    sendEgridToServer(egridList.get(0));
+                }               
             }
         });
     }
+    
+    private void sendEgridToServer(Egrid egrid) {
+        extractService.extractServer(egrid, new AsyncCallback<ExtractResponse>() {
+
+            @Override
+            public void onFailure(Throwable caught) {
+                // TODO failure handling
+            }
+
+            @Override
+            public void onSuccess(ExtractResponse result) {
+                // TODO Auto-generated method stub
+                
+                GWT.log("foo bar");
+            }
+            
+        });
+    }
+
+    
+    
+    
     
     public final class MapSingleClickListener implements EventListener<MapBrowserEvent> {
         @Override

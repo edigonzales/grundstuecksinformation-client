@@ -11,6 +11,8 @@ import ol.ViewOptions;
 import ol.control.Control;
 import ol.interaction.DefaultInteractionsOptions;
 import ol.interaction.Interaction;
+import ol.layer.Base;
+import ol.layer.Group;
 import ol.layer.LayerOptions;
 import ol.layer.Tile;
 import ol.proj.Projection;
@@ -43,40 +45,86 @@ public class MapPresets {
         projectionOptions.setExtent(new Extent(2420000, 1030000, 2900000, 1350000));
         
         Projection projection = new Projection(projectionOptions);
-
-//        ImageWmsParams imageWMSParams = OLFactory.createOptions();
-//        imageWMSParams.setLayers("LCSF,LCSFPROJ,LCOBJ,SOSF,SOOBJ,SOLI,SOPT,Liegenschaften,Gebaeudeadressen,Nomenklatur,Rohrleitungen,Hoheitsgrenzen,Fixpunkte");
-//        imageWMSParams.set("FORMAT", "image/jpeg");
-//        imageWMSParams.set("TRANSPARENT", "false");
         
-        TileWmsParams imageWMSParams = OLFactory.createOptions();
-        imageWMSParams.setLayers("LCSF,LCSFPROJ,LCOBJ,SOSF,SOOBJ,SOLI,SOPT,Liegenschaften,Gebaeudeadressen,Nomenklatur,Rohrleitungen,Hoheitsgrenzen,Fixpunkte");
-        imageWMSParams.set("FORMAT", "image/png; mode=8bit");
-        imageWMSParams.set("TRANSPARENT", "false");
-        imageWMSParams.set("TILED", "true");
+        // geodienste.ch WMS
+        ol.layer.Tile geodiensteWmsLayer;
+        {
+            TileWmsParams imageWMSParams = OLFactory.createOptions();
+            imageWMSParams.setLayers("LCSF,LCSFPROJ,LCOBJ,SOSF,SOOBJ,SOLI,SOPT,Liegenschaften,Gebaeudeadressen,Nomenklatur,Rohrleitungen,Hoheitsgrenzen,Fixpunkte");
+            imageWMSParams.set("FORMAT", "image/png; mode=8bit");
+            imageWMSParams.set("TRANSPARENT", "false");
+            imageWMSParams.set("TILED", "true");
+    
+            TileWmsOptions imageWMSOptions = OLFactory.createOptions();
+            imageWMSOptions.setUrl("https://wfs.geodienste.ch/av/deu");
+            imageWMSOptions.setParams(imageWMSParams);
+    
+            TileWms imageWMSSource = new TileWms(imageWMSOptions);
+    
+            LayerOptions layerOptions = OLFactory.createOptions();
+            layerOptions.setSource(imageWMSSource);
+    
+            geodiensteWmsLayer = new ol.layer.Tile(layerOptions);
+        }
+        // SO!GIS WMTS
+        Tile sogisWmtsLayer;
+        {
+            WmtsOptions wmtsOptions = OLFactory.createOptions();
+            wmtsOptions.setUrl("https://geo.so.ch/api/wmts/1.0.0/{Layer}/default/2056/{TileMatrix}/{TileRow}/{TileCol}");
+            wmtsOptions.setLayer("ch.so.agi.hintergrundkarte_sw");
+            wmtsOptions.setRequestEncoding("REST");
+            wmtsOptions.setFormat("image/png");
+            wmtsOptions.setMatrixSet("EPSG:2056");
+            wmtsOptions.setStyle("default");
+            wmtsOptions.setProjection(projection);
+            wmtsOptions.setWrapX(true);
+            wmtsOptions.setTileGrid(createWmtsTileGrid(projection));
 
-        //ImageWmsOptions imageWMSOptions = OLFactory.createOptions();
-        TileWmsOptions imageWMSOptions = OLFactory.createOptions();
-        //imageWMSOptions.setUrl("http://wms.geo.admin.ch/");
-        imageWMSOptions.setUrl("https://wfs.geodienste.ch/av/deu");
-        imageWMSOptions.setParams(imageWMSParams);
-        //imageWMSOptions.setRatio(1.5f); // ImageWmsOptions
+            Wmts wmtsSource = new Wmts(wmtsOptions);
 
-//        ImageWms imageWMSSource = new ImageWms(imageWMSOptions);
-        TileWms imageWMSSource = new TileWms(imageWMSOptions);
+            LayerOptions wmtsLayerOptions = OLFactory.createOptions();
+            wmtsLayerOptions.setSource(wmtsSource);
 
-        LayerOptions layerOptions = OLFactory.createOptions();
-        layerOptions.setSource(imageWMSSource);
+            sogisWmtsLayer = new Tile(wmtsLayerOptions);
+            sogisWmtsLayer.setOpacity(1.0);  
+        }
+        
+        // Geoview BL WMS
+        Tile geoviewBlWmsLayer;
+        {
+            TileWmsParams imageWMSParams = OLFactory.createOptions();
+            imageWMSParams.setLayers("grundkarte_sw_group");
+            imageWMSParams.set("FORMAT", "image/png");
+            imageWMSParams.set("TRANSPARENT", "true");
+            imageWMSParams.set("TILED", "true");
 
-//        ol.layer.Image wmsLayer = new ol.layer.Image(layerOptions);
-        ol.layer.Tile wmsLayer = new ol.layer.Tile(layerOptions);
+            TileWmsOptions imageWMSOptions = OLFactory.createOptions();
+            imageWMSOptions.setUrl("https://geowms.bl.ch/");
+            imageWMSOptions.setParams(imageWMSParams);
 
+            TileWms imageWMSSource = new TileWms(imageWMSOptions);
+
+            LayerOptions layerOptions = OLFactory.createOptions();
+            layerOptions.setSource(imageWMSSource);
+
+            geoviewBlWmsLayer = new ol.layer.Tile(layerOptions);
+        }
+       
+        // Layergroup
+        Group layerGroup = new Group();
+        ol.Collection<Base> layers = new Collection<Base>();
+        layers.push(geodiensteWmsLayer);
+        layers.push(geoviewBlWmsLayer);                
+        //layers.push(sogisWmtsLayer);        
+        layerGroup.setLayers(layers);
+         
         ViewOptions viewOptions = OLFactory.createOptions();
         viewOptions.setProjection(projection);
         viewOptions.setResolutions(new double[] { 4000.0, 2000.0, 1000.0, 500.0, 250.0, 100.0, 50.0, 20.0, 10.0, 5.0, 2.5, 1.0, 0.5, 0.25, 0.1 });
         View view = new View(viewOptions);
         //Coordinate centerCoordinate = new Coordinate(2616491, 1240287);
-        Coordinate centerCoordinate = new Coordinate(2600593,1215639); // Messen
+        //Coordinate centerCoordinate = new Coordinate(2600593,1215639); // Messen
+        Coordinate centerCoordinate = new Coordinate(2600470,1215425); // Messen
         //Coordinate centerCoordinate = new Coordinate(2688777,1283230); // Schaffhausen
 
         view.setCenter(centerCoordinate);
@@ -93,7 +141,8 @@ public class MapPresets {
         mapOptions.setInteractions(Interaction.defaults(interactionOptions));
 
         Map map = new Map(mapOptions);
-        map.addLayer(wmsLayer);
+        //map.addLayer(wmsLayer);
+        map.addLayer(layerGroup);
         
         return map;
     }
