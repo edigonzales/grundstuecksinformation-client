@@ -62,6 +62,7 @@ public class EgridServiceImpl extends RemoteServiceServlet implements EgridServi
         URL egridUrl = null;
         String oerebBaseUrl = null;
         HttpURLConnection connection = null;
+        int responseCode = 0;
         for (String baseUrl : Consts.OEREB_SERVICE_BASE_URL) {
             URL url = new URL(baseUrl + "getegrid/xml/?XY=" + XY.replace(" ",""));
             logger.info(url.toString());
@@ -69,18 +70,19 @@ public class EgridServiceImpl extends RemoteServiceServlet implements EgridServi
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Accept", "application/xml");
-
-            if (connection.getResponseCode() == 200) {
+            responseCode = connection.getResponseCode();
+            if (responseCode == 200) {
                 egridUrl = url;
                 oerebBaseUrl = baseUrl;
+                logger.info("E-GRID found: " + egridUrl);
                 break;
-            }
+            } 
         }
        
         if (egridUrl == null) {
-            // TODO: handle this case.
-            // Do not throw exception but return some value (?).
-            
+            EgridResponse response = new EgridResponse();
+            response.setResponseCode(responseCode);
+            return response;            
         }
         
         File xmlFile = Files.createTempFile("egrid_", ".xml").toFile();
@@ -125,6 +127,7 @@ public class EgridServiceImpl extends RemoteServiceServlet implements EgridServi
         }
 
         EgridResponse response = new EgridResponse();
+        response.setResponseCode(responseCode);
         response.setEgrid(egridList);
         return response;
     }

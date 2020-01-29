@@ -10,6 +10,7 @@ public final class Consts {
     // Cannot be static anymore. 
     public static List<String> OEREB_SERVICE_BASE_URL = Stream.of(
             "https://oereb.geo.sh.ch/oereb/", 
-            "https://geo.so.ch/api/oereb/")
+            "https://geo.so.ch/api/oereb/",
+            "https://map.geo.gl.ch/oereb/wsgi/oereb/")
             .collect(Collectors.toList());
 }

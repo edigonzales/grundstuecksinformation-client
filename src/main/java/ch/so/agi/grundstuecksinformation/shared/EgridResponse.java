@@ -8,6 +8,8 @@ import ch.so.agi.grundstuecksinformation.shared.models.Egrid;
 
 public class EgridResponse implements IsSerializable {
     private List<Egrid> egrid;
+    
+    private int responseCode;
 
     public List<Egrid> getEgrid() {
         return egrid;
@@ -15,5 +17,13 @@ public class EgridResponse implements IsSerializable {
 
     public void setEgrid(List<Egrid> egrid) {
         this.egrid = egrid;
+    }
+
+    public int getResponseCode() {
+        return responseCode;
+    }
+
+    public void setResponseCode(int responseCode) {
+        this.responseCode = responseCode;
     }
 }

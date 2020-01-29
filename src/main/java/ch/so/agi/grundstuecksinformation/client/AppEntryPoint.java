@@ -54,6 +54,7 @@ import gwt.material.design.client.ui.MaterialIcon;
 import gwt.material.design.client.ui.MaterialLoader;
 import gwt.material.design.client.ui.MaterialPanel;
 import gwt.material.design.client.ui.MaterialRow;
+import gwt.material.design.client.ui.MaterialToast;
 import gwt.material.design.client.ui.html.Div;
 
 public class AppEntryPoint implements EntryPoint {
@@ -154,17 +155,10 @@ public class AppEntryPoint implements EntryPoint {
             @Override
             public void onFailure(Throwable caught) {
                 //MaterialLoader.loading(false);
-
-                if (caught.getMessage().equalsIgnoreCase("204")) {
-                    //MaterialToast.fireToast(messages.responseError204(egrid));
-                } else if (caught.getMessage().equalsIgnoreCase("500")) {
-                    //MaterialToast.fireToast(messages.responseError500());
-                    //MaterialToast.fireToast(caught.getMessage());
-                } else {
-                    //MaterialToast.fireToast(messages.responseError500());
-                    //MaterialToast.fireToast(caught.getMessage());
-                }
-                GWT.log("error: " + caught.getMessage());
+                MaterialToast.fireToast("An error occured.");
+                
+                // TODO: Make logging production ready.
+                console.log("error: " + caught.getMessage());
             }
 
             @Override
@@ -172,6 +166,13 @@ public class AppEntryPoint implements EntryPoint {
                 GWT.log("SUCCESS!!!!"); 
                 resetGui();
                 
+                GWT.log(String.valueOf(result.getResponseCode()));
+                
+                if (result.getResponseCode() != 200) {
+                    MaterialToast.fireToast("E-GRID not found.");
+                    return;
+                }
+
                 String egrid;
                 String oerebServiceBaseUrl;
                 List<Egrid> egridList = result.getEgrid();
