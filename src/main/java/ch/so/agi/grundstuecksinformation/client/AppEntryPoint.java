@@ -50,6 +50,7 @@ import gwt.material.design.addins.client.window.MaterialWindow;
 import gwt.material.design.client.constants.Color;
 import gwt.material.design.client.ui.MaterialCard;
 import gwt.material.design.client.ui.MaterialCardContent;
+import gwt.material.design.client.ui.MaterialColumn;
 import gwt.material.design.client.ui.MaterialIcon;
 import gwt.material.design.client.ui.MaterialLoader;
 import gwt.material.design.client.ui.MaterialPanel;
@@ -111,18 +112,23 @@ public class AppEntryPoint implements EntryPoint {
         searchCardContent = new MaterialCardContent();
         searchCardContent.setId("searchCardContent");
      
-        MaterialRow titleRow = new MaterialRow();
-        Label titleLabel = new Label();
-        titleLabel.getElement().getStyle().setFontSize(1.4, Unit.EM);
-        titleLabel.getElement().getStyle().setFontStyle(FontStyle.OBLIQUE);
-        titleLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
-        titleLabel.setText("Grundstücksinformation");
-        titleRow.add(titleLabel);
+        MaterialRow logoRow = new MaterialRow();
+
+        com.google.gwt.user.client.ui.Image plrImage = new com.google.gwt.user.client.ui.Image();
+        plrImage.setUrl(GWT.getHostPageBaseURL() + "logo-grundstuecksinformation.png");
+        plrImage.setWidth("65%");
+
+        MaterialColumn plrLogoColumn = new MaterialColumn();
+        plrLogoColumn.setId("plrLogoColumn");
+        plrLogoColumn.setGrid("s12");
+        plrLogoColumn.add(plrImage);
+
+        logoRow.add(plrLogoColumn);
+        searchCardContent.add(logoRow);
         
         MaterialRow searchRow = new MaterialRow();
         searchRow.setId("searchRow");
 
-        searchCardContent.add(titleRow);
         searchCardContent.add(searchRow);
         searchCardContent.add(new Label("Search will be placed here."));
         searchCard.add(searchCardContent);

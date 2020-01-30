@@ -8,6 +8,7 @@ import ch.ehi.oereb.schemas.oereb._1_0.extract.GetExtractByIdResponse;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.ExtractType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.LanguageCodeType;
 import ch.so.agi.grundstuecksinformation.shared.models.Egrid;
+import ch.so.agi.grundstuecksinformation.shared.models.RealEstateDPR;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +17,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.xml.transform.stream.StreamSource;
 
@@ -31,8 +35,13 @@ public class OerebExtractService {
 
     private static final LanguageCodeType DE = LanguageCodeType.DE;
 
-    
-    public void getExtract(Egrid egrid) throws IOException {
+    Map<String, String> realEstateTypesMap = Stream.of(new String[][] {
+        { "Distinct_and_permanent_rights.BuildingRight", "Baurecht" }, 
+        { "RealEstate", "Liegenschaft" }, 
+    })
+    .collect(Collectors.toMap(data -> data[0], data -> data[1]));
+
+    public RealEstateDPR getExtract(Egrid egrid, RealEstateDPR realEstateDPR) throws IOException {
         logger.info("******: " + egrid.getOerebServiceBaseUrl());
         
         File xmlFile;
@@ -44,16 +53,9 @@ public class OerebExtractService {
         connection.setRequestMethod("GET");
         connection.setRequestProperty("Accept", "application/xml");
 
-        // TODO: exception handling
-        /*
-        if (connection.getResponseCode() == 500) {
-            throw new ExtractServiceException("500");
-        } else if (connection.getResponseCode() == 406) {
-            throw new ExtractServiceException("406");
-        } else if (connection.getResponseCode() == 204) {
-            throw new ExtractServiceException("204");
+        if (connection.getResponseCode() != 200) {
+            throw new IOException(connection.getResponseMessage());
         }
-        */
         
         InputStream initialStream = connection.getInputStream();
         java.nio.file.Files.copy(initialStream, xmlFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -64,7 +66,10 @@ public class OerebExtractService {
         GetExtractByIdResponse obj = (GetExtractByIdResponse) marshaller.unmarshal(xmlSource);
         ExtractType xmlExtract = obj.getValue().getExtract().getValue();
         logger.info("Extract-Id: " + xmlExtract.getExtractIdentifier());
+        
+        realEstateDPR.setOerebExtractIdentifier(xmlExtract.getExtractIdentifier());
 
 
+        return realEstateDPR;
     }
 }

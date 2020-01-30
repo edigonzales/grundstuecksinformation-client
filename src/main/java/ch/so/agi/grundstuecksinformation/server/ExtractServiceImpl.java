@@ -30,6 +30,7 @@ import ch.so.agi.grundstuecksinformation.shared.EgridService;
 import ch.so.agi.grundstuecksinformation.shared.ExtractResponse;
 import ch.so.agi.grundstuecksinformation.shared.ExtractService;
 import ch.so.agi.grundstuecksinformation.shared.models.Egrid;
+import ch.so.agi.grundstuecksinformation.shared.models.RealEstateDPR;
 
 import org.slf4j.Logger;
 
@@ -50,13 +51,11 @@ public class ExtractServiceImpl extends RemoteServiceServlet implements ExtractS
     public EgridResponse extractServer(Egrid egrid) throws IllegalArgumentException, IOException {
         logger.info("*****"+egrid.getEgrid());
         
-        oerebExtractService.getExtract(egrid);
-        
+        RealEstateDPR realEstateDPR = new RealEstateDPR();
+        oerebExtractService.getExtract(egrid, realEstateDPR);
         
         
         ExtractResponse extractResponse = new ExtractResponse();
-        
-        
         return null;
     }  
 }

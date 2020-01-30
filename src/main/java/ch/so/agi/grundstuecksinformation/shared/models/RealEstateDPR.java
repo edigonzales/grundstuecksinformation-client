@@ -22,7 +22,15 @@ public class RealEstateDPR implements IsSerializable {
     private int landRegistryArea;
     
     private String limit;
-
+    
+    private String oerebExtractIdentifier;
+    
+//    private ArrayList<ThemeWithoutData> oerebThemesWithoutData;
+//    
+//    private ArrayList<NotConcernedTheme> oerebNotConcernedThemes;
+//    
+//    private ArrayList<ConcernedTheme> oerebConcernedThemes;
+    
     public String getRealEstateType() {
         return realEstateType;
     }
@@ -101,5 +109,13 @@ public class RealEstateDPR implements IsSerializable {
 
     public void setLimit(String limit) {
         this.limit = limit;
+    }
+
+    public String getOerebExtractIdentifier() {
+        return oerebExtractIdentifier;
+    }
+
+    public void setOerebExtractIdentifier(String oerebExtractIdentifier) {
+        this.oerebExtractIdentifier = oerebExtractIdentifier;
     }
 }
