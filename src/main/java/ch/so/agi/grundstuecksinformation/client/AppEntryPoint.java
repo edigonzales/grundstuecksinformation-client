@@ -357,6 +357,7 @@ public class AppEntryPoint implements EntryPoint {
     }
     
     private void removeOerebWmsLayers() {
+        // Remove WMS (concerned themes) layers
         // I cannot iterate over map.getLayers() and
         // use map.removeLayers(). Seems to get some
         // confusion with the indices or whatever...
@@ -365,6 +366,7 @@ public class AppEntryPoint implements EntryPoint {
             map.removeLayer(rlayer);
         }
 
+        // Remove highlighting layer 
         Base vlayer = getMapLayerById(REAL_ESTATE_VECTOR_LAYER_ID);
         map.removeLayer(vlayer);
 
