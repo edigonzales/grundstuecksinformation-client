@@ -252,6 +252,8 @@ public class AppEntryPoint implements EntryPoint {
                     realEstateWindow.open();
                 } else {
                     GWT.log("Get extract from a map click (single click result): " + egridList.get(0).getEgrid());
+                    
+                    MaterialLoader.loading(true);
                     sendEgridToServer(egridList.get(0));
                 }               
             }
@@ -357,7 +359,7 @@ public class AppEntryPoint implements EntryPoint {
     }
     
     private void removeOerebWmsLayers() {
-        // Remove WMS (concerned themes) layers
+        // Remove WMS (concerned themes) layers.
         // I cannot iterate over map.getLayers() and
         // use map.removeLayers(). Seems to get some
         // confusion with the indices or whatever...
@@ -366,7 +368,7 @@ public class AppEntryPoint implements EntryPoint {
             map.removeLayer(rlayer);
         }
 
-        // Remove highlighting layer 
+        // Remove highlighting layer. 
         Base vlayer = getMapLayerById(REAL_ESTATE_VECTOR_LAYER_ID);
         map.removeLayer(vlayer);
 
@@ -399,7 +401,7 @@ public class AppEntryPoint implements EntryPoint {
     }-*/;
     
     // String.format() is not available in GWT.
-    public static String format(final String format, final String... args) {
+    private static String format(final String format, final String... args) {
         String[] split = format.split("%s");
         final StringBuffer msg = new StringBuffer();
         for (int pos = 0; pos < split.length - 1; pos += 1) {
