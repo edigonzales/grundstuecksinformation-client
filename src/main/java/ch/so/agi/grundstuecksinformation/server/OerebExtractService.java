@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ch.ehi.oereb.schemas.oereb._1_0.extract.GetExtractByIdResponse;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.ExtractType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.LanguageCodeType;
+import ch.ehi.oereb.schemas.oereb._1_0.extractdata.RealEstateDPRType;
 import ch.so.agi.grundstuecksinformation.shared.models.Egrid;
 import ch.so.agi.grundstuecksinformation.shared.models.RealEstateDPR;
 
@@ -41,13 +42,11 @@ public class OerebExtractService {
     })
     .collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
-    public RealEstateDPR getExtract(Egrid egrid, RealEstateDPR realEstateDPR) throws IOException {
-        logger.info("******: " + egrid.getOerebServiceBaseUrl());
-        
+    public RealEstateDPR getExtract(Egrid egrid, RealEstateDPR realEstateDPR) throws IOException {        
         File xmlFile;
         xmlFile = Files.createTempFile("oereb_extract_", ".xml").toFile();
         URL url = new URL(egrid.getOerebServiceBaseUrl() + "extract/reduced/xml/geometry/" + egrid.getEgrid());
-        logger.info(url.toString());
+        logger.debug("extract url: " + url.toString());
 
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -69,7 +68,25 @@ public class OerebExtractService {
         
         realEstateDPR.setOerebExtractIdentifier(xmlExtract.getExtractIdentifier());
 
+        // ----
 
+        // themes...
+        
+        // ----
+        RealEstateDPRType xmlRealEstateDPR = xmlExtract.getRealEstate();
+        realEstateDPR.setEgrid(xmlRealEstateDPR.getEGRID());
+        realEstateDPR.setFosnNr(xmlRealEstateDPR.getFosNr());
+        realEstateDPR.setMunicipality(xmlRealEstateDPR.getMunicipality());
+        realEstateDPR.setCanton(xmlRealEstateDPR.getCanton().value());
+        realEstateDPR.setNumber(xmlRealEstateDPR.getNumber());
+        realEstateDPR.setSubunitOfLandRegister(xmlRealEstateDPR.getSubunitOfLandRegister());
+        realEstateDPR.setLandRegistryArea(xmlRealEstateDPR.getLandRegistryArea());
+        realEstateDPR.setLimit(new Gml32ToJts().convertMultiSurface(xmlRealEstateDPR.getLimit()).toText());
+//        realEstateDPR.setThemesWithoutData(themesWithoutData);
+//        realEstateDPR.setNotConcernedThemes(notConcernedThemes);        
+        realEstateDPR.setRealEstateType(realEstateTypesMap.get(xmlRealEstateDPR.getType().value()));
+
+               
         return realEstateDPR;
     }
 }

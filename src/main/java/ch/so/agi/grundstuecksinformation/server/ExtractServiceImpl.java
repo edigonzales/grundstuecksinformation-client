@@ -26,7 +26,6 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 import ch.ehi.oereb.schemas.oereb._1_0.extract.GetEGRIDResponse;
 import ch.ehi.oereb.schemas.oereb._1_0.extract.GetEGRIDResponseType;
 import ch.so.agi.grundstuecksinformation.shared.EgridResponse;
-import ch.so.agi.grundstuecksinformation.shared.EgridService;
 import ch.so.agi.grundstuecksinformation.shared.ExtractResponse;
 import ch.so.agi.grundstuecksinformation.shared.ExtractService;
 import ch.so.agi.grundstuecksinformation.shared.models.Egrid;
@@ -48,14 +47,15 @@ public class ExtractServiceImpl extends RemoteServiceServlet implements ExtractS
     }
 
     @Override
-    public EgridResponse extractServer(Egrid egrid) throws IllegalArgumentException, IOException {
-        logger.info("*****"+egrid.getEgrid());
+    public ExtractResponse extractServer(Egrid egrid) throws IllegalArgumentException, IOException {
+        logger.info("Oereb extract request for: " + egrid.getEgrid());
         
         RealEstateDPR realEstateDPR = new RealEstateDPR();
         oerebExtractService.getExtract(egrid, realEstateDPR);
         
         
         ExtractResponse extractResponse = new ExtractResponse();
-        return null;
+        extractResponse.setRealEstateDPR(realEstateDPR);
+        return extractResponse;
     }  
 }

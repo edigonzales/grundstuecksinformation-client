@@ -1,5 +1,6 @@
 package ch.so.agi.grundstuecksinformation.client;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -32,6 +34,7 @@ import ch.so.agi.grundstuecksinformation.shared.SettingsResponse;
 import ch.so.agi.grundstuecksinformation.shared.SettingsService;
 import ch.so.agi.grundstuecksinformation.shared.SettingsServiceAsync;
 import ch.so.agi.grundstuecksinformation.shared.models.Egrid;
+import ch.so.agi.grundstuecksinformation.shared.models.RealEstateDPR;
 import elemental2.core.Global;
 import elemental2.dom.CSSProperties;
 import elemental2.dom.HTMLDivElement;
@@ -42,6 +45,8 @@ import ol.Map;
 import ol.MapBrowserEvent;
 import ol.event.EventListener;
 import ol.format.GeoJson;
+import ol.layer.Base;
+import ol.layer.Image;
 
 import static elemental2.dom.DomGlobal.fetch;
 import static elemental2.dom.DomGlobal.console;
@@ -63,9 +68,14 @@ public class AppEntryPoint implements EntryPoint {
     private final SettingsServiceAsync settingsService = GWT.create(SettingsService.class);
     private final EgridServiceAsync egridService = GWT.create(EgridService.class);
     private final ExtractServiceAsync extractService = GWT.create(ExtractService.class);
-
+    
+    // Settings
     private String MY_VAR;
     
+    private String ID_ATTR_NAME = "id";
+    private String REAL_ESTATE_VECTOR_LAYER_ID = "real_estate_vector_layer";
+    private String REAL_ESTATE_VECTOR_FEATURE_ID = "real_estate_fid";
+
     private NumberFormat fmtDefault = NumberFormat.getDecimalFormat();
     private NumberFormat fmtPercent = NumberFormat.getFormat("#0.0");
   
@@ -78,6 +88,8 @@ public class AppEntryPoint implements EntryPoint {
 
     private String identifyRequestTemplate = "https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=%s,%s&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=%s,%s,%s,%s&returnGeometry=true&sr=2056&tolerance=10";
 
+    private ArrayList<String> oerebWmsLayers = new ArrayList<String>();
+    
     public void onModuleLoad() {
         settingsService.settingsServer(new AsyncCallback<SettingsResponse>() {
             @Override
@@ -160,7 +172,7 @@ public class AppEntryPoint implements EntryPoint {
         egridService.egridServer(XY, new AsyncCallback<EgridResponse>() {
             @Override
             public void onFailure(Throwable caught) {
-                //MaterialLoader.loading(false);
+                MaterialLoader.loading(false);
                 MaterialToast.fireToast("An error occured.");
                 
                 // TODO: Make logging production ready.
@@ -251,14 +263,33 @@ public class AppEntryPoint implements EntryPoint {
 
             @Override
             public void onFailure(Throwable caught) {
-                // TODO failure handling
+                MaterialLoader.loading(false);
+                MaterialToast.fireToast("An error occured.");
+                
+                // TODO: Make logging production ready.
+                console.log("error: " + caught.getMessage());
             }
 
             @Override
             public void onSuccess(ExtractResponse result) {
-                // TODO Auto-generated method stub
-                
+                MaterialLoader.loading(false);
                 GWT.log("foo bar");
+                
+                String newUrl = Window.Location.getProtocol() + "//" + Window.Location.getHost() + Window.Location.getPath() + "?egrid=" + egrid.getEgrid();
+                updateURLWithoutReloading(newUrl);
+                
+                removeOerebWmsLayers();
+                
+                RealEstateDPR realEstateDPR = result.getRealEstateDPR();
+                String number = realEstateDPR.getNumber();
+                String municipality = realEstateDPR.getMunicipality();
+                String subunitOfLandRegister = realEstateDPR.getSubunitOfLandRegister();
+                String canton = realEstateDPR.getCanton();
+                String egrid = realEstateDPR.getEgrid();
+                int area = realEstateDPR.getLandRegistryArea();
+                String realEstateType = realEstateDPR.getRealEstateType();
+                
+                
             }
             
         });
@@ -323,6 +354,41 @@ public class AppEntryPoint implements EntryPoint {
             }); 
             */ 
         }
+    }
+    
+    private void removeOerebWmsLayers() {
+        // I cannot iterate over map.getLayers() and
+        // use map.removeLayers(). Seems to get some
+        // confusion with the indices or whatever...
+        for (String layerId : oerebWmsLayers) {
+            Image rlayer = (Image) getMapLayerById(layerId);
+            map.removeLayer(rlayer);
+        }
+
+        Base vlayer = getMapLayerById(REAL_ESTATE_VECTOR_LAYER_ID);
+        map.removeLayer(vlayer);
+
+        oerebWmsLayers.clear();
+    }
+    
+    private Base getMapLayerById(String id) {
+        ol.Collection<Base> layers = map.getLayers();
+        for (int i = 0; i < layers.getLength(); i++) {
+            Base item = layers.item(i);
+            try {
+                String layerId = item.get(ID_ATTR_NAME);
+                if (layerId == null) {
+                    continue;
+                }
+                if (layerId.equalsIgnoreCase(id)) {
+                    return item;
+                }
+            } catch (Exception e) {
+                GWT.log(e.getMessage());
+                GWT.log("should not reach here");
+            }
+        }
+        return null;
     }
     
     // Update the URL in the browser without reloading the page.
