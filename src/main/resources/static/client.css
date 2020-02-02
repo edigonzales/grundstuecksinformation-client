@@ -14,7 +14,7 @@ body, div {
     font-family: Roboto, sans-serif;   
     /*font-family: 'Roboto Condensed', sans-serif;*/
     color: rgba(0, 0, 0, 0.87);  
-    font-size: 16px;
+    /*font-size: 16px;*/
 }
 
 #map {
@@ -46,7 +46,7 @@ body .black{
     padding: 15px;
 }
 
-#plrLogoColumn {
+#logoColumn {
     margin: 0px;
     padding: 0px;
     text-align: left;
@@ -84,210 +84,401 @@ body .black{
     background-image: linear-gradient(rgba(250, 250, 250, 0) 0%, rgba(250, 250, 250, 1) 100%);
 }
 
-
-
-
-
-.searchPanel {
-	margin-top: 200px;
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 100%;    
-    width: 500px;
-
-    /*
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    */
+#resultHeaderRow {
+    background-color: #fafafa; /* GREY_LIGHTEN_5 */
+    margin-bottom: 5px;
+    position: sticky;
+    top: 0px;
+    padding-top: 0px;
+    padding-bottom: 15px;
+    z-index: 10;
+    height: 58px;
 }
 
-.resultSearchPanel {
-    padding-top: 40px;
-    padding-bottom: 40px;    
-    margin-left: auto;
-    margin-right: auto;
-    width: 500px;
-    max-width: 100%;  
+#resultParcelColumn {
+    margin: 0px;
+    padding: 0px !important;
+    font-size: 18px;
+    font-weight: 700;
+    height: 58px;
+    line-height: 58px;    
 }
 
-.searchBoxContainer {
-	width: 100%;
-	/*
-    border-bottom: 0px solid #D9D9D9;
-    */
+#resultButtonColumn {
+    padding: 0px !important;
+    text-align: right;
+    height: 58px;
+    line-height: 58px;
 }
 
-#tabsPanelContainer {
-    margin-left: auto;
-    margin-right: auto;
+#deleteExtractButtonColumn {
+    padding: 0px;
+}
+
+#deleteExtractButton {
+    background-color: #ef5350; /* RED_LIGHTEN_1 */
+}
+
+#minmaxExtractButton {
+    background-color: #ef5350; /* RED_LIGHTEN_1 */
+}
+
+#tabRow {
+    margin-bottom: 0px !important;
+    martin-top: 0px !important;
+}
+
+#tabHeaderColumn {
+    padding: 0px !important;    
+} 
+
+#resultTab {
+    /*background-color: #aed634 !important;*/
+    font-size: 14px !important;
+}
+
+.resultColumn {
+    padding: 15px 0px 0px 0px !important;    
+}
+
+.fakeColumn {
+    padding: 0px !important;
+    border-bottom: 1px #bdbdbd solid;
+}
+
+.mt15 {
+    margin: 15px 0px 0px 0px !important;
 
 }
 
-.nav-tabs {
-	border: none !important;
+.cadastralSurveyingInfoHeader {
+    padding: 0px !important;
+    margin: 15px 0px 0px 0px !important;
+    font-size: 14px;
+    font-weight: 700;
 }
 
-.nav-tabs.col-blue > li > a::before {
-	border-bottom-color: red !important;
+.cadastralSurveyingInfoKeyColumn {
+    padding: 0px !important;
+    margin: 0px !important;
+    font-size: 14px;
+    font-weight: 700;
 }
 
-.tabContainer {
-    margin-left: auto;
-    margin-right: auto;
+.cadastralSurveyingInfoValueColumn {
+    padding: 0px !important;
+    margin: 0px !important;
+    font-size: 14px;
+    font-weight: 400;
+}
 
+.cadastralSurveyingInfoHeaderSmall {
+    padding: 0px !important;
+    margin-right: 0px !important;
+    font-size: 12px;
+}   
+
+.textRight {
+    text-align: right !important;
+}
+
+.landCoverShareKeyColumn {
+    padding: 0px !important;
+    margin: 0px !important;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.landCoverShareValueColumn {
+    padding: 0px !important;
+    margin: 0px !important;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: right;
+}
+
+.buildingColumn {
+    padding: 0px !important;
+    margin: 0px 0px 10px 0px !important;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+#plrPdfButtonColumn {
+    padding: 0px !important;
+    font-size: 14px;
+    font-weight: 700;   
 }
 
 
-.tab-content {
-/*	background-color: white;*/
+/* */
+#pdfButtonColumn {
+    padding: 0px;
+    text-align: right;
 }
 
-.gwt-SuggestBox {
-    color: black;
-    font-family: Barlow, 'IBM Plex Sans', sans-serif; 
+#pdfButton {
+    background-color: #ef5350; /* RED_LIGHTEN_1 */
+}
+
+#generalInfoRow {
+    margin-bottom: 10px;    
+}
+
+.headerInfoColumn {
+    margin: 0px;
+    padding: 0px !important;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.infoRow {
+    margin: 0px !important;
+}
+
+.infoKeyColumn {
+    margin: 0px !important;
+    padding: 0px !important;
     font-size: 16px;
-    box-sizing: border-box;
-    /*
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    */
-    border: 1px solid #C2C2C2;
-    box-shadow: 1px 1px 4px #EBEBEB;
-    /*
-    -moz-box-shadow: 1px 1px 4px #EBEBEB;
-    -webkit-box-shadow: 1px 1px 4px #EBEBEB;
-    */
-    border-radius: 3px;
-    /*
-    -webkit-border-radius: 3px;
-    -moz-border-radius: 3px;
-    */
-    padding: 7px;
-    outline: none;
-    height: 40px;
-    background-image: url(common-search-lookup-glyph-256.png);  
-    background-position: 10px 10px;
-    background-size: 20px 20px;
-    background-repeat: no-repeat;
-    padding-left: 40px;  
+    font-weight: 700;
 }
 
-.gwt-SuggestBoxPopup { 
-   background-color: white;
-   border:  1px solid #C2C2C2 !important; 
-   border-bottom-left-radius: 3px;
-   border-bottom-right-radius: 3px;
-   /* collision with domino ui */
-   padding-left: 0px !important; 
-   margin-left: 1px !important;
-   margin-top: -1px !important;
-   
+.infoValueColumn {
+    margin: 0px !important;
+    padding: 0px !important;
+    font-size: 16px;
+    font-weight: 400;
 }
 
-.gwt-SuggestBoxPopup table { 
-   border:  0px solid red; 
-   width: 100%;
+.plrTopLevelCollapsible {
+    background-color: #fafafa; /* GREY_LIGHTEN_5 */
+    margin-top: 25px;   
 }
 
-.gwt-SuggestBoxPopup .item { 
-   padding: 4px !important;
-   font-size: 16px;   
+.plrCollapsibleThemeHeader {
+    background-color: #eeeeee !important; /* GREY_LIGHTEN_3 */
 }
 
-.gwt-SuggestBoxPopup .item-selected { 
-   background-color: #efefef !important;
+.collapsibleThemeHeaderRow {
+    margin-bottom: 0px !important;
 }
 
-.gwt-SuggestBoxPopup .suggestPopupTopLeft { 
-    height: 0px !important;
+.collapsibleThemeColumnLeft {
+    margin: 0px !important;
+    padding: 0px !important;
+}
+
+.collapsibleThemeColumnRight {
+    margin: 0px !important;
+    padding: 0px !important;
+    text-align: right;
+}
+
+.collapsibleThemesHeaderLink {
+    font-weight: 700;
+    font-size: 16px;
+    color: #000000 !important;
+}
+
+.collapsibleThemesHeaderChip {
+    margin: 0px;
+    background-color: #bdbdbd !important; /* GREY_LIGHTEN_1 */
+}
+
+.concernedThemeCollapsible {
+    background-color: #eeeeee !important; /* GREY_LIGHTEN_3 */
+    margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    border: 0px !important; 
+}
+
+.collapsibleThemeLayerHeader {
+    background-color: #f5f5f5 !important; /* GREY_LIGHTEN_4 */
+    line-height: 18px;
+    display: table;
+    width: 100%;
+    height: 45px;   
+}
+
+.helperParent {
+    border: 0px;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.collapsibleThemeLayerLink {
+    font-weight: bold;
+    font-size: 14px;
+    color: black; 
+    border: 0px;
+}
+
+a.collapsibleThemeLayerLink:hover {
+    font-weight: bold;
+    font-size: 14px;
+    color: #d32f2f; /* RED_DARKEN_2 */ 
+    border: 0px;
+}
+
+.collapsibleThemeLayerBody {
+    background-color: white !important;
+    padding: 5px 15px 5px 15px !important;  
+}
+
+.opacitySliderRow {
+    margin-bottom: 0px !important;
+}
+
+.opacitySlider {
+    padding: 0px !important;
+}
+
+.opacitySliderRowLeft {
+    font-size: 14px;
+    padding: 0px !important;    
+}
+
+.layerInfoHeaderRow {
+    padding: 10px 0px 0px 0px !important;
+    border-bottom: 0px #bdbdbd solid;
+    border-top: 1px #bdbdbd solid;
+    margin-top: 15px !important;
+    margin-bottom: 5px !important;  
+}
+      
+.layerTypeColumn {
+    padding: 0px !important;
+    margin-right: 0px !important;
+    font-size: 12px;
+}   
+
+.layerSymbolColumn {
+    padding: 0px !important;
+    margin-right: 0px !important;
+    text-align: right;  
+}
+
+.layerShareColumn {
+    text-align: right;
+    padding: 0px !important;    
+}
+                 
+.layerPercentColumn {
+    text-align: right;
+    padding: 0px !important;    
+}        
+
+.layerLegendRow {
+    border-top: 1px #bdbdbd solid;
+    margin-bottom: 10px !important;
+}         
+
+.layerLegendColumn {
+    padding-top: 5px !important;
+    padding-bottom: 0px !important;
+    padding-left: 0px !important;
+    margin-right: 0px !important;
+    font-size: 14px;
+}    
+
+.resultLink {
+    color: #d32f2f; /* RED_DARKEN_2 */ 
+}
+
+a.resultLink:hover {
+    color: #d32f2f; /* RED_DARKEN_2 */ 
+    text-decoration: underline !important;
+}  
+
+a.resultLink:visited {
+    color: #d32f2f; /* RED_DARKEN_2 */ 
+    text-decoration: underline !important;
+}    
+
+.documentsHeaderRow {
+    margin-bottom: 5px !important;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.documentRow {
+    margin-bottom: 0px !important;
+    font-size: 14px;    
+}
+
+.lawRow {
+    margin-bottom: 5px !important;
+    font-size: 14px;    
+}
+
+.documentAdditionalInfoRow {
+    margin-bottom: 10px !important;
+    font-size: 12px;    
+}
+
+.notConcernedThemesLabel {
+    font-size: 14px;
+}
+
+.withoutDataThemesLabel {
+    font-size: 14px;
+}
+
+.collapsibleGeneralInformationBody {
+    background-color: white !important;
+    font-size: 14px;
+    padding: 5px 15px 5px 15px !important;
+}
+
+#dummyButton {
+    position: absolute;
+    top: 40px;
+    right: 40px;    
+}
+
+::placeholder {
+    /*color: #ff8a80 !important;*/
+    color: #9e9e9e !important;
+    /*color: black !important;*/
+    font-size: 16px;
+    font-family: Roboto !important;
+}   
+.gwt-Label {
+    color: black;   
+}
+.gwt-HTML {
+    color: black;   
+}        
+ul.multiValueSuggestBox-list {
+    /*border-bottom: 1px solid #455a64 !important;*/
+    /*background-color: #eeeeee !important;*/
+    margin-bottom: 0px !important;
+}
+ul.multiValueSuggestBox-list li input {
+    width: 400px !important;
+}
+.multiValueSuggestBox-token {
+    background-color: #FF0000 !important;
+    visibility: hidden !important;
     width: 0px !important;
-    background-image: none !important;
-    border: none !important; 
-}
-
-.gwt-SuggestBoxPopup .suggestPopupTopLeftInner { 
-   border: none !important; 
-}
-
-.gwt-SuggestBoxPopup .suggestPopupTopCenter { 
-   border: none !important; 
-}
-
-.gwt-SuggestBoxPopup .suggestPopupTopCenterInner { 
-   border: none !important; 
-}
-
-.gwt-SuggestBoxPopup .suggestPopupTopRight {
     height: 0px !important;
-    width: 0px !important;
-    background-image: none !important;
-    border: none !important; 
+    margin: 0px !important;
+    padding: 0px !imporant;
+}
+.card {
+    margin-bottom: 0px !important;
+    /*margin-top: 0px !important;*/
+}
+.range-field {
+    padding: 0px !important;
 }
 
-.gwt-SuggestBoxPopup .suggestPopupTopRightInner {
-   border: none !important; 
+input[type=range] {
+    margin: 0px !important;
 }
 
-.gwt-SuggestBoxPopup .suggestPopupMiddleLeft { 
-   border: none !important;
-}
 
-.gwt-SuggestBoxPopup .suggestPopupMiddleLeftInner { 
-   border: none !important;
-   border-image-width: 0px !important;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupMiddleCenter { 
-   border: none !important; 
-}
-
-.gwt-SuggestBoxPopup .suggestPopupMiddleCenterInner { 
-   border: none !important;
-   padding: 3px !important;
-}
-
-/*
-.gwt-SuggestBoxPopup .suggestPopupMiddleCenterInner table { 
-   border:  3px solid green;
-   width: 100%;
-}
-*/
-.gwt-SuggestBoxPopup .suggestPopupMiddleRight { 
-   border: none !important;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupMiddleRightInner { 
-   border: none !important;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupBottomLeft {
-    height: 0px !important;
-    width: 0px !important;
-    background-image: none !important;
-    border: none !important;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupBottomLeftInner { 
-   border: none !important;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupBottomCenter {
-   border: none !important;
- }
-
-.gwt-SuggestBoxPopup .suggestPopupBottomCenterInner { 
-   border: none !important;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupBottomRight { 
-    height: 0px !important;
-    width: 0px !important;
-    background-image: none !important;
-    border: none !important;
-}
-
-.gwt-SuggestBoxPopup .suggestPopupBottomRightInner { 
-   border: none !important;
+::-webkit-scrollbar {
+    width: 0px;  /* Remove scrollbar space */
+    background: transparent;  /* Optional: just make scrollbar invisible */
 }

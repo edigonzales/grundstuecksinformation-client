@@ -1,5 +1,7 @@
 package ch.so.agi.grundstuecksinformation.shared.models;
 
+import java.util.ArrayList;
+
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class RealEstateDPR implements IsSerializable {
@@ -25,8 +27,12 @@ public class RealEstateDPR implements IsSerializable {
     
     private String oerebExtractIdentifier;
     
-//    private ArrayList<ThemeWithoutData> oerebThemesWithoutData;
-//    
+    private String oerebPdfExtractUrl;
+    
+    private Office oerebCadastreAuthority;
+    
+    private ArrayList<ThemeWithoutData> oerebThemesWithoutData;
+    
 //    private ArrayList<NotConcernedTheme> oerebNotConcernedThemes;
 //    
 //    private ArrayList<ConcernedTheme> oerebConcernedThemes;
@@ -117,5 +123,29 @@ public class RealEstateDPR implements IsSerializable {
 
     public void setOerebExtractIdentifier(String oerebExtractIdentifier) {
         this.oerebExtractIdentifier = oerebExtractIdentifier;
+    }
+
+    public String getOerebPdfExtractUrl() {
+        return oerebPdfExtractUrl;
+    }
+
+    public void setOerebPdfExtractUrl(String oerebPdfExtractUrl) {
+        this.oerebPdfExtractUrl = oerebPdfExtractUrl;
+    }
+
+    public Office getOerebCadastreAuthority() {
+        return oerebCadastreAuthority;
+    }
+
+    public void setOerebCadastreAuthority(Office oerebCadastreAuthority) {
+        this.oerebCadastreAuthority = oerebCadastreAuthority;
+    }
+
+    public ArrayList<ThemeWithoutData> getOerebThemesWithoutData() {
+        return oerebThemesWithoutData;
+    }
+
+    public void setOerebThemesWithoutData(ArrayList<ThemeWithoutData> oerebThemesWithoutData) {
+        this.oerebThemesWithoutData = oerebThemesWithoutData;
     }
 }
