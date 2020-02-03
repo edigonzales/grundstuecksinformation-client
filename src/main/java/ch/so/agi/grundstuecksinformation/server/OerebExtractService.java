@@ -26,6 +26,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -101,7 +102,15 @@ public class OerebExtractService {
         realEstateDPR.setNumber(xmlRealEstateDPR.getNumber());
         realEstateDPR.setSubunitOfLandRegister(xmlRealEstateDPR.getSubunitOfLandRegister());
         realEstateDPR.setLandRegistryArea(xmlRealEstateDPR.getLandRegistryArea());
-        realEstateDPR.setLimit(new Gml32ToJts().convertMultiSurface(xmlRealEstateDPR.getLimit()).toText());
+        
+        try {
+            realEstateDPR.setLimit(new Gml32ToJts().convertMultiSurface(xmlRealEstateDPR.getLimit()).toText()); 
+        } catch (ParseException e) {
+            e.printStackTrace();
+            logger.error(e.getMessage());
+            realEstateDPR.setLimit(null);
+        }
+        
         realEstateDPR.setOerebThemesWithoutData(themesWithoutData);
 //        realEstateDPR.setNotConcernedThemes(notConcernedThemes);        
         realEstateDPR.setRealEstateType(realEstateTypesMap.get(xmlRealEstateDPR.getType().value()));

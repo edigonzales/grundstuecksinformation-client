@@ -125,6 +125,7 @@ public class MapPresets {
         //Coordinate centerCoordinate = new Coordinate(2616491, 1240287);
         //Coordinate centerCoordinate = new Coordinate(2600593,1215639); // Messen
         Coordinate centerCoordinate = new Coordinate(2600470,1215425); // Messen
+        //Coordinate centerCoordinate = new Coordinate(2723698,1211282); // Glarus
         //Coordinate centerCoordinate = new Coordinate(2688777,1283230); // Schaffhausen
 
         view.setCenter(centerCoordinate);

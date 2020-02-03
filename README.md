@@ -31,7 +31,7 @@ Testrequests:
 - https://oereb.geo.sh.ch/oereb/extract/reduced/pdf/CH330871542766 
 - https://oereb.geo.sh.ch/oereb/getegrid/xml/?XY=2688777,1283230
  
-
+2723698 1211282
 
 ```
 https://wfs.geodienste.ch/av/deu?&VERSION=1.0.0&SERVICE=WFS&REQUEST=DescribeFeatureType&TYPENAME=ms:DPRSF

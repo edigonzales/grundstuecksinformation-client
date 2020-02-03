@@ -354,20 +354,22 @@ public class AppEntryPoint implements EntryPoint {
                 String realEstateType = realEstateDPR.getRealEstateType();
                 
                 ol.layer.Vector vlayer = createRealEstateVectorLayer(realEstateDPR.getLimit());
+                
+                if (realEstateDPR.getLimit() != null) {
+                    Geometry geometry = new Wkt().readGeometry(realEstateDPR.getLimit());
+                    Extent extent = geometry.getExtent();
+                    
+                    View view = map.getView();
+                    double resolution = view.getResolutionForExtent(extent);
+                    view.setZoom(Math.floor(view.getZoomForResolution(resolution)) - 1);
 
-                Geometry geometry = new Wkt().readGeometry(realEstateDPR.getLimit());
-                Extent extent = geometry.getExtent();
+                    double x = extent.getLowerLeftX() + extent.getWidth() / 2;
+                    double y = extent.getLowerLeftY() + extent.getHeight() / 2;
 
-                View view = map.getView();
-                double resolution = view.getResolutionForExtent(extent);
-                view.setZoom(Math.floor(view.getZoomForResolution(resolution)) - 1);
-
-                double x = extent.getLowerLeftX() + extent.getWidth() / 2;
-                double y = extent.getLowerLeftY() + extent.getHeight() / 2;
-
-                // Das ist jetzt ziemlich heuristisch...
-                // 500 = Breite des Suchresultates
-                view.setCenter(new Coordinate(x - (resultCard.getWidth() * view.getResolution()) / 2, y));
+                    // Das ist jetzt ziemlich heuristisch...
+                    // 500 = Breite des Suchresultates
+                    view.setCenter(new Coordinate(x - (resultCard.getWidth() * view.getResolution()) / 2, y));                    
+                } 
 
                 vlayer.setZIndex(1001);
                 map.addLayer(vlayer);
