@@ -15,6 +15,7 @@ import ch.ehi.oereb.schemas.oereb._1_0.extractdata.MultilingualTextType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.MultilingualUriType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.RealEstateDPRType;
 import ch.so.agi.grundstuecksinformation.shared.models.Egrid;
+import ch.so.agi.grundstuecksinformation.shared.models.NotConcernedTheme;
 import ch.so.agi.grundstuecksinformation.shared.models.Office;
 import ch.so.agi.grundstuecksinformation.shared.models.RealEstateDPR;
 import ch.so.agi.grundstuecksinformation.shared.models.ThemeWithoutData;
@@ -92,6 +93,26 @@ public class OerebExtractService {
                 .collect(collectingAndThen(toList(), ArrayList<ThemeWithoutData>::new));
         // TODO: 'Generic' sorting of themes... including possible subthemes?!
         //themesWithoutData.sort(compare);
+        
+        logger.debug("Not concerned themes:");
+        ArrayList<NotConcernedTheme> notConcernedThemes = xmlExtract.getNotConcernedTheme()
+                .stream()
+                .map(theme -> {
+                    NotConcernedTheme notConcernedTheme = new NotConcernedTheme();
+                    notConcernedTheme.setCode(theme.getCode());
+                    notConcernedTheme.setName(theme.getText().getText());
+                    
+                    logger.debug("-------");
+                    logger.debug(theme.getCode());
+                    logger.debug(theme.getText().getText());
+                    
+                    return notConcernedTheme;
+                })
+                .collect(collectingAndThen(toList(), ArrayList<NotConcernedTheme>::new));
+        // TODO: 'Generic' sorting of themes... including possible subthemes?!
+        //notConcernedThemes.sort(compare);
+        logger.debug("======================");
+
 
 
         RealEstateDPRType xmlRealEstateDPR = xmlExtract.getRealEstate();
@@ -112,9 +133,10 @@ public class OerebExtractService {
         }
         
         realEstateDPR.setOerebThemesWithoutData(themesWithoutData);
-//        realEstateDPR.setNotConcernedThemes(notConcernedThemes);        
+        realEstateDPR.setOerebNotConcernedThemes(notConcernedThemes);        
         realEstateDPR.setRealEstateType(realEstateTypesMap.get(xmlRealEstateDPR.getType().value()));
         
+        // TODO: which one is correct (according spec)?
         //realEstateDPR.setOerebPdfExtractUrl(egrid.getOerebServiceBaseUrl() + "extract/reduced/pdf/geometry/" + egrid.getEgrid());
         realEstateDPR.setOerebPdfExtractUrl(egrid.getOerebServiceBaseUrl() + "extract/reduced/pdf/" + egrid.getEgrid());
                 

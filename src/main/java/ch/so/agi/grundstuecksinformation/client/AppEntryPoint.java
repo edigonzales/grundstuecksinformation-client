@@ -35,6 +35,7 @@ import ch.so.agi.grundstuecksinformation.shared.SettingsResponse;
 import ch.so.agi.grundstuecksinformation.shared.SettingsService;
 import ch.so.agi.grundstuecksinformation.shared.SettingsServiceAsync;
 import ch.so.agi.grundstuecksinformation.shared.models.Egrid;
+import ch.so.agi.grundstuecksinformation.shared.models.NotConcernedTheme;
 import ch.so.agi.grundstuecksinformation.shared.models.RealEstateDPR;
 import ch.so.agi.grundstuecksinformation.shared.models.ThemeWithoutData;
 import elemental2.core.Global;
@@ -128,7 +129,7 @@ public class AppEntryPoint implements EntryPoint {
     private String expandedOerebLayerId;
     private MaterialCollapsible plrCollapsibleConcernedTheme;
     private MaterialCollapsible plrInnerCollapsibleConcernedTheme;
-    private MaterialCollapsible plrCollapsibleNotConcernedTheme;
+    private MaterialCollapsible oerebCollapsibleNotConcernedTheme;
     private MaterialCollapsible oerebCollapsibleThemesWithoutData;
     private MaterialCollapsible oerebCollapsibleGeneralInformation;
 
@@ -252,7 +253,6 @@ public class AppEntryPoint implements EntryPoint {
                 }
 
                 String egrid;
-                String oerebServiceBaseUrl;
                 List<Egrid> egridList = result.getEgrid();
                 if (egridList.size() > 1) {
                     MaterialLoader.loading(false);
@@ -276,7 +276,6 @@ public class AppEntryPoint implements EntryPoint {
 
                     for (Egrid egridObj : egridList) {
                         egrid = (String) egridObj.getEgrid(); 
-                        oerebServiceBaseUrl = (String) egridObj.getOerebServiceBaseUrl();
                         String number = egridObj.getNumber();
 
                         MaterialRow row = new MaterialRow();
@@ -932,69 +931,70 @@ public class AppEntryPoint implements EntryPoint {
 //            plrCollapsibleDiv.add(plrCollapsibleConcernedTheme);
 //        }
 //
-//        {
-//            plrCollapsibleNotConcernedTheme = new MaterialCollapsible();
-//            plrCollapsibleNotConcernedTheme.addStyleName("plrTopLevelCollapsible");
-//            plrCollapsibleNotConcernedTheme.setShadow(0);
-//
-//            plrCollapsibleNotConcernedTheme.addExpandHandler(event -> {
-//                plrCollapsibleConcernedTheme.close(1);
-//                plrCollapsibleThemesWithoutData.closeAll();
-//                plrCollapsibleGeneralInformation.closeAll();
-//            });
-//
-//            MaterialCollapsibleItem collapsibleNotConcernedThemeItem = new MaterialCollapsibleItem();
-//
-//            MaterialCollapsibleHeader collapsibleNotConcernedThemeHeader = new MaterialCollapsibleHeader();
-//            collapsibleNotConcernedThemeHeader.addStyleName("plrCollapsibleThemeHeader");
-//
-//            MaterialRow collapsibleNotConcernedThemeHeaderRow = new MaterialRow();
-//            collapsibleNotConcernedThemeHeaderRow.addStyleName("collapsibleThemeHeaderRow");
-//
-//            MaterialColumn collapsibleNotConcernedThemeColumnLeft = new MaterialColumn();
-//            collapsibleNotConcernedThemeColumnLeft.addStyleName("collapsibleThemeColumnLeft");
-//            collapsibleNotConcernedThemeColumnLeft.setGrid("s10");
-//            MaterialColumn collapsibleNotConcernedThemeColumnRight = new MaterialColumn();
-//            collapsibleNotConcernedThemeColumnRight.addStyleName("collapsibleThemeColumnRight");
-//            collapsibleNotConcernedThemeColumnRight.setGrid("s2");
-//
-//            MaterialLink collapsibleNotConcernedHeaderLink = new MaterialLink();
-//            collapsibleNotConcernedHeaderLink.addStyleName("collapsibleThemesHeaderLink");
-//            collapsibleNotConcernedHeaderLink.setText(messages.notConcernedThemes());
-//            collapsibleNotConcernedThemeColumnLeft.add(collapsibleNotConcernedHeaderLink);
-//
-//            MaterialChip collapsibleNotConcernedHeaderChip = new MaterialChip();
-//            collapsibleNotConcernedHeaderChip.addStyleName("collapsibleThemesHeaderChip");
-//            collapsibleNotConcernedHeaderChip
-//                    .setText(String.valueOf(extract.getRealEstate().getNotConcernedThemes().size()));
-//            collapsibleNotConcernedThemeColumnRight.add(collapsibleNotConcernedHeaderChip);
-//
-//            collapsibleNotConcernedThemeHeaderRow.add(collapsibleNotConcernedThemeColumnLeft);
-//            collapsibleNotConcernedThemeHeaderRow.add(collapsibleNotConcernedThemeColumnRight);
-//            collapsibleNotConcernedThemeHeader.add(collapsibleNotConcernedThemeHeaderRow);
-//
-//            MaterialCollapsibleBody collapsibleBody = new MaterialCollapsibleBody();
-//            collapsibleBody.addMouseOverHandler(event -> {
-//                collapsibleBody.getElement().getStyle().setCursor(Cursor.DEFAULT);
-//            });
-//            collapsibleBody.setPadding(0);
-//            MaterialCollection collection = new MaterialCollection();
-//
-//            for (NotConcernedTheme theme : extract.getRealEstate().getNotConcernedThemes()) {
-//                MaterialCollectionItem item = new MaterialCollectionItem();
-//                MaterialLabel label = new MaterialLabel(theme.getName());
-//                label.addStyleName("notConcernedThemesLabel");
-//                item.add(label);
-//                collection.add(item);
-//            }
-//            collapsibleBody.add(collection);
-//
-//            collapsibleNotConcernedThemeItem.add(collapsibleNotConcernedThemeHeader);
-//            collapsibleNotConcernedThemeItem.add(collapsibleBody);
-//            plrCollapsibleNotConcernedTheme.add(collapsibleNotConcernedThemeItem);
-//
-//            plrCollapsibleDiv.add(plrCollapsibleNotConcernedTheme);
-//        }
+        {
+            oerebCollapsibleNotConcernedTheme = new MaterialCollapsible();
+            oerebCollapsibleNotConcernedTheme.addStyleName("plrTopLevelCollapsible");
+            oerebCollapsibleNotConcernedTheme.setShadow(0);
+
+            oerebCollapsibleNotConcernedTheme.addExpandHandler(event -> {
+                plrCollapsibleConcernedTheme.close(1);
+                oerebCollapsibleThemesWithoutData.closeAll();
+                oerebCollapsibleGeneralInformation.closeAll();
+            });
+
+            MaterialCollapsibleItem collapsibleNotConcernedThemeItem = new MaterialCollapsibleItem();
+
+            MaterialCollapsibleHeader collapsibleNotConcernedThemeHeader = new MaterialCollapsibleHeader();
+            collapsibleNotConcernedThemeHeader.addStyleName("plrCollapsibleThemeHeader");
+
+            MaterialRow collapsibleNotConcernedThemeHeaderRow = new MaterialRow();
+            collapsibleNotConcernedThemeHeaderRow.addStyleName("collapsibleThemeHeaderRow");
+
+            MaterialColumn collapsibleNotConcernedThemeColumnLeft = new MaterialColumn();
+            collapsibleNotConcernedThemeColumnLeft.addStyleName("collapsibleThemeColumnLeft");
+            collapsibleNotConcernedThemeColumnLeft.setGrid("s10");
+            MaterialColumn collapsibleNotConcernedThemeColumnRight = new MaterialColumn();
+            collapsibleNotConcernedThemeColumnRight.addStyleName("collapsibleThemeColumnRight");
+            collapsibleNotConcernedThemeColumnRight.setGrid("s2");
+
+            MaterialLink collapsibleNotConcernedHeaderLink = new MaterialLink();
+            collapsibleNotConcernedHeaderLink.addStyleName("collapsibleThemesHeaderLink");
+            collapsibleNotConcernedHeaderLink.setText(messages.notConcernedThemes());
+            collapsibleNotConcernedThemeColumnLeft.add(collapsibleNotConcernedHeaderLink);
+
+            MaterialChip collapsibleNotConcernedHeaderChip = new MaterialChip();
+            collapsibleNotConcernedHeaderChip.addStyleName("collapsibleThemesHeaderChip");
+            collapsibleNotConcernedHeaderChip
+                    .setText(String.valueOf(realEstateDPR.getOerebNotConcernedThemes().size()));
+            collapsibleNotConcernedThemeColumnRight.add(collapsibleNotConcernedHeaderChip);
+
+            collapsibleNotConcernedThemeHeaderRow.add(collapsibleNotConcernedThemeColumnLeft);
+            collapsibleNotConcernedThemeHeaderRow.add(collapsibleNotConcernedThemeColumnRight);
+            collapsibleNotConcernedThemeHeader.add(collapsibleNotConcernedThemeHeaderRow);
+
+            MaterialCollapsibleBody collapsibleBody = new MaterialCollapsibleBody();
+            collapsibleBody.addMouseOverHandler(event -> {
+                collapsibleBody.getElement().getStyle().setCursor(Cursor.DEFAULT);
+            });
+            collapsibleBody.setPadding(0);
+            MaterialCollection collection = new MaterialCollection();
+
+            for (NotConcernedTheme theme : realEstateDPR.getOerebNotConcernedThemes()) {
+                MaterialCollectionItem item = new MaterialCollectionItem();
+                MaterialLabel label = new MaterialLabel(theme.getName());
+                label.addStyleName("notConcernedThemesLabel");
+                item.add(label);
+                collection.add(item);
+            }
+            collapsibleBody.add(collection);
+
+            collapsibleNotConcernedThemeItem.add(collapsibleNotConcernedThemeHeader);
+            collapsibleNotConcernedThemeItem.add(collapsibleBody);
+            oerebCollapsibleNotConcernedTheme.add(collapsibleNotConcernedThemeItem);
+
+            plrCollapsibleDiv.add(oerebCollapsibleNotConcernedTheme);
+        }
+        
         {
             oerebCollapsibleThemesWithoutData = new MaterialCollapsible();
             oerebCollapsibleThemesWithoutData.addStyleName("plrTopLevelCollapsible");
@@ -1002,7 +1002,7 @@ public class AppEntryPoint implements EntryPoint {
 
             oerebCollapsibleThemesWithoutData.addExpandHandler(event -> {
                 plrCollapsibleConcernedTheme.close(1);
-                plrCollapsibleNotConcernedTheme.closeAll();
+                oerebCollapsibleNotConcernedTheme.closeAll();
                 oerebCollapsibleGeneralInformation.closeAll();
             });
 
@@ -1066,7 +1066,7 @@ public class AppEntryPoint implements EntryPoint {
 
             oerebCollapsibleGeneralInformation.addExpandHandler(event -> {
                 plrCollapsibleConcernedTheme.close(1);
-                plrCollapsibleNotConcernedTheme.closeAll();
+                oerebCollapsibleNotConcernedTheme.closeAll();
                 oerebCollapsibleThemesWithoutData.closeAll();
             });
 
