@@ -263,7 +263,7 @@ public class AppEntryPoint implements EntryPoint {
                     realEstateWindow.setMarginLeft(0);
                     realEstateWindow.setMarginRight(0);
                     realEstateWindow.setWidth("300px");
-                    realEstateWindow.setToolbarColor(Color.GREEN_LIGHTEN_1);
+                    realEstateWindow.setToolbarColor(Color.RED_LIGHTEN_1);
 
                     MaterialIcon maximizeIcon = realEstateWindow.getIconMaximize();
                     maximizeIcon.getElement().getStyle().setProperty("visibility", "hidden");
