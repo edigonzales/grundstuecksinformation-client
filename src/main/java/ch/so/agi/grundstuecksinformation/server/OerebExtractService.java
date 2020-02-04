@@ -119,6 +119,7 @@ public class OerebExtractService {
         
         
         // Create a map with all restrictions grouped by theme text.
+        // Map mit gruppierten Restrictions (gruppiert nach Prosa-Text).
         Map<String, List<RestrictionOnLandownershipType>> groupedXmlRestrictions = xmlExtract.getRealEstate().getRestrictionOnLandownership()
                 .stream()
                 .collect(Collectors.groupingBy(r -> r.getTheme().getText().getText()));
