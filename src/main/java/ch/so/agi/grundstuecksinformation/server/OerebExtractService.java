@@ -14,6 +14,8 @@ import ch.ehi.oereb.schemas.oereb._1_0.extractdata.MultilingualMTextType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.MultilingualTextType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.MultilingualUriType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.RealEstateDPRType;
+import ch.ehi.oereb.schemas.oereb._1_0.extractdata.RestrictionOnLandownershipType;
+import ch.so.agi.grundstuecksinformation.shared.models.ConcernedTheme;
 import ch.so.agi.grundstuecksinformation.shared.models.Egrid;
 import ch.so.agi.grundstuecksinformation.shared.models.NotConcernedTheme;
 import ch.so.agi.grundstuecksinformation.shared.models.Office;
@@ -30,6 +32,7 @@ import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -112,9 +115,33 @@ public class OerebExtractService {
         // TODO: 'Generic' sorting of themes... including possible subthemes?!
         //notConcernedThemes.sort(compare);
         logger.debug("======================");
+ 
+        
+        
+        // Create a map with all restrictions grouped by theme text.
+        Map<String, List<RestrictionOnLandownershipType>> groupedXmlRestrictions = xmlExtract.getRealEstate().getRestrictionOnLandownership()
+                .stream()
+                .collect(Collectors.groupingBy(r -> r.getTheme().getText().getText()));
+        logger.debug("groupedXmlRestrictions: " + groupedXmlRestrictions.toString());
+        
+        // We create one ConcernedTheme object per theme with all restrictions belonging
+        // to the same theme since this is the way we present the restriction in the GUI.
+        logger.debug("Concerned themes:");
+        ArrayList<ConcernedTheme> concernedThemesList = new ArrayList<ConcernedTheme>();
+        for (Map.Entry<String, List<RestrictionOnLandownershipType>> entry : groupedXmlRestrictions.entrySet()) {
+            logger.debug("*********************************************");
+            logger.debug("ConcernedTheme: " + entry.getKey());
+            logger.debug("---------------------------------------------");
 
+            List<RestrictionOnLandownershipType> xmlRestrictions = entry.getValue();
 
-
+        }
+        // TODO: 'Generic' sorting of themes... including possible subthemes?!        
+        //concernedThemesList.sort(compare);        
+        logger.debug("======================");
+        
+        
+        
         RealEstateDPRType xmlRealEstateDPR = xmlExtract.getRealEstate();
         realEstateDPR.setEgrid(xmlRealEstateDPR.getEGRID());
         realEstateDPR.setFosnNr(xmlRealEstateDPR.getFosNr());
