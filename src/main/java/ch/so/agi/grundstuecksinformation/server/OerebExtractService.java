@@ -130,7 +130,7 @@ public class OerebExtractService {
         logger.debug("Concerned themes:");
         ArrayList<ConcernedTheme> concernedThemesList = new ArrayList<ConcernedTheme>();
         for (Map.Entry<String, List<RestrictionOnLandownershipType>> entry : groupedXmlRestrictions.entrySet()) {
-            logger.debug("*********************************************");
+            logger.debug("---------------------------------------------");
             logger.debug("ConcernedTheme: " + entry.getKey());
             logger.debug("---------------------------------------------");
 
