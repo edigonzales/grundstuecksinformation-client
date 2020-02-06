@@ -62,4 +62,11 @@ public class ReferenceWMS implements IsSerializable {
     public void setLegendAtWeb(String legendAtWeb) {
         this.legendAtWeb = legendAtWeb;
     }
+
+    @Override
+    public String toString() {
+        return "ReferenceWMS [baseUrl=" + baseUrl + ", layers=" + layers + ", imageFormat=" + imageFormat
+                + ", layerOpacity=" + layerOpacity + ", layerIndex=" + layerIndex + ", legendAtWeb=" + legendAtWeb
+                + "]";
+    }
 }

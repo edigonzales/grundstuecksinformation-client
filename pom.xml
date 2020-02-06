@@ -126,6 +126,13 @@
 		<version>2.3.0</version>
 		<classifier>sources</classifier>
 	</dependency> 
+	
+<dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpclient</artifactId>
+    <version>4.5.11</version>
+</dependency>
+	
 	</dependencies>
 	<build>
 		<plugins>
