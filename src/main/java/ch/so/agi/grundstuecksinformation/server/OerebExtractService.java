@@ -315,27 +315,24 @@ public class OerebExtractService {
             int layerIndex = xmlRestrictions.get(0).getMap().getLayerIndex();
             String wmsUrl = xmlRestrictions.get(0).getMap().getReferenceWMS();
 
-            UriComponents uriComponents = UriComponentsBuilder.fromUriString(URLDecoder.decode(wmsUrl, StandardCharsets.UTF_8.toString())).build();
+            UriComponents uriComponents = UriComponentsBuilder.fromUriString(URLDecoder.decode(wmsUrl, StandardCharsets.UTF_8.toString())).build();            
             String schema = uriComponents.getScheme();
             String host = uriComponents.getHost();
             String path = uriComponents.getPath();
 
-            List<NameValuePair> params;
-            try {
-                params = URLEncodedUtils.parse(new URI(URLDecoder.decode(wmsUrl, StandardCharsets.UTF_8.toString())), Charset.forName("UTF-8"));
-            } catch (Exception e) {
-                // FIXME!
-                e.printStackTrace();
-                throw new IOException(e.getMessage());
-            } 
-            for (NameValuePair param : params) {
-                System.out.println(param.getName() + " : " + param.getValue());
+            String layers = null;
+            String imageFormat = null;
+            Iterator<Map.Entry<String, List<String>>> iterator = uriComponents.getQueryParams().entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, List<String>> e = iterator.next();
+                if (e.getKey().equalsIgnoreCase("layers")) {
+                    layers = e.getValue().get(0);
+                }
+                if (e.getKey().equalsIgnoreCase("format")) {
+                    imageFormat = e.getValue().get(0);
+                }
             }
             
-            
-            String layers = uriComponents.getQueryParams().getFirst("LAYERS"); // FIXME case insensitivity
-            String imageFormat = uriComponents.getQueryParams().getFirst("FORMAT"); // FIXME case insensitivity
-
             StringBuilder baseUrlBuilder = new StringBuilder();
             baseUrlBuilder.append(schema).append("://").append(host);
             if (uriComponents.getPort() != -1) {
@@ -350,7 +347,7 @@ public class OerebExtractService {
             referenceWMS.setImageFormat(imageFormat);
             referenceWMS.setLayerOpacity(layerOpacity);
             referenceWMS.setLayerIndex(layerIndex);
-
+            logger.debug("referenceWMS: " + referenceWMS.toString()); 
             
             
             
