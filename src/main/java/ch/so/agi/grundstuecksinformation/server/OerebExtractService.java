@@ -195,7 +195,7 @@ public class OerebExtractService {
             Map<String, Integer> sumNrOfPoints = xmlRestrictions
                     .stream()
                     .filter(r -> r.getNrOfPoints() != null)
-                    .collect( Collectors.groupingBy(r -> r.getTypeCode(), Collectors.summingInt(r -> r.getNrOfPoints())));
+                    .collect(Collectors.groupingBy(r -> r.getTypeCode(), Collectors.summingInt(r -> r.getNrOfPoints())));
 
             Map<String, Double> sumAreaPercentShare = xmlRestrictions
                     .stream()
@@ -208,8 +208,8 @@ public class OerebExtractService {
             logger.debug("sumAreaPercentShare: " + sumAreaPercentShare.toString());
 
             // Die vorher berechnete Summe wird dem jeweiligen vereinfachten
-            // OEREB-Objekt zugewiesen. Dieses wird einer definitiven Liste
-            // von vereinfachten OEREB-Objekten zugewiesen. Eine solche Liste
+            // OEREB-Objekt zugewiesen. Dieses wird in einer Liste
+            // von vereinfachten OEREB-Objekten eingefügt. Eine solche definitive Liste
             // gibt es pro ConcernedTheme.
             List<Restriction> restrictionsList = new ArrayList<Restriction>();
             for (Map.Entry<String, Restriction> restrictionEntry : restrictionsMap.entrySet()) {
