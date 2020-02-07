@@ -136,7 +136,36 @@ public class OerebExtractService {
         //notConcernedThemes.sort(compare);
         logger.debug("===========Not concerned themes===========");
  
-        // Map mit gruppierten Restrictions (gruppiert nach Prosa-Text).
+        /*
+         * Solothurn:
+         * Theme.Code:           LandUsePlans                               LandUsePlans
+         * Theme.Text.Text:      Nutzungsplanung Grundnutzung               Baulinien (kantonal/kommunal
+         * Subtheme:             ch.SO.NutzungsplanungGrundnutzung          ch.SO.Baulinien
+         * 
+         * Glarus:
+         * Theme.Code:           LandUsePlans                               LandUsePlans
+         * Theme.Text.Text:      Nutzungsplanung                            Nutzungsplanung
+         * Subtheme:             Grundnutzung                               Linienbezogene Festlegungen
+         */
+        
+        /*
+         * Im Client: falls Subthema vorhanden und Subthema mit 'ch' startet etc. etc. kann man davon ausgehen,
+         * dass dieser Text nicht zum darstellen taugt, sondern Theme.Text.Text.
+         */
+        
+        // Soll zuerst geprüft werden, ob überhaupt Subthemen vorhanden sind?
+        
+        Map<String, List<RestrictionOnLandownershipType>> testGroupedXmlRestrictions = xmlExtract.getRealEstate().getRestrictionOnLandownership()
+                .stream()
+                .collect(Collectors.groupingBy(r -> r.getTheme().getText().getText()+'.'+r.getSubTheme()));
+        logger.debug("testGroupedXmlRestrictions: " + testGroupedXmlRestrictions.toString());
+
+        
+        
+        
+        
+        
+        // Map mit gruppierten Restrictions (gruppiert nach Prosa-Text (= Theme.Text.Text)).
         Map<String, List<RestrictionOnLandownershipType>> groupedXmlRestrictions = xmlExtract.getRealEstate().getRestrictionOnLandownership()
                 .stream()
                 .collect(Collectors.groupingBy(r -> r.getTheme().getText().getText()));
@@ -328,7 +357,7 @@ public class OerebExtractService {
             logger.debug("distinct legal provisions: " + distinctLegalProvisionsList.toString());
             logger.debug("distinct laws: " + distinctLawsList.toString());
             
-            // WMS: Muss auseinandergenommen werden, damit man im GUI mit OL3 arbeiten kann.
+            // WMS: Muss auseinandergenommen werden, damit man im Client mit OL3 arbeiten kann.
             double layerOpacity = xmlRestrictions.get(0).getMap().getLayerOpacity();
             int layerIndex = xmlRestrictions.get(0).getMap().getLayerIndex();
             String wmsUrl = xmlRestrictions.get(0).getMap().getReferenceWMS();
