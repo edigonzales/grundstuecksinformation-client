@@ -316,7 +316,7 @@ body .black{
 
 a.collapsibleThemeLayerLink:hover {
     font-weight: bold;
-    font-size: 14px;
+    font-size: 13px;
     color: #d32f2f; /* RED_DARKEN_2 */ 
     border: 0px;
 }
