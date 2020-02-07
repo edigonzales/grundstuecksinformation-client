@@ -35,7 +35,7 @@ public class RealEstateDPR implements IsSerializable {
     
     private ArrayList<NotConcernedTheme> oerebNotConcernedThemes;
     
-//    private ArrayList<ConcernedTheme> oerebConcernedThemes;
+    private ArrayList<ConcernedTheme> oerebConcernedThemes;
     
     public String getRealEstateType() {
         return realEstateType;
@@ -155,5 +155,13 @@ public class RealEstateDPR implements IsSerializable {
 
     public void setOerebNotConcernedThemes(ArrayList<NotConcernedTheme> oerebNotConcernedThemes) {
         this.oerebNotConcernedThemes = oerebNotConcernedThemes;
+    }
+
+    public ArrayList<ConcernedTheme> getOerebConcernedThemes() {
+        return oerebConcernedThemes;
+    }
+
+    public void setOerebConcernedThemes(ArrayList<ConcernedTheme> oerebConcernedThemes) {
+        this.oerebConcernedThemes = oerebConcernedThemes;
     }
 }

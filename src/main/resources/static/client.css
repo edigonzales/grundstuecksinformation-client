@@ -308,9 +308,10 @@ body .black{
 
 .collapsibleThemeLayerLink {
     font-weight: bold;
-    font-size: 14px;
+    font-size: 13px;
     color: black; 
     border: 0px;
+    /*font-family: 'Barlow Semi Condensed';*/
 }
 
 a.collapsibleThemeLayerLink:hover {
@@ -333,6 +334,15 @@ a.collapsibleThemeLayerLink:hover {
     padding: 0px !important;
 }
 
+/* Bug? */
+.range-field .progress-container {
+	z-index: 0 !important;
+}
+
+input[type="range"] {
+	z-index: 2 !important;
+}
+
 .opacitySliderRowLeft {
     font-size: 14px;
     padding: 0px !important;    
@@ -342,7 +352,7 @@ a.collapsibleThemeLayerLink:hover {
     padding: 10px 0px 0px 0px !important;
     border-bottom: 0px #bdbdbd solid;
     border-top: 1px #bdbdbd solid;
-    margin-top: 15px !important;
+    /*margin-top: 15px !important;*/
     margin-bottom: 5px !important;  
 }
       

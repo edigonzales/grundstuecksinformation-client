@@ -173,7 +173,12 @@ public class OerebExtractService {
                             encodedImage = "data:image/png;base64," + encodedImage;
                             restriction.setSymbol(encodedImage);
                         } else if (r.getSymbolRef() != null) {
-                            restriction.setSymbolRef(r.getSymbolRef());
+                            try {
+                                String symbolUrl = URLDecoder.decode(r.getSymbolRef(), StandardCharsets.UTF_8.toString());
+                                restriction.setSymbolRef(symbolUrl);
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
                         }
                         return restriction;
                     })
@@ -241,8 +246,13 @@ public class OerebExtractService {
                         Office office = new Office();
                         if (r.getResponsibleOffice().getName() != null) {
                             office.setName(getLocalisedText(r.getResponsibleOffice().getName(), DE));
+                        }      
+                        try {
+                            office.setOfficeAtWeb(URLDecoder.decode(r.getResponsibleOffice().getOfficeAtWeb().getValue(), StandardCharsets.UTF_8.toString()));
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                            office.setOfficeAtWeb(r.getResponsibleOffice().getOfficeAtWeb().getValue());
                         }
-                        office.setOfficeAtWeb(r.getResponsibleOffice().getOfficeAtWeb().getValue());
                         return office;
                     })
                     .collect(Collectors.toList());
@@ -274,8 +284,12 @@ public class OerebExtractService {
                     if (xmlLegalProvision.getAbbreviation() != null) {
                         legalProvision.setAbbreviation(getLocalisedText(xmlLegalProvision.getAbbreviation(), DE));
                     }
-                    if (xmlLegalProvision.getTextAtWeb() != null) {
-                        legalProvision.setTextAtWeb(getLocalisedText(xmlLegalProvision.getTextAtWeb(), DE));
+                    if (xmlLegalProvision.getTextAtWeb() != null) { 
+                       try {
+                           legalProvision.setTextAtWeb(URLDecoder.decode(getLocalisedText(xmlLegalProvision.getTextAtWeb(), DE), StandardCharsets.UTF_8.toString()));
+                       } catch (UnsupportedEncodingException e) {
+                           legalProvision.setTextAtWeb(getLocalisedText(xmlLegalProvision.getTextAtWeb(), DE));
+                       }
                     }
                     legalProvisionsList.add(legalProvision);
 
@@ -293,7 +307,11 @@ public class OerebExtractService {
                             law.setAbbreviation(getLocalisedText(xmlLaw.getAbbreviation(), DE));
                         }
                         if (xmlLaw.getTextAtWeb() != null) {
-                            law.setTextAtWeb(getLocalisedText(xmlLaw.getTextAtWeb(), DE));
+                            try {
+                                law.setTextAtWeb(URLDecoder.decode(getLocalisedText(xmlLaw.getTextAtWeb(), DE), StandardCharsets.UTF_8.toString()));
+                            } catch (UnsupportedEncodingException e) {
+                                law.setTextAtWeb(getLocalisedText(xmlLaw.getTextAtWeb(), DE));
+                            }
                         }
                         lawsList.add(law);
                     }
@@ -349,8 +367,26 @@ public class OerebExtractService {
             referenceWMS.setLayerIndex(layerIndex);
             logger.debug("referenceWMS: " + referenceWMS.toString()); 
             
+            // Bundesthemen haben, Stand heute, keine LegendeImWeb
+            String legendAtWeb = null;
+            if (xmlRestrictions.get(0).getMap().getLegendAtWeb() != null) {
+                legendAtWeb = URLDecoder.decode(xmlRestrictions.get(0).getMap().getLegendAtWeb().getValue(), StandardCharsets.UTF_8.toString());
+            }
             
-            
+            // Finally we create the concerned theme with all information.
+            ConcernedTheme concernedTheme = new ConcernedTheme();
+            concernedTheme.setRestrictions(restrictionsList);
+            concernedTheme.setLegalProvisions(distinctLegalProvisionsList);
+            concernedTheme.setLaws(distinctLawsList);
+            concernedTheme.setReferenceWMS(referenceWMS);
+            concernedTheme.setLegendAtWeb(legendAtWeb);
+            concernedTheme.setCode(xmlRestrictions.get(0).getTheme().getCode());
+            concernedTheme.setName(xmlRestrictions.get(0).getTheme().getText().getText());
+            concernedTheme.setSubtheme(xmlRestrictions.get(0).getSubTheme());
+            concernedTheme.setResponsibleOffice(officeList);
+
+            concernedThemesList.add(concernedTheme);
+
             logger.debug("---------------------------------------------");
         }
         // TODO: 'Generic' sorting of themes... including possible subthemes?!        
@@ -378,6 +414,7 @@ public class OerebExtractService {
         
         realEstateDPR.setOerebThemesWithoutData(themesWithoutData);
         realEstateDPR.setOerebNotConcernedThemes(notConcernedThemes);        
+        realEstateDPR.setOerebConcernedThemes(concernedThemesList);
         realEstateDPR.setRealEstateType(realEstateTypesMap.get(xmlRealEstateDPR.getType().value()));
         
         // TODO: which one is correct (according spec)?
@@ -391,10 +428,8 @@ public class OerebExtractService {
         oerebCadastreAuthority.setNumber(xmlExtract.getPLRCadastreAuthority().getNumber());
         oerebCadastreAuthority.setPostalCode(xmlExtract.getPLRCadastreAuthority().getPostalCode());
         oerebCadastreAuthority.setCity(xmlExtract.getPLRCadastreAuthority().getCity());
-        
         realEstateDPR.setOerebCadastreAuthority(oerebCadastreAuthority);
 
-               
         return realEstateDPR;
     }
     
