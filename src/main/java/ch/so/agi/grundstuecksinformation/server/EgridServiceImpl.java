@@ -37,18 +37,7 @@ public class EgridServiceImpl extends RemoteServiceServlet implements EgridServi
 
     @Autowired
     Jaxb2Marshaller marshaller;
-
-//    // TODO: inject from application.properties
-//    private List<String> oerebServiceBaseUrlList = Stream.of(
-//            "https://oereb.geo.sh.ch/oereb/", 
-//            "https://geo.so.ch/api/oereb/")
-//            .collect(Collectors.toList());    
-    
-//    private List<String> wfsUrlTemplateList = Stream.of(
-//            "https://wfs.geodienste.ch/av/deu?&VERSION=1.0.0&SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:DPRSF&Filter=<Filter><PropertyIsEqualTo><PropertyName>EGRIS_EGRID</PropertyName><Literal>%s</Literal></PropertyIsEqualTo></Filter>", 
-//            "https://wfs.geodienste.ch/av/deu?&VERSION=1.0.0&SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:RESF&Filter=<Filter><PropertyIsEqualTo><PropertyName>EGRIS_EGRID</PropertyName><Literal>%s</Literal></PropertyIsEqualTo></Filter>")
-//            .collect(Collectors.toList());    
-        
+            
     // see:
     // https://stackoverflow.com/questions/51874785/gwt-spring-boot-autowired-is-not-working
     @Override

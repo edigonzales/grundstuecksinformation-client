@@ -28,6 +28,12 @@ body .black{
     opacity: 0.9 !important;
 }
 
+#infoButton {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+}
+
 #searchCard {
     background-color: #fafafa; /* GREY_LIGHTEN_5 */
     position: absolute;
@@ -44,6 +50,10 @@ body .black{
 
 #searchCardContent {
     padding: 15px;
+}
+
+.suggestPopupContent {
+    cursor: pointer !important;
 }
 
 #logoColumn {
@@ -467,6 +477,7 @@ ul.multiValueSuggestBox-list {
 ul.multiValueSuggestBox-list li input {
     width: 400px !important;
 }
+
 .multiValueSuggestBox-token {
     background-color: #FF0000 !important;
     visibility: hidden !important;
@@ -475,6 +486,7 @@ ul.multiValueSuggestBox-list li input {
     margin: 0px !important;
     padding: 0px !imporant;
 }
+
 .card {
     margin-bottom: 0px !important;
     /*margin-top: 0px !important;*/

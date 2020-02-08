@@ -53,7 +53,6 @@ public class ExtractServiceImpl extends RemoteServiceServlet implements ExtractS
         RealEstateDPR realEstateDPR = new RealEstateDPR();
         oerebExtractService.getExtract(egrid, realEstateDPR);
         
-        
         ExtractResponse extractResponse = new ExtractResponse();
         extractResponse.setRealEstateDPR(realEstateDPR);
         return extractResponse;

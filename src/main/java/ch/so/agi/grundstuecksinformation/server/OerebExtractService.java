@@ -34,11 +34,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -53,8 +50,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.xerces.impl.dv.util.Base64;
 
 import javax.xml.transform.stream.StreamSource;
@@ -80,25 +75,49 @@ public class OerebExtractService {
     })
     .collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
-    public RealEstateDPR getExtract(Egrid egrid, RealEstateDPR realEstateDPR) throws IOException {        
+    public RealEstateDPR getExtract(Egrid egrid, RealEstateDPR realEstateDPR) throws IOException {     
+        // FIXME: Kann man vereinfachen.
         File xmlFile;
-        xmlFile = Files.createTempFile("oereb_extract_", ".xml").toFile();
-        URL url = new URL(egrid.getOerebServiceBaseUrl() + "extract/reduced/xml/geometry/" + egrid.getEgrid());
-        logger.debug("extract url: " + url.toString());
+        if (egrid.getOerebServiceBaseUrl() != null) {
+            xmlFile = Files.createTempFile("oereb_extract_", ".xml").toFile();
+            URL url = new URL(egrid.getOerebServiceBaseUrl() + "extract/reduced/xml/geometry/" + egrid.getEgrid());
+            logger.debug("extract url: " + url.toString());
 
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("Accept", "application/xml");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setRequestProperty("Accept", "application/xml");
 
-        if (connection.getResponseCode() != 200) {
-            throw new IOException(connection.getResponseMessage());
+            if (connection.getResponseCode() != 200) {
+                throw new IOException(connection.getResponseMessage());
+            }
+            
+            InputStream initialStream = connection.getInputStream();
+            java.nio.file.Files.copy(initialStream, xmlFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            initialStream.close();
+            logger.info("File downloaded: " + xmlFile.getAbsolutePath());  
+        } else {
+            HttpURLConnection connection = null;
+            int responseCode = 0;
+            for (String baseUrl : Consts.OEREB_SERVICE_BASE_URL) {
+                URL url = new URL(baseUrl + "extract/reduced/xml/geometry/" + egrid.getEgrid());
+                logger.info(url.toString());
+                
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("Accept", "application/xml");
+                responseCode = connection.getResponseCode();
+                if (responseCode == 200) {
+                    logger.info("Extract found: " + url.toString());
+                    break;
+                } 
+            }
+            xmlFile = Files.createTempFile("oereb_extract_", ".xml").toFile();            
+            InputStream initialStream = connection.getInputStream();
+            java.nio.file.Files.copy(initialStream, xmlFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            initialStream.close();
+            logger.info("File downloaded: " + xmlFile.getAbsolutePath());  
         }
         
-        InputStream initialStream = connection.getInputStream();
-        java.nio.file.Files.copy(initialStream, xmlFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        initialStream.close();
-        logger.info("File downloaded: " + xmlFile.getAbsolutePath());
-
         StreamSource xmlSource = new StreamSource(xmlFile);
         GetExtractByIdResponse obj = (GetExtractByIdResponse) marshaller.unmarshal(xmlSource);
         ExtractType xmlExtract = obj.getValue().getExtract().getValue();
@@ -139,7 +158,7 @@ public class OerebExtractService {
         /*
          * Solothurn:
          * Theme.Code:           LandUsePlans                               LandUsePlans
-         * Theme.Text.Text:      Nutzungsplanung Grundnutzung               Baulinien (kantonal/kommunal
+         * Theme.Text.Text:      Nutzungsplanung Grundnutzung               Baulinien (kantonal/kommunal)
          * Subtheme:             ch.SO.NutzungsplanungGrundnutzung          ch.SO.Baulinien
          * 
          * Glarus:
@@ -149,36 +168,26 @@ public class OerebExtractService {
          */
         
         /*
-         * Im Client: falls Subthema vorhanden und Subthema mit 'ch' startet etc. etc. kann man davon ausgehen,
-         * dass dieser Text nicht zum darstellen taugt, sondern Theme.Text.Text.
+         * Weil Kantone Subthemen völlig anders behandeln und verwenden, muss dies auch beim Verarbeiten
+         * und Darstellen im Client Rechnung getragen werden.
+         * Auf Serverseite muss die Kombination Theme.Text.Text + Subtheme gruppiert werden.
+         * Im Client für das Beschriften der Handorgeln wir geprüft, ob - falls vorhanden - das Subthema
+         * sprechend ist (Kanton Solothurn) oder ob es sich um den technischen Namen handelt (Kanton GL).
          */
         
-        // Soll zuerst geprüft werden, ob überhaupt Subthemen vorhanden sind?
-        
-        Map<String, List<RestrictionOnLandownershipType>> testGroupedXmlRestrictions = xmlExtract.getRealEstate().getRestrictionOnLandownership()
+        Map<ThemeTuple, List<RestrictionOnLandownershipType>> groupedXmlRestrictions = xmlExtract.getRealEstate().getRestrictionOnLandownership()
                 .stream()
-                .collect(Collectors.groupingBy(r -> r.getTheme().getText().getText()+'.'+r.getSubTheme()));
-        logger.debug("testGroupedXmlRestrictions: " + testGroupedXmlRestrictions.toString());
-
-        
-        
-        
-        
-        
-        // Map mit gruppierten Restrictions (gruppiert nach Prosa-Text (= Theme.Text.Text)).
-        Map<String, List<RestrictionOnLandownershipType>> groupedXmlRestrictions = xmlExtract.getRealEstate().getRestrictionOnLandownership()
-                .stream()
-                .collect(Collectors.groupingBy(r -> r.getTheme().getText().getText()));
-        logger.debug("groupedXmlRestrictions: " + groupedXmlRestrictions.toString());
+                .collect(Collectors.groupingBy(r -> new ThemeTuple(r.getTheme().getText().getText(), r.getSubTheme())));
+        logger.debug("groupedXmlRestrictions (tuple): " + groupedXmlRestrictions.toString());
         
         // Es gibt ein ConcerncedTheme-Objekt pro Thema mit allen ÖREBs zu diesem Thema. 
         // Diese ConcernedThemes werden in einer Liste gespeichert. Dies entspricht
         // dem späteren Handling im GUI.
         logger.debug("===========Concerned themes===========");
         ArrayList<ConcernedTheme> concernedThemesList = new ArrayList<ConcernedTheme>();
-        for (Map.Entry<String, List<RestrictionOnLandownershipType>> entry : groupedXmlRestrictions.entrySet()) {
+        for (Map.Entry<ThemeTuple, List<RestrictionOnLandownershipType>> entry : groupedXmlRestrictions.entrySet()) {
             logger.debug("---------------------------------------------");
-            logger.debug("ConcernedTheme: " + entry.getKey());
+            logger.debug("ConcernedTheme: " + entry.getKey().toString());
 
             List<RestrictionOnLandownershipType> xmlRestrictions = entry.getValue();
             logger.debug("Anzahl einzelne OEREB-Objekte im XML für dieses Thema: " + String.valueOf(xmlRestrictions.size()));
@@ -452,7 +461,7 @@ public class OerebExtractService {
                 
         Office oerebCadastreAuthority = new Office();
         oerebCadastreAuthority.setName(getLocalisedText(xmlExtract.getPLRCadastreAuthority().getName(), DE));
-        oerebCadastreAuthority.setOfficeAtWeb(xmlExtract.getPLRCadastreAuthority().getOfficeAtWeb().getValue());
+        oerebCadastreAuthority.setOfficeAtWeb(URLDecoder.decode(xmlExtract.getPLRCadastreAuthority().getOfficeAtWeb().getValue(), StandardCharsets.UTF_8.toString()));
         oerebCadastreAuthority.setStreet(xmlExtract.getPLRCadastreAuthority().getStreet());
         oerebCadastreAuthority.setNumber(xmlExtract.getPLRCadastreAuthority().getNumber());
         oerebCadastreAuthority.setPostalCode(xmlExtract.getPLRCadastreAuthority().getPostalCode());

@@ -56,7 +56,7 @@ public interface MainMessages extends Messages {
     @DefaultMessage("Share")
     String resultShare();
         
-    @DefaultMessage("Share in %")
+    @DefaultMessage("Share %")
     String resultShareInPercent();
     
     @DefaultMessage("Show full legend")

@@ -2,6 +2,7 @@ package ch.so.agi.grundstuecksinformation.client;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,9 @@ import com.google.gwt.dom.client.Style.FontStyle;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.VerticalAlign;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
@@ -25,6 +29,8 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SuggestOracle;
+import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
 import ch.qos.logback.classic.Logger;
 import ch.so.agi.grundstuecksinformation.shared.EgridResponse;
@@ -76,7 +82,10 @@ import ol.style.Style;
 import static elemental2.dom.DomGlobal.fetch;
 import static elemental2.dom.DomGlobal.console;
 import elemental2.dom.Response;
+import gwt.material.design.addins.client.autocomplete.MaterialAutoComplete;
+import gwt.material.design.addins.client.autocomplete.constants.AutocompleteType;
 import gwt.material.design.addins.client.window.MaterialWindow;
+import gwt.material.design.client.constants.ButtonSize;
 import gwt.material.design.client.constants.ButtonType;
 import gwt.material.design.client.constants.Color;
 import gwt.material.design.client.constants.Display;
@@ -116,6 +125,7 @@ public class AppEntryPoint implements EntryPoint {
     
     // Settings
     private String MY_VAR;
+    private String SEARCH_SERVICE_URL = "https://api3.geo.admin.ch/rest/services/api/SearchServer?sr=2056&limit=15&type=locations&origins=address,parcel&searchText=";
     
     private String SUB_HEADER_FONT_SIZE = "16px";
     private String BODY_FONT_SIZE = "14px";
@@ -132,6 +142,7 @@ public class AppEntryPoint implements EntryPoint {
   
     private Map map;
     private MaterialCard searchCard;  
+    private MaterialAutoComplete autocomplete;    
     private MaterialCard resultCard;    
     private MaterialCardContent searchCardContent;   
     private MaterialCardContent resultCardContent;    
@@ -170,16 +181,11 @@ public class AppEntryPoint implements EntryPoint {
     }
 
     private void init() {                        
-        GWT.log("fubar");
-        
-        // Add the allmighty map.
+        // Add the almighty map.
         Div mapDiv = new Div();
         mapDiv.setId("map");
 
         RootPanel.get().add(mapDiv);
-
-        map = MapPresets.getCadastralSurveyingWms(mapDiv.getId());
-        map.addSingleClickListener(new MapSingleClickListener());
         
         // Search card on in the top left corner.
         searchCard = new MaterialCard();
@@ -205,8 +211,21 @@ public class AppEntryPoint implements EntryPoint {
         MaterialRow searchRow = new MaterialRow();
         searchRow.setId("searchRow");
 
+        SearchOracle searchOracle = new SearchOracle(SEARCH_SERVICE_URL);
+        autocomplete = new MaterialAutoComplete(searchOracle);
+        autocomplete.setId("autocomplete");
+        // It's not possible to get the object with AutocompleteType.TEXT.
+        // You only get the text then. But we definitely need the object.
+        // The chip can be made invisible with CSS. But the size
+        // must be also set to zero.
+        //autocomplete.setType(AutocompleteType.TEXT);
+        autocomplete.setPlaceholder(messages.searchPlaceholder());
+        autocomplete.setAutoSuggestLimit(5);
+        autocomplete.setLimit(1);
+        autocomplete.addValueChangeHandler(new SearchValueChangeHandler());
+        
+        searchRow.add(autocomplete);
         searchCardContent.add(searchRow);
-        searchCardContent.add(new Label("Search will be placed here."));
         searchCard.add(searchCardContent);
         
         RootPanel.get().add(searchCard);
@@ -224,10 +243,67 @@ public class AppEntryPoint implements EntryPoint {
         resultCard.add(fadeoutBottomDiv);
         
         RootPanel.get().add(resultCard);
+        
+        // It seems that initializing the map and/or adding the click listener
+        // must be done after adding the value changed handler of the search.
+        // Selecting a search result was also triggering a map single click event.
+        map = MapPresets.getCadastralSurveyingWms(mapDiv.getId());
+        map.addSingleClickListener(new MapSingleClickListener());
+
+        // Info button.
+        MaterialButton infoButton = new MaterialButton();
+        infoButton.setId("infoButton");
+        infoButton.setMargin(8);
+        infoButton.setType(ButtonType.FLOATING);
+        infoButton.setSize(ButtonSize.LARGE);
+        infoButton.setBackgroundColor(Color.RED_LIGHTEN_1);
+        infoButton.setIconType(IconType.INFO_OUTLINE);
+        
+        infoButton.addClickHandler(event -> {
+           GWT.log(event.toString()); 
+           
+           MaterialWindow infoWindow = new MaterialWindow();
+           infoWindow.setTitle("Grundstücksinformation");
+           infoWindow.setFontSize("16px");
+           infoWindow.setTop(15);
+           infoWindow.setMarginLeft(0);
+           infoWindow.setMarginRight(0);
+           infoWindow.setWidth("400px");
+           infoWindow.setToolbarColor(Color.RED_LIGHTEN_1);
+           infoWindow.getElement().getStyle().setProperty("margin", "auto");
+
+           MaterialIcon maximizeIcon = infoWindow.getIconMaximize();
+           maximizeIcon.getElement().getStyle().setProperty("visibility", "hidden");
+
+           infoWindow.setMaximize(false);
+
+           MaterialPanel infoWindowPanel = new MaterialPanel();
+           infoWindowPanel.setPadding(5);
+           HTML infoHTML = new HTML("<b>fubar</b>");
+           infoWindowPanel.add(infoHTML);
+           
+           infoWindow.add(infoWindowPanel);
+           infoWindow.open();
+        });
+        
+        //RootPanel.get().add(infoButton);
+        
+        // If there is an egrid query parameter in the url,
+        // we request the extract without further interaction.
+        if (Window.Location.getParameter("egrid") != null) {
+            String egrid = Window.Location.getParameter("egrid").toString();
+            MaterialLoader.loading(true);
+            resetGui();
+            Egrid egridObj = new Egrid();
+            egridObj.setEgrid(egrid);
+            sendEgridToServer(egridObj);
+        }
     }
     
     private void resetGui() {
         removeOerebWmsLayers();
+        
+        expandedOerebLayerId = null;
 
         if (resultDiv != null) {
             resultCardContent.remove(resultDiv);
@@ -257,11 +333,8 @@ public class AppEntryPoint implements EntryPoint {
 
             @Override
             public void onSuccess(EgridResponse result) {
-                GWT.log("SUCCESS!!!!"); 
                 resetGui();
-                
-                GWT.log(String.valueOf(result.getResponseCode()));
-                
+                                
                 if (result.getResponseCode() != 200) {
                     MaterialLoader.loading(false);
 
@@ -290,7 +363,8 @@ public class AppEntryPoint implements EntryPoint {
                     realEstateWindow.setLeft(event.getPixel().getX());
   
                     MaterialPanel realEstatePanel = new MaterialPanel();
-
+                    
+                    HashMap<String, Egrid> egridMap = new HashMap<String, Egrid>();
                     for (Egrid egridObj : egridList) {
                         egrid = (String) egridObj.getEgrid(); 
                         String number = egridObj.getNumber();
@@ -299,20 +373,22 @@ public class AppEntryPoint implements EntryPoint {
                         row.setId(egrid);
                         row.setMarginBottom(0);
                         row.setPadding(5);
-                        row.add(new Label(messages.realEstateAbbreviation() + ": " + number + " (unknown...)"));
+                        row.add(new Label(messages.realEstateAbbreviation() + ": " + number + " (unknown type...)"));
 
+                        egridMap.put(egrid, egridObj);
+                        
                         row.addClickHandler(event -> {
                             realEstateWindow.removeFromParent();
                             GWT.log("Get extract from a map click (multiple click result): " + row.getId());
-//                            Egrid  = new Egrid();
 
-//                            MaterialLoader.loading(true);
-//                            sendEgridToServer(row.getId());
+                            MaterialLoader.loading(true);
+                            sendEgridToServer(egridMap.get(row.getId()));
                         });
 
                         row.addMouseOverHandler(event -> {
                             row.setBackgroundColor(Color.GREY_LIGHTEN_3);
                             row.getElement().getStyle().setCursor(Cursor.POINTER);
+                            // Since there is no geometry, we cannot hightlight the real estate.
 //                            ol.layer.Vector vlayer = createRealEstateVectorLayer(feature.getGeometry());
 //                            map.addLayer(vlayer);
                         });
@@ -353,7 +429,6 @@ public class AppEntryPoint implements EntryPoint {
             @Override
             public void onSuccess(ExtractResponse result) {
                 MaterialLoader.loading(false);
-                GWT.log("foo bar");
                 
                 String newUrl = Window.Location.getProtocol() + "//" + Window.Location.getHost() + Window.Location.getPath() + "?egrid=" + egrid.getEgrid();
                 updateURLWithoutReloading(newUrl);
@@ -527,7 +602,7 @@ public class AppEntryPoint implements EntryPoint {
 
                 resultTab.addSelectionHandler(event -> {
                     // 2 == OEREB
-                    if (event.getSelectedItem() == 2) {
+                    if (event.getSelectedItem() == 2) {                        
                         for (String layerId : oerebWmsLayers) {
                             Image wmsLayer = (Image) getMapLayerById(layerId);
                             if (layerId.equalsIgnoreCase(expandedOerebLayerId)) {
@@ -576,14 +651,12 @@ public class AppEntryPoint implements EntryPoint {
             pdfRow.add(pdfButtonColumn);
             oerebResultColumn.add(pdfRow);
             
-            GWT.log(realEstateDPR.getOerebPdfExtractUrl());
-
             pdfButton.addClickHandler(event -> {
                 Window.open(realEstateDPR.getOerebPdfExtractUrl(), "_blank", null);
             });
         }
 
-        Div plrCollapsibleDiv = new Div();
+        Div oerebCollapsibleDiv = new Div();
 
         {
             oerebCollapsibleConcernedTheme = new MaterialCollapsible();
@@ -645,8 +718,7 @@ public class AppEntryPoint implements EntryPoint {
 
                     MaterialCollapsibleItem item = new MaterialCollapsibleItem();
 
-                    // Cannot use the code since all subthemes share
-                    // the same code.
+                    // Cannot use the code since all subthemes share the same code.
                     String layerId = theme.getReferenceWMS().getLayers();
                     item.setId(layerId);
                     oerebWmsLayers.add(layerId);
@@ -664,8 +736,21 @@ public class AppEntryPoint implements EntryPoint {
 
                     MaterialLink link = new MaterialLink();
                     link.addStyleName("collapsibleThemeLayerLink");
-                    link.setText(theme.getName());
-
+                    
+                    /*
+                     * Wegen des unterschiedlichen Umgangs mit Subthemen wird
+                     * es ein klein wenig kompliziert...
+                     */
+                    if (theme.getSubtheme() != null && !theme.getSubtheme().isEmpty()) {
+                        if (!theme.getSubtheme().substring(0,2).equals("ch")) {
+                            link.setText(theme.getName() + " - " + theme.getSubtheme());
+                        } else {
+                            link.setText(theme.getName());
+                        }
+                    } else {
+                        link.setText(theme.getName());
+                    }
+                    
                     aParent.add(link);
                     header.add(aParent);
                     item.add(header);
@@ -937,7 +1022,8 @@ public class AppEntryPoint implements EntryPoint {
 //                  }
                 });
 
-                oerebInnerCollapsibleConcernedTheme.open(1);
+                // Do not open accordion automatically.
+                //oerebInnerCollapsibleConcernedTheme.open(1);
                 collapsibleConcernedThemeBody.add(oerebInnerCollapsibleConcernedTheme);
             }
 
@@ -952,7 +1038,7 @@ public class AppEntryPoint implements EntryPoint {
                 oerebCollapsibleConcernedTheme.open(1);
             }
 
-            plrCollapsibleDiv.add(oerebCollapsibleConcernedTheme);
+            oerebCollapsibleDiv.add(oerebCollapsibleConcernedTheme);
         }
 
         {
@@ -1016,7 +1102,7 @@ public class AppEntryPoint implements EntryPoint {
             collapsibleNotConcernedThemeItem.add(collapsibleBody);
             oerebCollapsibleNotConcernedTheme.add(collapsibleNotConcernedThemeItem);
 
-            plrCollapsibleDiv.add(oerebCollapsibleNotConcernedTheme);
+            oerebCollapsibleDiv.add(oerebCollapsibleNotConcernedTheme);
         }
         
         {
@@ -1081,7 +1167,7 @@ public class AppEntryPoint implements EntryPoint {
             collapsibleThemesWithoutDataItem.add(collapsibleBody);
             oerebCollapsibleThemesWithoutData.add(collapsibleThemesWithoutDataItem);
 
-            plrCollapsibleDiv.add(oerebCollapsibleThemesWithoutData);
+            oerebCollapsibleDiv.add(oerebCollapsibleThemesWithoutData);
         }
         {
             oerebCollapsibleGeneralInformation = new MaterialCollapsible();
@@ -1107,10 +1193,17 @@ public class AppEntryPoint implements EntryPoint {
 
             HTML infoHtml = new HTML();
 
+            Office cadastreAuthority = realEstateDPR.getOerebCadastreAuthority();
             StringBuilder html = new StringBuilder();
             html.append("<b>Katasterverantwortliche Stelle</b>");
             html.append("<br>");
-            html.append(realEstateDPR.getOerebCadastreAuthority().getName());
+            html.append(cadastreAuthority.getName());
+            html.append("<br>");
+            html.append(cadastreAuthority.getStreet() + " " + cadastreAuthority.getNumber());
+            html.append("<br>");
+            html.append(cadastreAuthority.getPostalCode() + " " + cadastreAuthority.getCity());
+            html.append("<br>");
+            html.append(makeHtmlLink(cadastreAuthority.getOfficeAtWeb()));
 
             infoHtml.setHTML(html.toString());
             body.add(infoHtml);
@@ -1134,10 +1227,10 @@ public class AppEntryPoint implements EntryPoint {
             collapsibleGeneralInformationItem.add(body);
             oerebCollapsibleGeneralInformation.add(collapsibleGeneralInformationItem);
 
-            plrCollapsibleDiv.add(oerebCollapsibleGeneralInformation);
+            oerebCollapsibleDiv.add(oerebCollapsibleGeneralInformation);
         }
 
-        oerebResultColumn.add(plrCollapsibleDiv);
+        oerebResultColumn.add(oerebCollapsibleDiv);
     }
     
     private void addCadastralSurveyingContent(RealEstateDPR realEstateDPR) {
@@ -1174,10 +1267,31 @@ public class AppEntryPoint implements EntryPoint {
         }
     }
     
+    public class SearchValueChangeHandler implements ValueChangeHandler {
+        @Override
+        public void onValueChange(ValueChangeEvent event) {
+            GWT.log("onValueChange: " + event.getValue().toString());
+            
+            // We only allow one result in the autocomplete widget.
+            List<? extends SuggestOracle.Suggestion> values = (List<? extends Suggestion>) event.getValue();
+            SearchSuggestion searchSuggestion = (SearchSuggestion) values.get(0);
+            SearchResult searchResult = searchSuggestion.getSearchResult();
+
+            GWT.log(searchResult.getBbox());
+            
+//            MaterialLoader.loading(true);
+//            resetGui();
+            
+        }
+
+
+    }
+
     public final class MapSingleClickListener implements EventListener<MapBrowserEvent> {
         @Override
         public void onEvent(MapBrowserEvent event) {
             MaterialLoader.loading(true);
+            GWT.log("map click");
             
             Coordinate coordinate = event.getCoordinate();
             sendCoordinateToServer(coordinate.toStringXY(3), event);
@@ -1450,6 +1564,12 @@ public class AppEntryPoint implements EntryPoint {
             }
         }
         return null;
+    }
+    
+    // Make a html link from a string.
+    private String makeHtmlLink(String text) {
+        String html = "<a class='resultLink' href='" + text + "' target='_blank'>" + text + "</a>";
+        return html;
     }
     
     // Update the URL in the browser without reloading the page.
