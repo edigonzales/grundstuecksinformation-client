@@ -341,10 +341,14 @@ public class AppEntryPoint implements EntryPoint {
                     MaterialToast.fireToast("E-GRID not found.");
                     return;
                 }
-
+                
+                // MapBrowserEvent is null if we end up here by a text search.
+                // We just use the first egrid from the list w/o asking the
+                // user. Wouldn't be too easy I guess to interact with the
+                // user without confusing him.
                 String egrid;
                 List<Egrid> egridList = result.getEgrid();
-                if (egridList.size() > 1) {
+                if (egridList.size() > 1 && event != null) {
                     MaterialLoader.loading(false);
 
                     realEstateWindow = new MaterialWindow();
@@ -404,6 +408,8 @@ public class AppEntryPoint implements EntryPoint {
                     
                     realEstateWindow.add(realEstatePanel);
                     realEstateWindow.open();
+                } else if (egridList.size() > 1) {
+                    GWT.log("Get extract from a text search: " + egridList.get(0).getEgrid());
                 } else {
                     GWT.log("Get extract from a map click (single click result): " + egridList.get(0).getEgrid());
                     
@@ -1270,28 +1276,38 @@ public class AppEntryPoint implements EntryPoint {
     public class SearchValueChangeHandler implements ValueChangeHandler {
         @Override
         public void onValueChange(ValueChangeEvent event) {
-            GWT.log("onValueChange: " + event.getValue().toString());
+            // Remove the chip from the text field. Even if it is not visible.
+            // This is needed to get further value change events.
+            autocomplete.reset();
             
+            MaterialLoader.loading(true);
+            resetGui();
+
             // We only allow one result in the autocomplete widget.
             List<? extends SuggestOracle.Suggestion> values = (List<? extends Suggestion>) event.getValue();
             SearchSuggestion searchSuggestion = (SearchSuggestion) values.get(0);
             SearchResult searchResult = searchSuggestion.getSearchResult();
-
-            GWT.log(searchResult.getBbox());
             
-//            MaterialLoader.loading(true);
-//            resetGui();
+            /*
+            String[] coords = searchResult.getBbox().substring(4,searchResult.getBbox().length()-1).split(",");
+            String[] coordLL = coords[0].split(" ");
+            String[] coordUR = coords[1].split(" ");
+            Extent extent = new Extent(Double.valueOf(coordLL[0]).doubleValue(), Double.valueOf(coordLL[1]).doubleValue(), 
+                    Double.valueOf(coordUR[0]).doubleValue(), Double.valueOf(coordUR[1]).doubleValue());
+            */
             
+            double easting = Double.valueOf(searchResult.getEasting()).doubleValue();
+            double northing = Double.valueOf(searchResult.getNorthing()).doubleValue();
+            
+            Coordinate coordinate = new Coordinate(easting, northing);
+            sendCoordinateToServer(coordinate.toStringXY(3), null);
         }
-
-
     }
 
     public final class MapSingleClickListener implements EventListener<MapBrowserEvent> {
         @Override
         public void onEvent(MapBrowserEvent event) {
             MaterialLoader.loading(true);
-            GWT.log("map click");
             
             Coordinate coordinate = event.getCoordinate();
             sendCoordinateToServer(coordinate.toStringXY(3), event);
