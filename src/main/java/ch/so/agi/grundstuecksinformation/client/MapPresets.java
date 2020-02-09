@@ -13,6 +13,7 @@ import ol.interaction.DefaultInteractionsOptions;
 import ol.interaction.Interaction;
 import ol.layer.Base;
 import ol.layer.Group;
+import ol.layer.Image;
 import ol.layer.LayerOptions;
 import ol.layer.Tile;
 import ol.proj.Projection;
@@ -46,7 +47,8 @@ public class MapPresets {
         
         Projection projection = new Projection(projectionOptions);
         
-        // geodienste.ch WMS
+        // geodienste.ch WMS tiled
+        /*
         ol.layer.Tile geodiensteWmsLayer;
         {
             TileWmsParams imageWMSParams = OLFactory.createOptions();
@@ -66,6 +68,27 @@ public class MapPresets {
             layerOptions.setSource(imageWMSSource);
     
             geodiensteWmsLayer = new ol.layer.Tile(layerOptions);
+        }
+        */
+        // geodienste.ch WMS single
+        ol.layer.Image geodiensteWmsLayer;        
+        {
+            ImageWmsParams imageWMSParams = OLFactory.createOptions();
+            imageWMSParams.setLayers("LCSF,LCSFPROJ,LCOBJ,SOSF,SOOBJ,SOLI,SOPT,Liegenschaften,Gebaeudeadressen,Nomenklatur,Rohrleitungen,Hoheitsgrenzen,Fixpunkte");
+            imageWMSParams.set("FORMAT", "image/jpeg");
+            imageWMSParams.set("TRANSPARENT", "false");
+
+            ImageWmsOptions imageWMSOptions = OLFactory.createOptions();
+            imageWMSOptions.setUrl("https://wfs.geodienste.ch/av/deu");
+            imageWMSOptions.setRatio(1.2f);
+            imageWMSOptions.setParams(imageWMSParams);
+
+            ImageWms imageWMSSource = new ImageWms(imageWMSOptions);
+
+            LayerOptions layerOptions = OLFactory.createOptions();
+            layerOptions.setSource(imageWMSSource);
+            
+            geodiensteWmsLayer = new Image(layerOptions);
         }
         // SO!GIS WMTS
         Tile sogisWmtsLayer;
@@ -115,7 +138,7 @@ public class MapPresets {
         Group layerGroup = new Group();
         ol.Collection<Base> layers = new Collection<Base>();
         layers.push(geodiensteWmsLayer);
-        layers.push(geoviewBlWmsLayer);                
+        //layers.push(geoviewBlWmsLayer);                
         //layers.push(sogisWmtsLayer);        
         layerGroup.setLayers(layers);
          

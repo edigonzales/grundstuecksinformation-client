@@ -33,6 +33,8 @@ Testrequests:
  
 2723698 1211282
 
+CH207740742262 (schwyz)
+
 ```
 https://wfs.geodienste.ch/av/deu?&VERSION=1.0.0&SERVICE=WFS&REQUEST=DescribeFeatureType&TYPENAME=ms:DPRSF
 

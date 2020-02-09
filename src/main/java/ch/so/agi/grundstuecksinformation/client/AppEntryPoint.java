@@ -867,32 +867,48 @@ public class AppEntryPoint implements EntryPoint {
                         legendColumn.addStyleName("layerLegendColumn");
                         legendColumn.setGrid("s12");
 
-                        MaterialLink legendLink = new MaterialLink();
-                        legendLink.addStyleName("resultLink");
-                        legendLink.setText(messages.resultShowLegend());
-                        legendColumn.add(legendLink);
+                        // TODO: was ist alles möglich?
+                        // Weil die Extension auch fehlen kann, weiss man nie sicher, ob es 
+                        // sich um ein Bild oder Dokument handelt.
+                        String legendAtWeb = theme.getLegendAtWeb();
+                        if (legendAtWeb.toLowerCase().endsWith(".xml") || legendAtWeb.toLowerCase().endsWith(".html")) {
+                            MaterialLink legendLink = new MaterialLink();
+                            legendLink.addStyleName("resultLink");
+                            legendLink.setText(legendAtWeb);
+                            legendLink.setHref(legendAtWeb);
+                            legendLink.setTarget("_blank");
+                            legendColumn.add(legendLink);
 
-                        legendRow.add(legendColumn);
-                        body.add(legendRow);
+                            legendRow.add(legendColumn);
+                            body.add(legendRow);
+                        } else {
+                            MaterialLink legendLink = new MaterialLink();
+                            legendLink.addStyleName("resultLink");
+                            legendLink.setText(messages.resultShowLegend());
+                            legendColumn.add(legendLink);
 
-                        com.google.gwt.user.client.ui.Image legendImage = new com.google.gwt.user.client.ui.Image();
-                        legendImage.setUrl(theme.getLegendAtWeb());
-                        legendImage.setVisible(false);
-                        body.add(legendImage);
+                            legendRow.add(legendColumn);
+                            body.add(legendRow);
 
-                        MaterialRow fakeRow = new MaterialRow();
-                        fakeRow.setBorderBottom("1px #bdbdbd solid");
-                        body.add(fakeRow);
+                            com.google.gwt.user.client.ui.Image legendImage = new com.google.gwt.user.client.ui.Image();
+                            legendImage.setUrl(theme.getLegendAtWeb());
+                            legendImage.setVisible(false);
+                            body.add(legendImage);
 
-                        legendLink.addClickHandler(event -> {
-                            if (legendImage.isVisible()) {
-                                legendImage.setVisible(false);
-                                legendLink.setText(messages.resultShowLegend());
-                            } else {
-                                legendImage.setVisible(true);
-                                legendLink.setText(messages.resultHideLegend());
-                            }
-                        });
+                            MaterialRow fakeRow = new MaterialRow();
+                            fakeRow.setBorderBottom("1px #bdbdbd solid");
+                            body.add(fakeRow);
+                            
+                            legendLink.addClickHandler(event -> {
+                                if (legendImage.isVisible()) {
+                                    legendImage.setVisible(false);
+                                    legendLink.setText(messages.resultShowLegend());
+                                } else {
+                                    legendImage.setVisible(true);
+                                    legendLink.setText(messages.resultHideLegend());
+                                }
+                            });                            
+                        }
                     }
 
                     {
@@ -1481,7 +1497,7 @@ public class AppEntryPoint implements EntryPoint {
         wmsLayer.set(ID_ATTR_NAME, referenceWms.getLayers());
         wmsLayer.setVisible(false);
         wmsLayer.setOpacity(referenceWms.getLayerOpacity());
-        wmsLayer.setZIndex(referenceWms.getLayerIndex());
+        //wmsLayer.setZIndex(referenceWms.getLayerIndex());
 
         return wmsLayer;
     }
