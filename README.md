@@ -19,9 +19,13 @@ mvn gwt:generate-module gwt:devmode
 
 Build fat jar and docker image:
 ```
-TRAVIS_BUILD_NUMBER=9999 mvn package
+BUILD_NUMBER=9999 mvn package
 ```
 
+## Run 
+```
+docker run -p 9090:8080 sogis/grundstuecksinformation-client
+```
 
 Testrequests:
 - https://geo.so.ch/api/oereb/extract/reduced/xml/geometry/CH593289130610

@@ -1,4 +1,4 @@
-package ch.so.agi.geoportal.search;
+package ch.so.agi.grundstuecksinformation;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
