@@ -21,6 +21,7 @@
     <gwtVersion>2.8.2</gwtVersion>
     <serverPort>8080</serverPort>
   </properties>
+  <!--
   <repositories>
     <repository>
       <id>sonatype-snapshots-repo</id>
@@ -32,6 +33,7 @@
       </snapshots>
     </repository>
   </repositories>
+  -->
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
