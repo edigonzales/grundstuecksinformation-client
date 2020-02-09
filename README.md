@@ -31,9 +31,13 @@ Testrequests:
 - https://oereb.geo.sh.ch/oereb/extract/reduced/pdf/CH330871542766 
 - https://oereb.geo.sh.ch/oereb/getegrid/xml/?XY=2688777,1283230
  
-2723698 1211282
 
-CH207740742262 (schwyz)
+- http://grundstuecksinformation.ch/?egrid=CH344022777626 (Schwyz)
+- http://grundstuecksinformation.ch/?egrid=CH352022786904 (Glarus)
+- http://grundstuecksinformation.ch/?egrid=CH590878145427 (Schaffhausen)
+- http://grundstuecksinformation.ch/?egrid=CH955832730623 (Messen)
+
+https://map.geo.sz.ch/oereb/wsgi/oereb/extract/reduced/xml/CH207740742262
 
 ```
 https://wfs.geodienste.ch/av/deu?&VERSION=1.0.0&SERVICE=WFS&REQUEST=DescribeFeatureType&TYPENAME=ms:DPRSF

@@ -410,6 +410,9 @@ public class AppEntryPoint implements EntryPoint {
                     realEstateWindow.open();
                 } else if (egridList.size() > 1) {
                     GWT.log("Get extract from a text search: " + egridList.get(0).getEgrid());
+                    
+                    MaterialLoader.loading(true);
+                    sendEgridToServer(egridList.get(0));                    
                 } else {
                     GWT.log("Get extract from a map click (single click result): " + egridList.get(0).getEgrid());
                     

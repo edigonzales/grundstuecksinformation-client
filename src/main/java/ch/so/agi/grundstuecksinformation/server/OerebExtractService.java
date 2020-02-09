@@ -370,19 +370,20 @@ public class OerebExtractService {
             double layerOpacity = xmlRestrictions.get(0).getMap().getLayerOpacity();
             int layerIndex = xmlRestrictions.get(0).getMap().getLayerIndex();
             String wmsUrl = xmlRestrictions.get(0).getMap().getReferenceWMS();
-
+            
             UriComponents uriComponents = UriComponentsBuilder.fromUriString(URLDecoder.decode(wmsUrl, StandardCharsets.UTF_8.toString())).build();            
             String schema = uriComponents.getScheme();
             String host = uriComponents.getHost();
             String path = uriComponents.getPath();
-
+            
             String layers = null;
             String imageFormat = null;
             Iterator<Map.Entry<String, List<String>>> iterator = uriComponents.getQueryParams().entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<String, List<String>> e = iterator.next();
                 if (e.getKey().equalsIgnoreCase("layers")) {
-                    layers = e.getValue().get(0);
+                    // LAYERS string needs to be decoded as well because ol3 will encode it again.
+                    layers = URLDecoder.decode(e.getValue().get(0), StandardCharsets.UTF_8.toString());
                 }
                 if (e.getKey().equalsIgnoreCase("format")) {
                     imageFormat = e.getValue().get(0);
