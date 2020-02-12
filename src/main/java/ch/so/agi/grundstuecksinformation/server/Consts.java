@@ -13,7 +13,8 @@ public final class Consts {
             "https://geo.so.ch/api/oereb/",
             "https://map.geo.gl.ch/oereb/wsgi/oereb/",
             "https://map.geo.sz.ch/oereb/wsgi/oereb/",
-            "https://api.geo.ag.ch/v1/oereb/")
+            "https://api.geo.ag.ch/v1/oereb/",
+            "https://maps.zh.ch/oereb/")
             .collect(Collectors.toList());
     
 //    public List<String> wfsUrlTemplateList = Stream.of(

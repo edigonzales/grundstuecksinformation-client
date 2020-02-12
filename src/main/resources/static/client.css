@@ -395,6 +395,10 @@ input[type="range"] {
 .layerLegendRow {
     border-top: 1px #bdbdbd solid;
     margin-bottom: 10px !important;
+    display:inline-block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden !important;        
 }         
 
 .layerLegendColumn {

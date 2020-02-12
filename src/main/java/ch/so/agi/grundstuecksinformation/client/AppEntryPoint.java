@@ -788,9 +788,9 @@ public class AppEntryPoint implements EntryPoint {
                     slider.addStyleName("opacitySlider");
                     slider.setMin(0);
                     slider.setMax(100);
-                    
+                                        
                     int opacity;
-                    if (Double.valueOf(theme.getReferenceWMS().getLayerOpacity()) != null) {
+                    if (Double.valueOf(theme.getReferenceWMS().getLayerOpacity()) != null && theme.getReferenceWMS().getLayerOpacity() != 0) {
                         opacity = Double.valueOf((theme.getReferenceWMS().getLayerOpacity() * 100)).intValue();
                     } else {
                         opacity = 60;
@@ -847,13 +847,19 @@ public class AppEntryPoint implements EntryPoint {
                                 body.add(informationRow);
                             }
 
-                            if (restriction.getLengthShare() != null) {
+                            if (restriction.getLengthShare() != null) { 
                                 MaterialRow informationRow = processRestrictionRow(restriction, GeometryType.LINE);
                                 body.add(informationRow);
                             }
 
                             if (restriction.getNrOfPoints() != null) {
                                 MaterialRow informationRow = processRestrictionRow(restriction, GeometryType.POINT);
+                                body.add(informationRow);
+                            }
+                            
+                            // FIXME (?) Falls kein Share mitgeliefert wird (z.B. ZH). Ist es mandatory?
+                            if (restriction.getNrOfPoints() == null && restriction.getLengthShare() == null && restriction.getAreaShare() == null) {
+                                MaterialRow informationRow = processRestrictionRow(restriction, null);
                                 body.add(informationRow);
                             }
                         }
@@ -874,7 +880,7 @@ public class AppEntryPoint implements EntryPoint {
                         // Weil die Extension auch fehlen kann, weiss man nie sicher, ob es 
                         // sich um ein Bild oder Dokument handelt.
                         String legendAtWeb = theme.getLegendAtWeb();
-                        if (legendAtWeb.toLowerCase().endsWith(".xml") || legendAtWeb.toLowerCase().endsWith(".html")) {
+                        if (legendAtWeb.toLowerCase().endsWith(".xml") || legendAtWeb.toLowerCase().endsWith(".html") || legendAtWeb.toLowerCase().endsWith(".pdf")) {
                             MaterialLink legendLink = new MaterialLink();
                             legendLink.addStyleName("resultLink");
                             legendLink.setText(legendAtWeb);
@@ -1451,6 +1457,10 @@ public class AppEntryPoint implements EntryPoint {
             HTML htmlPoints = new HTML(fmtDefault.format(restriction.getNrOfPoints()));
             shareColumn.add(htmlPoints);
         }
+        if (type == null) {
+            HTML html = new HTML();
+            shareColumn.add(html);
+        }
 
         MaterialColumn sharePercentColumn = new MaterialColumn();
         sharePercentColumn.setTextAlign(TextAlign.RIGHT);
@@ -1499,7 +1509,13 @@ public class AppEntryPoint implements EntryPoint {
         Image wmsLayer = new Image(layerOptions);
         wmsLayer.set(ID_ATTR_NAME, referenceWms.getLayers());
         wmsLayer.setVisible(false);
-        wmsLayer.setOpacity(referenceWms.getLayerOpacity());
+        
+        // FIXME: ZH is always 0 which is completely transparent.
+        if (referenceWms.getLayerOpacity() == 0) {
+            wmsLayer.setOpacity(0.6);
+        } else {
+            wmsLayer.setOpacity(referenceWms.getLayerOpacity()); 
+        }
         //wmsLayer.setZIndex(referenceWms.getLayerIndex());
 
         return wmsLayer;

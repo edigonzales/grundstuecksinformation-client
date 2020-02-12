@@ -165,6 +165,11 @@ public class OerebExtractService {
          * Theme.Code:           LandUsePlans                               LandUsePlans
          * Theme.Text.Text:      Nutzungsplanung                            Nutzungsplanung
          * Subtheme:             Grundnutzung                               Linienbezogene Festlegungen
+         * 
+         * Aargau:
+         * Theme.Code:           LandUsePlans                              
+         * Theme.Text.Text:      Nutzungsplanung (kantonal/kommunal)       
+         * Subtheme:             73B_73C_ARE_DNPGrundnutzung               
          */
         
         /*
@@ -308,9 +313,12 @@ public class OerebExtractService {
             List<Document> lawsList = new ArrayList<Document>();
 
             for (RestrictionOnLandownershipType xmlRestriction : xmlRestrictions) {
-                List<DocumentBaseType> xmlLegalProvisions = xmlRestriction.getLegalProvisions();
+                List<DocumentBaseType> xmlLegalProvisions = xmlRestriction.getLegalProvisions()
+                        .stream()
+                        .filter(d -> d.getDocumentType().equalsIgnoreCase("LegalProvision"))
+                        .collect(Collectors.toList());
                 for (DocumentBaseType xmlDocumentBase : xmlLegalProvisions) {
-                    DocumentType xmlLegalProvision = (DocumentType) xmlDocumentBase;
+                    DocumentType xmlLegalProvision = (DocumentType) xmlDocumentBase;                    
                     Document legalProvision = new Document();
                     if (xmlLegalProvision.getTitle() != null) {
                         legalProvision.setTitle(getLocalisedText(xmlLegalProvision.getTitle(), DE));
@@ -331,7 +339,10 @@ public class OerebExtractService {
                     }
                     legalProvisionsList.add(legalProvision);
 
-                    List<DocumentType> xmlLaws = xmlLegalProvision.getReference();
+                    List<DocumentType> xmlLaws = xmlLegalProvision.getReference()
+                            .stream()
+                            .filter(d -> d.getDocumentType().equalsIgnoreCase("Law"))
+                            .collect(Collectors.toList());
                     for (DocumentType xmlLaw : xmlLaws) {
                         Document law = new Document();
                         if (xmlLaw.getTitle() != null) {
@@ -354,6 +365,36 @@ public class OerebExtractService {
                         lawsList.add(law);
                     }
                 }
+                // FIXME: ZH liefert die Gesetze nicht als Referenz zu den Rechtsvorschriften,
+                // sondern auf gleicher Ebene. Das ist m.E. falsch.
+                List<DocumentBaseType> xmlLaws = xmlRestriction.getLegalProvisions()
+                        .stream()
+                        .filter(d -> d.getDocumentType().equalsIgnoreCase("Law"))
+                        .collect(Collectors.toList());
+                for (DocumentBaseType xmlDocumentBase : xmlLaws) {
+                    DocumentType xmlLaw = (DocumentType) xmlDocumentBase;                    
+                    Document law = new Document();
+                    if (xmlLaw.getTitle() != null) {
+                        law.setTitle(getLocalisedText(xmlLaw.getTitle(), DE));
+                    }
+                    if (xmlLaw.getOfficialTitle() != null) {
+                        law.setOfficialTitle(getLocalisedText(xmlLaw.getOfficialTitle(), DE));
+                    }
+                    law.setOfficialNumber(xmlLaw.getOfficialNumber());
+                    if (xmlLaw.getAbbreviation() != null) {
+                        law.setAbbreviation(getLocalisedText(xmlLaw.getAbbreviation(), DE));
+                    }
+                    if (xmlLaw.getTextAtWeb() != null) {
+                        try {
+                            law.setTextAtWeb(URLDecoder.decode(getLocalisedText(xmlLaw.getTextAtWeb(), DE), StandardCharsets.UTF_8.toString()));
+                        } catch (UnsupportedEncodingException e) {
+                            law.setTextAtWeb(getLocalisedText(xmlLaw.getTextAtWeb(), DE));
+                        }
+                    }
+                    lawsList.add(law);
+                }
+
+                
             }
 
             // Because restrictions can share the same legal provision and laws,
@@ -477,6 +518,9 @@ public class OerebExtractService {
         return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
     
+    // TODO: nicht-DE Kantone?
+    // Falls DE nicht gefunden wird, das erste nehmen?
+    
     private String getLocalisedText(MultilingualTextType multilingualTextType, LanguageCodeType languageCodeType) {
         Iterator<LocalisedTextType> it = multilingualTextType.getLocalisedText().iterator();
         while(it.hasNext()) {
@@ -484,7 +528,7 @@ public class OerebExtractService {
             if (textType.getLanguage().compareTo(languageCodeType) == 0) {
                 return textType.getText();
             }
-        }
+        }        
         return null;
     }
     
