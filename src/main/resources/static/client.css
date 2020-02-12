@@ -312,8 +312,12 @@ body .black{
 
 .helperParent {
     border: 0px;
-    display: table-cell;
+    /*display: table-cell;*/
     vertical-align: middle;
+    
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden !important;    
 }
 
 .collapsibleThemeLayerLink {

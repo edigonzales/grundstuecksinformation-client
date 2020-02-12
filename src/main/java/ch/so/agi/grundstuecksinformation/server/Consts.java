@@ -12,7 +12,8 @@ public final class Consts {
             "https://oereb.geo.sh.ch/oereb/", 
             "https://geo.so.ch/api/oereb/",
             "https://map.geo.gl.ch/oereb/wsgi/oereb/",
-            "https://map.geo.sz.ch/oereb/wsgi/oereb/")
+            "https://map.geo.sz.ch/oereb/wsgi/oereb/",
+            "https://api.geo.ag.ch/v1/oereb/")
             .collect(Collectors.toList());
     
 //    public List<String> wfsUrlTemplateList = Stream.of(

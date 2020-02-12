@@ -153,6 +153,7 @@ public class MapPresets {
         //Coordinate centerCoordinate = new Coordinate(2723698,1211282); // Glarus
         //Coordinate centerCoordinate = new Coordinate(2723877,1211327); // Glarus
         //Coordinate centerCoordinate = new Coordinate(2688777,1283230); // Schaffhausen
+        //Coordinate centerCoordinate = new Coordinate(2645218,1246759); // Unterentfelden
         Coordinate centerCoordinate = new Coordinate(2660158,1183640); // Mittelpunkt CH 
 
         view.setCenter(centerCoordinate);
