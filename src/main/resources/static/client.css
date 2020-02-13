@@ -335,6 +335,8 @@ body .black{
     text-overflow: ellipsis;
     overflow: hidden !important;
     display:inline-block;
+    
+    max-width: 430px;    
 }
 
 a.collapsibleThemeLayerLink:hover {
