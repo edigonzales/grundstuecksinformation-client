@@ -40,6 +40,8 @@ Testrequests:
 - http://grundstuecksinformation.ch/?egrid=CH352022786904 (Glarus)
 - http://grundstuecksinformation.ch/?egrid=CH590878145427 (Schaffhausen)
 - http://grundstuecksinformation.ch/?egrid=CH955832730623 (Messen)
+- http://grundstuecksinformation.ch/?egrid=CH575291772384 (Unterentfelden)
+- http://grundstuecksinformation.ch/?egrid=CH527789999186 (Züri)
 
 https://map.geo.sz.ch/oereb/wsgi/oereb/extract/reduced/xml/CH207740742262
 
