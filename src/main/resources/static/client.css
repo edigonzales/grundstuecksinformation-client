@@ -453,6 +453,11 @@ a.resultLink:visited {
     font-size: 14px;    
 }
 
+.hintRow {
+    margin-bottom: 5px !important;
+    font-size: 14px;    
+}
+
 .documentAdditionalInfoRow {
     margin-bottom: 10px !important;
     font-size: 12px;    

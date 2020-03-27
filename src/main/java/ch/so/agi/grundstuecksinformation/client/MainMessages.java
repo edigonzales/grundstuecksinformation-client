@@ -70,7 +70,10 @@ public interface MainMessages extends Messages {
     
     @DefaultMessage("Laws")
     String laws();
-
+    
+    @DefaultMessage("Hints")
+    String hints();
+    
     @DefaultMessage("Responsible office")
     String responsibleOffice();
     
@@ -86,4 +89,6 @@ public interface MainMessages extends Messages {
     @DefaultMessage("PLR")
     String tabTitlePlr();
     
+    @DefaultMessage("Point(s)")
+    String plrNrOfPoints();
 }

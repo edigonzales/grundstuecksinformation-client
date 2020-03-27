@@ -302,8 +302,8 @@ public class OerebExtractService {
 
             logger.debug("Size of office: " + officeList.size());
 
-            // Get legal provisions and laws. Put them in Lists. 
-            // Die Gesetze stammen nicht aus der gleichen Hierarchie wie
+            // Get legal provisions, laws and hints. Put them in Lists. 
+            // Die Gesetze und Hinweise stammen nicht aus der gleichen Hierarchie wie
             // die Rechtsgrundlagen. Sondern sind in den Rechtsgrundlagen
             // verschachtelt. Man schaue sich ein korrektes XML an.
             // Aus diesem Grund können Gesetze vielfach vorkommen und
@@ -311,6 +311,7 @@ public class OerebExtractService {
             // aber auch für die Rechtsgrundlagen.
             List<Document> legalProvisionsList = new ArrayList<Document>();
             List<Document> lawsList = new ArrayList<Document>();
+            List<Document> hintsList = new ArrayList<Document>();
 
             for (RestrictionOnLandownershipType xmlRestriction : xmlRestrictions) {
                 List<DocumentBaseType> xmlLegalProvisions = xmlRestriction.getLegalProvisions()
@@ -364,9 +365,36 @@ public class OerebExtractService {
                         }
                         lawsList.add(law);
                     }
+                    
+                    List<DocumentType> xmlHints = xmlLegalProvision.getReference()
+                            .stream()
+                            .filter(d -> d.getDocumentType().equalsIgnoreCase("Hint"))
+                            .collect(Collectors.toList());
+                    for (DocumentType xmlHint : xmlHints) {
+                        Document hint = new Document();
+                        if (xmlHint.getTitle() != null) {
+                            hint.setTitle(getLocalisedText(xmlHint.getTitle(), DE));
+                        }
+                        if (xmlHint.getOfficialTitle() != null) {
+                            hint.setOfficialTitle(getLocalisedText(xmlHint.getOfficialTitle(), DE));
+                        }
+                        hint.setOfficialNumber(xmlHint.getOfficialNumber());
+                        if (xmlHint.getAbbreviation() != null) {
+                            hint.setAbbreviation(getLocalisedText(xmlHint.getAbbreviation(), DE));
+                        }
+                        if (xmlHint.getTextAtWeb() != null) {
+                            try {
+                                hint.setTextAtWeb(URLDecoder.decode(getLocalisedText(xmlHint.getTextAtWeb(), DE), StandardCharsets.UTF_8.toString()));
+                            } catch (UnsupportedEncodingException e) {
+                                hint.setTextAtWeb(getLocalisedText(xmlHint.getTextAtWeb(), DE));
+                            }
+                        }
+                        hintsList.add(hint);
+                    }
                 }
                 // FIXME: ZH liefert die Gesetze nicht als Referenz zu den Rechtsvorschriften,
                 // sondern auf gleicher Ebene. Das ist m.E. falsch.
+                // Hints nicht speziell für Kanton ZH behandelt.
                 List<DocumentBaseType> xmlLaws = xmlRestriction.getLegalProvisions()
                         .stream()
                         .filter(d -> d.getDocumentType().equalsIgnoreCase("Law"))
@@ -404,8 +432,13 @@ public class OerebExtractService {
 
             List<Document> distinctLawsList = lawsList.stream().filter(distinctByKey(Document::getTextAtWeb))
                     .collect(Collectors.toList());
+            
+            List<Document> distinctHintsList = hintsList.stream().filter(distinctByKey(Document::getTextAtWeb))
+                    .collect(Collectors.toList());
+
             logger.debug("distinct legal provisions: " + distinctLegalProvisionsList.toString());
             logger.debug("distinct laws: " + distinctLawsList.toString());
+            logger.debug("distinct hints: " + distinctHintsList.toString());
             
             // WMS: Muss auseinandergenommen werden, damit man im Client mit OL3 arbeiten kann.
             double layerOpacity = xmlRestrictions.get(0).getMap().getLayerOpacity();
@@ -458,6 +491,7 @@ public class OerebExtractService {
             concernedTheme.setRestrictions(restrictionsList);
             concernedTheme.setLegalProvisions(distinctLegalProvisionsList);
             concernedTheme.setLaws(distinctLawsList);
+            concernedTheme.setHints(distinctHintsList);
             concernedTheme.setReferenceWMS(referenceWMS);
             concernedTheme.setLegendAtWeb(legendAtWeb);
             concernedTheme.setCode(xmlRestrictions.get(0).getTheme().getCode());

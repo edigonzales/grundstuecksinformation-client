@@ -985,6 +985,40 @@ public class AppEntryPoint implements EntryPoint {
                             row.add(lawLink);
                             body.add(row);
                         }
+                        
+                        if (theme.getHints().size() > 0) {
+                            MaterialRow hintsHeaderRow = new MaterialRow();
+                            hintsHeaderRow.addStyleName("documentsHeaderRow");
+                            hintsHeaderRow.add(new Label(messages.hints()));
+                            body.add(hintsHeaderRow);
+
+                            for (Document hint : theme.getHints()) {
+                                MaterialRow row = new MaterialRow();
+                                row.addStyleName("hintRow");
+
+                                MaterialLink hintLink = new MaterialLink();
+
+                                String linkText = "";
+                                if (hint.getOfficialTitle() != null) {
+                                    linkText = hint.getOfficialTitle();
+                                } else {
+                                    linkText = hint.getTitle();
+                                }
+                                if (hint.getAbbreviation() != null) {
+                                    linkText += " (" + hint.getAbbreviation() + ")";
+                                }
+                                if (hint.getOfficialNumber() != null) {
+                                    linkText += ", " + hint.getOfficialNumber();
+                                }
+                                hintLink.setText(linkText);
+                                hintLink.setHref(hint.getTextAtWeb());
+                                hintLink.setTarget("_blank");
+                                hintLink.addStyleName("resultLink");
+                                row.add(hintLink);
+                                body.add(row);
+                            }                
+                        }
+                        
                         MaterialRow fakeRow = new MaterialRow();
                         fakeRow.setBorderBottom("1px #bdbdbd solid");
                         fakeRow.setPaddingTop(5);
@@ -1454,7 +1488,7 @@ public class AppEntryPoint implements EntryPoint {
             shareColumn.add(htmlLength);
         }
         if (type == GeometryType.POINT) {
-            HTML htmlPoints = new HTML(fmtDefault.format(restriction.getNrOfPoints()));
+            HTML htmlPoints = new HTML(fmtDefault.format(restriction.getNrOfPoints()) + " " + messages.plrNrOfPoints());
             shareColumn.add(htmlPoints);
         }
         if (type == null) {
