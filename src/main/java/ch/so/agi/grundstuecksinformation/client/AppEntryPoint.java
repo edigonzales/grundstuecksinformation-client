@@ -183,13 +183,14 @@ public class AppEntryPoint implements EntryPoint {
 
     private void init() {         
     	GWT.log("Rock the Casbah");
-        // Add the almighty map.
+        // Add the almighty map div element. The ol3 map itself
+    	// is added later.
     	SimplePanel mapDiv = new SimplePanel();
         mapDiv.getElement().setAttribute("id", "map");
-
         RootPanel.get().add(mapDiv);
         
-        // Search card in the top left corner.
+        // Search card in the top left corner with autocomplete for address
+        // and parcel search.
         SimplePanel searchCard = new SimplePanel();
         searchCard.getElement().setAttribute("id", "searchCard");
         
