@@ -10,11 +10,14 @@ import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
 public class CustomSuggestionDisplay extends DefaultSuggestionDisplay {
 	private int border = 1;
+	
+	// TODO
+	// isDisplayStringHTML -> true
 
 	@Override
 	protected void showSuggestions(SuggestBox suggestBox, Collection<? extends Suggestion> suggestions,
 			boolean isDisplayStringHTML, boolean isAutoSelectEnabled, SuggestionCallback callback) {
-		super.showSuggestions(suggestBox, suggestions, isDisplayStringHTML, isAutoSelectEnabled, callback);
+		super.showSuggestions(suggestBox, suggestions, true, isAutoSelectEnabled, callback);
 		getPopupPanel().setWidth((suggestBox.getElement().getAbsoluteRight() - suggestBox.getAbsoluteLeft())
 				- 2 * border + Unit.PX.getType());
 	}

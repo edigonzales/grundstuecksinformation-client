@@ -1,10 +1,11 @@
-body /*, html*/ {
+body , html {
     margin: 0px;
     padding: 0px;
     background: #fafafa; /* #f5f5f5 */
     /*font-family: Barlow, 'IBM Plex Sans', sans-serif;*/    
     /*font-size: 16px;*/
-    /*height:100%;*/    
+    height:100%;  
+    font-weight: 300;     
 }
 
 body, div {
@@ -12,8 +13,10 @@ body, div {
     font-family: 'IBM Plex Sans', sans-serif;   
     font-family: 'IBM Plex Sans Condensed', sans-serif;*/   
     font-family: Roboto, sans-serif;   
+    font-weight: 300;   
     /*font-family: 'Roboto Condensed', sans-serif;*/
-    color: rgba(0, 0, 0, 0.87);  
+    /*color: rgba(0, 0, 0, 0.87);*/
+    color: #260101;  
     /*font-size: 16px;*/
 }
 
@@ -35,7 +38,7 @@ body .black{
 }
 
 #searchCard {
-    background-color: #fafafa; /* GREY_LIGHTEN_5 */
+    background-color: white; /* GREY_LIGHTEN_5 #fafafa */
     box-shadow: rgba(0, 0, 0, 0.16) 0px 2px 5px 0px, rgba(0, 0, 0, 0.12) 0px 2px 10px 0px;
     position: absolute;
     margin-top: 0px;
@@ -49,13 +52,21 @@ body .black{
     max-width: calc(100% - 30px);
 }
 
+/*
 #searchCardContent {
     padding: 15px;
 }
+*/
 
 .suggestPopupContent {
     cursor: pointer !important;
 }
+
+.gwt-PopupPanelGlass {
+	background-color: white;
+	opacity: 0.5;
+}
+
 
 /*
 #logoColumn {
@@ -65,9 +76,11 @@ body .black{
 }
 */
 
+/*
 #searchRow {
     margin-bottom: 2px;
 }
+*/
 
 #resultCard {
     background-color: #fafafa; /* GREY_LIGHTEN_5 */

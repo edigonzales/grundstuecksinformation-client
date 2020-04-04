@@ -210,10 +210,21 @@ public class MapPresets {
         viewOptions.setProjection(projection);
         viewOptions.setResolutions(new double[] { 4000.0, 2000.0, 1000.0, 500.0, 250.0, 100.0, 50.0, 20.0, 10.0, 5.0, 2.5, 1.0, 0.5, 0.25, 0.1 });
         View view = new View(viewOptions);
-        Coordinate centerCoordinate = new Coordinate(2616491, 1240287);
+        //Coordinate centerCoordinate = new Coordinate(2616491, 1240287);
+        //Coordinate centerCoordinate = new Coordinate(2600593,1215639); // Messen
+        Coordinate centerCoordinate = new Coordinate(2600470,1215425); // Messen
+        //Coordinate centerCoordinate = new Coordinate(2607752, 1228542); // Solothurn (Chantierwiese -> KbS) 
+        //Coordinate centerCoordinate = new Coordinate(2723698,1211282); // Glarus
+        //Coordinate centerCoordinate = new Coordinate(2723877,1211327); // Glarus
+        //Coordinate centerCoordinate = new Coordinate(2688777,1283230); // Schaffhausen
+        //Coordinate centerCoordinate = new Coordinate(2645218,1246759); // Unterentfelden
+        //Coordinate centerCoordinate = new Coordinate(2683467,1248065); // Zürich
+        //Coordinate centerCoordinate = new Coordinate(2660158,1183640); // Mittelpunkt CH 
 
         view.setCenter(centerCoordinate);
-        view.setZoom(6);
+        //view.setZoom(3);
+        view.setZoom(13);
+
 
         MapOptions mapOptions = OLFactory.createOptions();
         mapOptions.setTarget(mapId);

@@ -10,11 +10,14 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsonUtils;
+import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.FontStyle;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.VerticalAlign;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.RequestBuilder;
@@ -26,12 +29,19 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 import ch.qos.logback.classic.Logger;
 import ch.so.agi.grundstuecksinformation.shared.EgridResponse;
@@ -63,6 +73,8 @@ import ol.FeatureOptions;
 import ol.Map;
 import ol.MapBrowserEvent;
 import ol.OLFactory;
+import ol.Overlay;
+import ol.OverlayOptions;
 import ol.View;
 import ol.event.EventListener;
 import ol.format.GeoJson;
@@ -142,6 +154,7 @@ public class AppEntryPoint implements EntryPoint {
     private NumberFormat fmtPercent = NumberFormat.getFormat("#0.0");
   
     private Map map;
+    SuggestBox suggestBox;
 //    private MaterialCard searchCard;  
 //    private MaterialAutoComplete autocomplete;    
 //    private MaterialCard resultCard;    
@@ -189,10 +202,10 @@ public class AppEntryPoint implements EntryPoint {
         mapDiv.getElement().setAttribute("id", "map");
         RootPanel.get().add(mapDiv);
         
-        // Search card in the top left corner with autocomplete for address
+        // Search card in the top left corner with suggestBox for address
         // and parcel search.
-        SimplePanel searchCard = new SimplePanel();
-        searchCard.getElement().setAttribute("id", "searchCard");
+        FlowPanel searchPanel = new FlowPanel();
+        searchPanel.getElement().setAttribute("id", "searchCard");
         
         SimplePanel logoPanel = new SimplePanel();
         logoPanel.getElement().getStyle().setPadding(10, Unit.PX);
@@ -200,15 +213,46 @@ public class AppEntryPoint implements EntryPoint {
 		logoImage.setUrl(GWT.getHostPageBaseURL() + "logo-grundstuecksinformation.png");
 		logoImage.setWidth("62%");
 		logoPanel.add(logoImage);
-		searchCard.add(logoPanel);
+		searchPanel.add(logoPanel);
 		
 		SimplePanel oraclePanel = new SimplePanel();
+		oraclePanel.getElement().getStyle().setPadding(15, Unit.PX);
 		
-//                MaterialColumn logoColumn = new MaterialColumn();
-//                logoColumn.setId("logoColumn");
-//                logoColumn.setGrid("s12");
-//                logoColumn.add(plrImage);
+        SearchOracle searchOracle = new SearchOracle(SEARCH_SERVICE_URL);
 
+        suggestBox = new SuggestBox(searchOracle, new TextBox(), new CustomSuggestionDisplay());
+        suggestBox.setWidth("100%");
+        suggestBox.setAutoSelectEnabled(false);
+        suggestBox.getElement().setAttribute("placeholder", messages.searchPlaceholder());
+        suggestBox.getElement().setAttribute("id", "autocomplete"); // TODO: needed?
+       
+		suggestBox.addSelectionHandler(new SelectionHandler<Suggestion>() {
+			@Override
+			public void onSelection(SelectionEvent<Suggestion> event) {
+				suggestBox.setText(null);
+				
+	            Loader.show(true);
+//	            resetGui();
+				
+				SearchSuggestion searchSuggestion = (SearchSuggestion) event.getSelectedItem();
+				SearchResult searchResult = searchSuggestion.getSearchResult();
+				
+	            String[] coords = searchResult.getBbox().substring(4,searchResult.getBbox().length()-1).split(",");
+	            String[] coordLL = coords[0].split(" ");
+	            String[] coordUR = coords[1].split(" ");
+	            Extent extent = new Extent(Double.valueOf(coordLL[0]).doubleValue(), Double.valueOf(coordLL[1]).doubleValue(), 
+	            Double.valueOf(coordUR[0]).doubleValue(), Double.valueOf(coordUR[1]).doubleValue());
+	            
+	            double easting = Double.valueOf(searchResult.getEasting()).doubleValue();
+	            double northing = Double.valueOf(searchResult.getNorthing()).doubleValue();
+	            
+	            Coordinate coordinate = new Coordinate(easting, northing);
+//	            sendCoordinateToServer(coordinate.toStringXY(3), null);
+			}
+		});
+        
+        oraclePanel.add(suggestBox);
+        searchPanel.add(oraclePanel);
         
         // Search card on in the top left corner.
 //        searchCard = new MaterialCard();
@@ -251,7 +295,7 @@ public class AppEntryPoint implements EntryPoint {
 //        searchCardContent.add(searchRow);
 //        searchCard.add(searchCardContent);
 //        
-        RootPanel.get().add(searchCard);
+        RootPanel.get().add(searchPanel);
 //        
 //        // Card that shows the results from the extracts.
 //        resultCard = new MaterialCard();
@@ -270,7 +314,8 @@ public class AppEntryPoint implements EntryPoint {
         // It seems that initializing the map and/or adding the click listener
         // must be done after adding the value changed handler of the search.
         // Selecting a search result was also triggering a map single click event.
-        map = MapPresets.getCadastralSurveyingWms(mapDiv.getElement().getAttribute("id"));
+        //map = MapPresets.getCadastralSurveyingWms(mapDiv.getElement().getAttribute("id"));
+        map = MapPresets.getBlackAndWhiteMap(mapDiv.getElement().getAttribute("id"));
         map.addSingleClickListener(new MapSingleClickListener());
 
         // Info button.
@@ -349,23 +394,43 @@ public class AppEntryPoint implements EntryPoint {
         egridService.egridServer(XY, new AsyncCallback<EgridResponse>() {
             @Override
             public void onFailure(Throwable caught) {
-//                MaterialLoader.loading(false);
+            	Loader.show(false);
+            	// TODO: show some gui stuff
 //                MaterialToast.fireToast("An error occured.");
                 
                 // TODO: Make logging production ready.
-//                console.log("error: " + caught.getMessage());
+                GWT.log("error: " + caught.getMessage());
             }
 
             @Override
             public void onSuccess(EgridResponse result) {
-                resetGui();
-                                
-//                if (result.getResponseCode() != 200) {
-//                    MaterialLoader.loading(false);
-//
+//                resetGui();
+                              
+            	GWT.log("fubar");
+            	
+                if (result.getResponseCode() != 200) {
+                    Loader.show(false);
+                    
+                    // TODO
 //                    MaterialToast.fireToast("E-GRID not found.");
-//                    return;
-//                }
+                    return;
+                }
+                
+                
+                DivElement overlay = com.google.gwt.dom.client.Document.get().createDivElement();
+                overlay.setClassName("overlay-font");
+                overlay.setInnerText("Created with GWT SDK " + GWT.getVersion());
+
+                OverlayOptions overlayOptions = OLFactory.createOptions();
+                overlayOptions.setElement(overlay);
+                Coordinate foo = new Coordinate(Double.valueOf(XY.split(",")[0]), Double.valueOf(XY.split(",")[1]));
+                overlayOptions.setPosition(foo);
+                overlayOptions.setOffset(OLFactory.createPixel(-300, 0));
+
+                map.addOverlay(new Overlay(overlayOptions));
+
+                
+                
 //                
 //                // MapBrowserEvent is null if we end up here by a text search.
 //                // We just use the first egrid from the list w/o asking the
@@ -1357,44 +1422,13 @@ public class AppEntryPoint implements EntryPoint {
 //        }
     }
     
-    public class SearchValueChangeHandler implements ValueChangeHandler {
-        @Override
-        public void onValueChange(ValueChangeEvent event) {
-            // Remove the chip from the text field. Even if it is not visible.
-            // This is needed to get further value change events.
-//            autocomplete.reset();
-            
-//            MaterialLoader.loading(true);
-            resetGui();
-
-            // We only allow one result in the autocomplete widget.
-            List<? extends SuggestOracle.Suggestion> values = (List<? extends Suggestion>) event.getValue();
-            SearchSuggestion searchSuggestion = (SearchSuggestion) values.get(0);
-            SearchResult searchResult = searchSuggestion.getSearchResult();
-            
-            /*
-            String[] coords = searchResult.getBbox().substring(4,searchResult.getBbox().length()-1).split(",");
-            String[] coordLL = coords[0].split(" ");
-            String[] coordUR = coords[1].split(" ");
-            Extent extent = new Extent(Double.valueOf(coordLL[0]).doubleValue(), Double.valueOf(coordLL[1]).doubleValue(), 
-                    Double.valueOf(coordUR[0]).doubleValue(), Double.valueOf(coordUR[1]).doubleValue());
-            */
-            
-            double easting = Double.valueOf(searchResult.getEasting()).doubleValue();
-            double northing = Double.valueOf(searchResult.getNorthing()).doubleValue();
-            
-            Coordinate coordinate = new Coordinate(easting, northing);
-            sendCoordinateToServer(coordinate.toStringXY(3), null);
-        }
-    }
-
     public final class MapSingleClickListener implements EventListener<MapBrowserEvent> {
         @Override
         public void onEvent(MapBrowserEvent event) {
 //            MaterialLoader.loading(true);
             
             Coordinate coordinate = event.getCoordinate();
-//            sendCoordinateToServer(coordinate.toStringXY(3), event);
+            sendCoordinateToServer(coordinate.toStringXY(3), event);
             
             // does not return egrid :(
             /*
