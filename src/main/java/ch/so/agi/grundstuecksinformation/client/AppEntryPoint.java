@@ -226,7 +226,7 @@ public class AppEntryPoint implements EntryPoint {
         autocomplete.setLimit(1);
         autocomplete.addValueChangeHandler(new SearchValueChangeHandler());
         
-        // TODO TEST 
+        // TODO: TEST 
         // Es scheint, dass man so "autocomplete.setType(AutocompleteType.TEXT);"
         // verwenden kann und die hässlichen invisible und Lösch-Workarounds
         // unnötig werden?
