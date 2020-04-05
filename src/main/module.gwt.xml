@@ -13,6 +13,7 @@
     <!--<inherits name="org.dominokit.domino.ui.DominoUI"/>-->
     <!--<inherits name="gwt.material.design.GwtMaterialDesignBasic"/>-->
     <!--<inherits name="gwt.material.design.themes.ThemeRed"/>   --> 
+    <inherits name='com.google.gwt.user.theme.clean.Clean'/>
     <inherits name="ol.GwtOL"/>
     <inherits name="proj4.GwtProj4"/>
 

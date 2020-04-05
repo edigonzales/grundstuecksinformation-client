@@ -29,19 +29,34 @@ import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment.VerticalAlignmentConstant;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.MultiWordSuggestOracle;
 import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.SimpleLayoutPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.SuggestBox;
 import com.google.gwt.user.client.ui.SuggestOracle;
 import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
 
 import ch.qos.logback.classic.Logger;
 import ch.so.agi.grundstuecksinformation.shared.EgridResponse;
@@ -154,16 +169,18 @@ public class AppEntryPoint implements EntryPoint {
     private NumberFormat fmtPercent = NumberFormat.getFormat("#0.0");
   
     private Map map;
-    SuggestBox suggestBox;
+    private SuggestBox suggestBox;
 //    private MaterialCard searchCard;  
 //    private MaterialAutoComplete autocomplete;    
-//    private MaterialCard resultCard;    
+    private FlowPanel resultPanel;    
 //    private MaterialCardContent searchCardContent;   
-//    private MaterialCardContent resultCardContent;    
+    private FlowPanel resultPanelContent;
+    private DialogBox realEstateDialogBox;
 //    private MaterialWindow realEstateWindow;
-//    private MaterialRow resultHeaderRow;
+    private HorizontalPanel headerRow;
 //    private MaterialTab resultTab;
 //    private Div resultDiv;
+    private SimplePanel fadeoutBottomDiv;
 //    private MaterialColumn cadastralSurveyingResultColumn;
 //    private MaterialColumn oerebResultColumn;
     private String expandedOerebLayerId;
@@ -189,6 +206,15 @@ public class AppEntryPoint implements EntryPoint {
             @Override
             public void onSuccess(SettingsResponse result) {
                 MY_VAR = (String) result.getSettings().get("MY_VAR");
+//        		TabLayoutPanel p = new TabLayoutPanel(1.5, Unit.EM);
+//        		p.add(new HTML("tab1 content"), "TAB1");
+//        		p.add(new HTML("tab2 content"), "TAB2");
+//        		p.add(new HTML("tab3 content"), "TAB3");
+//
+//        		RootLayoutPanel rp = RootLayoutPanel.get();
+//        		rp.add(p);
+
+                
                 init();
             }
         });
@@ -232,7 +258,7 @@ public class AppEntryPoint implements EntryPoint {
 				suggestBox.setText(null);
 				
 	            Loader.show(true);
-//	            resetGui();
+	            resetGui();
 				
 				SearchSuggestion searchSuggestion = (SearchSuggestion) event.getSelectedItem();
 				SearchResult searchResult = searchSuggestion.getSearchResult();
@@ -247,147 +273,65 @@ public class AppEntryPoint implements EntryPoint {
 	            double northing = Double.valueOf(searchResult.getNorthing()).doubleValue();
 	            
 	            Coordinate coordinate = new Coordinate(easting, northing);
-//	            sendCoordinateToServer(coordinate.toStringXY(3), null);
+	            sendCoordinateToServer(coordinate.toStringXY(3), null);
 			}
 		});
         
         oraclePanel.add(suggestBox);
-        searchPanel.add(oraclePanel);
-        
-        // Search card on in the top left corner.
-//        searchCard = new MaterialCard();
-//        searchCard.setId("searchCard");
-//
-//        searchCardContent = new MaterialCardContent();
-//        searchCardContent.setId("searchCardContent");
-//     
-//        MaterialRow logoRow = new MaterialRow();
-//
-//        com.google.gwt.user.client.ui.Image plrImage = new com.google.gwt.user.client.ui.Image();
-//        plrImage.setUrl(GWT.getHostPageBaseURL() + "logo-grundstuecksinformation.png");
-//        plrImage.setWidth("65%");
-//
-//        MaterialColumn logoColumn = new MaterialColumn();
-//        logoColumn.setId("logoColumn");
-//        logoColumn.setGrid("s12");
-//        logoColumn.add(plrImage);
-//
-//        logoRow.add(logoColumn);
-//        searchCardContent.add(logoRow);
-//        
-//        MaterialRow searchRow = new MaterialRow();
-//        searchRow.setId("searchRow");
-//
-//        SearchOracle searchOracle = new SearchOracle(SEARCH_SERVICE_URL);
-//        autocomplete = new MaterialAutoComplete(searchOracle);
-//        autocomplete.setId("autocomplete");
-//        // It's not possible to get the object with AutocompleteType.TEXT.
-//        // You only get the text then. But we definitely need the object.
-//        // The chip can be made invisible with CSS. But the size
-//        // must be also set to zero.
-//        //autocomplete.setType(AutocompleteType.TEXT);
-//        autocomplete.setPlaceholder(messages.searchPlaceholder());
-//        autocomplete.setAutoSuggestLimit(5);
-//        autocomplete.setLimit(1);
-//        autocomplete.addValueChangeHandler(new SearchValueChangeHandler());
-//        
-//        searchRow.add(autocomplete);
-//        searchCardContent.add(searchRow);
-//        searchCard.add(searchCardContent);
-//        
+        searchPanel.add(oraclePanel);      
         RootPanel.get().add(searchPanel);
+    
+        // Card that shows the results from the extracts.
+        resultPanel = new FlowPanel();
+        resultPanel.getElement().setAttribute("id", "resultCard");
+
+        resultPanelContent = new FlowPanel();
+        resultPanelContent.getElement().setAttribute("id", "resultCardContent");
+        resultPanel.add(resultPanelContent);
 //        
-//        // Card that shows the results from the extracts.
-//        resultCard = new MaterialCard();
-//        resultCard.setId("resultCard");
-//
-//        resultCardContent = new MaterialCardContent();
-//        resultCardContent.setId("resultCardContent");
-//        resultCard.add(resultCardContent);
-//        
-//        Div fadeoutBottomDiv = new Div();
-//        fadeoutBottomDiv.setId("fadeoutBottomDiv");
-//        resultCard.add(fadeoutBottomDiv);
-//        
-//        RootPanel.get().add(resultCard);
+        fadeoutBottomDiv = new SimplePanel();
+        fadeoutBottomDiv.getElement().setAttribute("id", "fadeoutBottomDiv");
+        resultPanel.add(fadeoutBottomDiv);
+        
+        RootPanel.get().add(resultPanel);
         
         // It seems that initializing the map and/or adding the click listener
         // must be done after adding the value changed handler of the search.
         // Selecting a search result was also triggering a map single click event.
         //map = MapPresets.getCadastralSurveyingWms(mapDiv.getElement().getAttribute("id"));
         map = MapPresets.getBlackAndWhiteMap(mapDiv.getElement().getAttribute("id"));
-        map.addSingleClickListener(new MapSingleClickListener());
-
-        // Info button.
-//        MaterialButton infoButton = new MaterialButton();
-//        infoButton.setId("infoButton");
-//        infoButton.setMargin(8);
-//        infoButton.setType(ButtonType.FLOATING);
-//        infoButton.setSize(ButtonSize.LARGE);
-//        infoButton.setBackgroundColor(Color.RED_LIGHTEN_1);
-//        infoButton.setIconType(IconType.INFO_OUTLINE);
-//        
-//        infoButton.addClickHandler(event -> {
-//           GWT.log(event.toString()); 
-//           
-//           MaterialWindow infoWindow = new MaterialWindow();
-//           infoWindow.setTitle("Grundstücksinformation");
-//           infoWindow.setFontSize("16px");
-//           infoWindow.setTop(15);
-//           infoWindow.setMarginLeft(0);
-//           infoWindow.setMarginRight(0);
-//           infoWindow.setWidth("400px");
-//           infoWindow.setToolbarColor(Color.RED_LIGHTEN_1);
-//           infoWindow.getElement().getStyle().setProperty("margin", "auto");
-//
-//           MaterialIcon maximizeIcon = infoWindow.getIconMaximize();
-//           maximizeIcon.getElement().getStyle().setProperty("visibility", "hidden");
-//
-//           infoWindow.setMaximize(false);
-//
-//           MaterialPanel infoWindowPanel = new MaterialPanel();
-//           infoWindowPanel.setPadding(5);
-//           HTML infoHTML = new HTML("<b>fubar</b>");
-//           infoWindowPanel.add(infoHTML);
-//           
-//           infoWindow.add(infoWindowPanel);
-//           infoWindow.open();
-//        });
-        
-        //RootPanel.get().add(infoButton);
+        map.addSingleClickListener(new MapSingleClickListener());        
         
         // If there is an egrid query parameter in the url,
         // we request the extract without further interaction.
-        /*
         if (Window.Location.getParameter("egrid") != null) {
             String egrid = Window.Location.getParameter("egrid").toString();
-            MaterialLoader.loading(true);
+            Loader.show(true);
             resetGui();
             Egrid egridObj = new Egrid();
             egridObj.setEgrid(egrid);
             sendEgridToServer(egridObj);
         }
-        */
     }
     
     private void resetGui() {
-//        removeOerebWmsLayers();
-//        
+        removeOerebWmsLayers();
+        
 //        expandedOerebLayerId = null;
 //
 //        if (resultDiv != null) {
 //            resultCardContent.remove(resultDiv);
 //        }
-//
-//        if (realEstateWindow != null) {
-//            realEstateWindow.removeFromParent();
-//        }
-//
-//        if (resultHeaderRow != null) {
-//            resultHeaderRow.removeFromParent();
-//        }
-//
-//        resultCard.getElement().getStyle().setProperty("visibility", "hidden");
+
+        if (realEstateDialogBox != null) {
+        	realEstateDialogBox.removeFromParent();
+        }
+
+        if (headerRow != null) {
+            headerRow.removeFromParent();
+        }
+
+        resultPanel.getElement().getStyle().setProperty("visibility", "hidden");
     }
     
     private void sendCoordinateToServer(String XY, MapBrowserEvent event) {
@@ -404,10 +348,8 @@ public class AppEntryPoint implements EntryPoint {
 
             @Override
             public void onSuccess(EgridResponse result) {
-//                resetGui();
+                resetGui();
                               
-            	GWT.log("fubar");
-            	
                 if (result.getResponseCode() != 200) {
                     Loader.show(false);
                     
@@ -415,100 +357,90 @@ public class AppEntryPoint implements EntryPoint {
 //                    MaterialToast.fireToast("E-GRID not found.");
                     return;
                 }
-                
-                
-                DivElement overlay = com.google.gwt.dom.client.Document.get().createDivElement();
-                overlay.setClassName("overlay-font");
-                overlay.setInnerText("Created with GWT SDK " + GWT.getVersion());
 
-                OverlayOptions overlayOptions = OLFactory.createOptions();
-                overlayOptions.setElement(overlay);
-                Coordinate foo = new Coordinate(Double.valueOf(XY.split(",")[0]), Double.valueOf(XY.split(",")[1]));
-                overlayOptions.setPosition(foo);
-                overlayOptions.setOffset(OLFactory.createPixel(-300, 0));
-
-                map.addOverlay(new Overlay(overlayOptions));
-
-                
-                
-//                
 //                // MapBrowserEvent is null if we end up here by a text search.
 //                // We just use the first egrid from the list w/o asking the
 //                // user. Wouldn't be too easy I guess to interact with the
-//                // user without confusing him.
-//                String egrid;
-//                List<Egrid> egridList = result.getEgrid();
-//                if (egridList.size() > 1 && event != null) {
-//                    MaterialLoader.loading(false);
-//
-//                    realEstateWindow = new MaterialWindow();
-//                    realEstateWindow.setTitle(messages.realEstatePlural());
-//                    realEstateWindow.setFontSize("16px");
-//                    realEstateWindow.setMarginLeft(0);
-//                    realEstateWindow.setMarginRight(0);
-//                    realEstateWindow.setWidth("300px");
-//                    realEstateWindow.setToolbarColor(Color.RED_LIGHTEN_1);
-//
-//                    MaterialIcon maximizeIcon = realEstateWindow.getIconMaximize();
-//                    maximizeIcon.getElement().getStyle().setProperty("visibility", "hidden");
-//
-//                    realEstateWindow.setMaximize(false);
-//                    realEstateWindow.setTop(event.getPixel().getY());
-//                    realEstateWindow.setLeft(event.getPixel().getX());
-//  
-//                    MaterialPanel realEstatePanel = new MaterialPanel();
-//                    
-//                    HashMap<String, Egrid> egridMap = new HashMap<String, Egrid>();
-//                    for (Egrid egridObj : egridList) {
-//                        egrid = (String) egridObj.getEgrid(); 
-//                        String number = egridObj.getNumber();
-//
-//                        MaterialRow row = new MaterialRow();
-//                        row.setId(egrid);
-//                        row.setMarginBottom(0);
-//                        row.setPadding(5);
-//                        row.add(new Label(messages.realEstateAbbreviation() + ": " + number + " (unknown type...)"));
-//
-//                        egridMap.put(egrid, egridObj);
-//                        
-//                        row.addClickHandler(event -> {
-//                            realEstateWindow.removeFromParent();
-//                            GWT.log("Get extract from a map click (multiple click result): " + row.getId());
-//
-//                            MaterialLoader.loading(true);
-//                            sendEgridToServer(egridMap.get(row.getId()));
-//                        });
-//
-//                        row.addMouseOverHandler(event -> {
-//                            row.setBackgroundColor(Color.GREY_LIGHTEN_3);
-//                            row.getElement().getStyle().setCursor(Cursor.POINTER);
-//                            // Since there is no geometry, we cannot hightlight the real estate.
-////                            ol.layer.Vector vlayer = createRealEstateVectorLayer(feature.getGeometry());
-////                            map.addLayer(vlayer);
-//                        });
-//
-//                        row.addMouseOutHandler(event -> {
-//                            row.setBackgroundColor(Color.WHITE);
-//                            row.getElement().getStyle().setCursor(Cursor.DEFAULT);
-////                            removeRealEstateVectorLayer();
-//                        });
-//                        
-//                        realEstatePanel.add(row);
-//                    }
-//                    
-//                    realEstateWindow.add(realEstatePanel);
-//                    realEstateWindow.open();
-//                } else if (egridList.size() > 1) {
-//                    GWT.log("Get extract from a text search: " + egridList.get(0).getEgrid());
-//                    
-//                    MaterialLoader.loading(true);
-//                    sendEgridToServer(egridList.get(0));                    
-//                } else {
-//                    GWT.log("Get extract from a map click (single click result): " + egridList.get(0).getEgrid());
-//                    
-//                    MaterialLoader.loading(true);
-//                    sendEgridToServer(egridList.get(0));
-//                }               
+//                // user without confusing the user.
+                String egrid;
+                List<Egrid> egridList = result.getEgrid();
+                if (egridList.size() > 1 && event != null) {
+                    Loader.show(false);
+
+                    realEstateDialogBox = new DialogBox();
+                    realEstateDialogBox.setText(messages.realEstatePlural());
+                    realEstateDialogBox.setGlassEnabled(false);
+                    realEstateDialogBox.setModal(false);
+                    realEstateDialogBox.setWidth("300px");
+                    realEstateDialogBox.getElement().getStyle().setBackgroundColor("white");
+    				Button closeButton = new Button("Close", new ClickHandler() {
+    					public void onClick(ClickEvent sender) {
+    						realEstateDialogBox.removeFromParent();
+    					}
+    				});
+
+    				FlowPanel dialogContents = new FlowPanel();
+					HashMap<String, Egrid> egridMap = new HashMap<String, Egrid>();
+					for (Egrid egridObj : egridList) {
+						egrid = (String) egridObj.getEgrid();
+						String number = egridObj.getNumber();
+                        egridMap.put(egrid, egridObj);
+						
+						SimplePanel row = new SimplePanel();
+						row.getElement().setAttribute("id", egrid);
+						row.getElement().getStyle().setPadding(0, Unit.PX);
+						row.getElement().getStyle().setWidth(100, Unit.PCT);
+						// TODO (use cadastre-web-service)
+//						new Label("GB-Nr.: " + number + " ("+ type.substring(type.lastIndexOf(".") + 1) + ")");						
+						Label label = new Label(messages.realEstateAbbreviation() + ": " + number + " (unknown type...)");
+						label.getElement().getStyle().setPadding(5, Unit.PX);;
+                        row.add(label);
+
+                        dialogContents.add(row);
+                        
+						row.addDomHandler(new MouseOverHandler() {
+							@Override
+							public void onMouseOver(MouseOverEvent event) {
+								row.getElement().getStyle().setBackgroundColor("#efefef");
+	                            row.getElement().getStyle().setCursor(Cursor.POINTER);
+	                            // Since there is no geometry, we cannot highlight the real estate.
+//                            ol.layer.Vector vlayer = createRealEstateVectorLayer(feature.getGeometry());
+//                            map.addLayer(vlayer);	                            
+							}
+						}, MouseOverEvent.getType());
+						
+						row.addDomHandler(new MouseOutHandler() {
+							@Override
+							public void onMouseOut(MouseOutEvent event) {
+								row.getElement().getStyle().setBackgroundColor("white");
+	                            row.getElement().getStyle().setCursor(Cursor.DEFAULT);
+//                            removeRealEstateVectorLayer();	                            
+							}
+						}, MouseOutEvent.getType());
+						
+						row.addDomHandler(new ClickHandler() {
+							@Override
+							public void onClick(ClickEvent event) {
+								realEstateDialogBox.removeFromParent();
+	                            Loader.show(true);
+	                            sendEgridToServer(egridMap.get(row.getElement().getAttribute("id")));
+	                            
+							}
+						}, ClickEvent.getType());
+					}
+					dialogContents.add(closeButton);
+					realEstateDialogBox.add(dialogContents);
+                    realEstateDialogBox.setPopupPosition(event.getPixel().getX(), event.getPixel().getY());
+                    realEstateDialogBox.show();
+                } else if (egridList.size() > 1) {
+                    GWT.log("Get extract from a text search: " + egridList.get(0).getEgrid());
+                    Loader.show(true);
+                    sendEgridToServer(egridList.get(0));                    
+                } else {
+                    GWT.log("Get extract from a map click (single click result): " + egridList.get(0).getEgrid());
+                    Loader.show(true);
+                    sendEgridToServer(egridList.get(0));
+                }               
             }
         });
     }
@@ -518,114 +450,153 @@ public class AppEntryPoint implements EntryPoint {
 
             @Override
             public void onFailure(Throwable caught) {
-//                MaterialLoader.loading(false);
+                Loader.show(false);
+                // TODO
 //                MaterialToast.fireToast("An error occured.");
                 
                 // TODO: Make logging production ready.
-//                console.log("error: " + caught.getMessage());
+                GWT.log("error: " + caught.getMessage());
             }
 
             @Override
             public void onSuccess(ExtractResponse result) {
-//                MaterialLoader.loading(false);
-//                
-//                String newUrl = Window.Location.getProtocol() + "//" + Window.Location.getHost() + Window.Location.getPath() + "?egrid=" + egrid.getEgrid();
-//                updateURLWithoutReloading(newUrl);
-//                
-//                removeOerebWmsLayers();
-//                
-//                RealEstateDPR realEstateDPR = result.getRealEstateDPR();
-//                String number = realEstateDPR.getNumber();
-//                String municipality = realEstateDPR.getMunicipality();
-//                String subunitOfLandRegister = realEstateDPR.getSubunitOfLandRegister();
-//                String canton = realEstateDPR.getCanton();
-//                String egrid = realEstateDPR.getEgrid();
-//                int area = realEstateDPR.getLandRegistryArea();
-//                String realEstateType = realEstateDPR.getRealEstateType();
-//                
-//                ol.layer.Vector vlayer = createRealEstateVectorLayer(realEstateDPR.getLimit());
-//                
-//                if (realEstateDPR.getLimit() != null) {
-//                    Geometry geometry = new Wkt().readGeometry(realEstateDPR.getLimit());
-//                    Extent extent = geometry.getExtent();
-//                    
-//                    View view = map.getView();
-//                    double resolution = view.getResolutionForExtent(extent);
-//                    view.setZoom(Math.floor(view.getZoomForResolution(resolution)) - 1);
-//
-//                    double x = extent.getLowerLeftX() + extent.getWidth() / 2;
-//                    double y = extent.getLowerLeftY() + extent.getHeight() / 2;
-//
-//                    // Das ist jetzt ziemlich heuristisch...
-//                    // 500 = Breite des Suchresultates
-//                    view.setCenter(new Coordinate(x - (resultCard.getWidth() * view.getResolution()) / 2, y));                    
-//                } 
-//
-//                vlayer.setZIndex(1001);
-//                map.addLayer(vlayer);
-//                
-//                // Add the extract results to the card.
+                Loader.show(false);
+                
+                String newUrl = Window.Location.getProtocol() + "//" + Window.Location.getHost() + Window.Location.getPath() + "?egrid=" + egrid.getEgrid();
+                updateURLWithoutReloading(newUrl);
+                
+                removeOerebWmsLayers();
+                
+                RealEstateDPR realEstateDPR = result.getRealEstateDPR();
+                String number = realEstateDPR.getNumber();
+                String municipality = realEstateDPR.getMunicipality();
+                String subunitOfLandRegister = realEstateDPR.getSubunitOfLandRegister();
+                String canton = realEstateDPR.getCanton();
+                String egrid = realEstateDPR.getEgrid();
+                int area = realEstateDPR.getLandRegistryArea();
+                String realEstateType = realEstateDPR.getRealEstateType();
+                
+                ol.layer.Vector vlayer = createRealEstateVectorLayer(realEstateDPR.getLimit());
+                
+                if (realEstateDPR.getLimit() != null) {
+                    Geometry geometry = new Wkt().readGeometry(realEstateDPR.getLimit());
+                    Extent extent = geometry.getExtent();
+                    
+                    View view = map.getView();
+                    double resolution = view.getResolutionForExtent(extent);
+                    view.setZoom(Math.floor(view.getZoomForResolution(resolution)) - 1);
+
+                    double x = extent.getLowerLeftX() + extent.getWidth() / 2;
+                    double y = extent.getLowerLeftY() + extent.getHeight() / 2;
+
+                    // Das ist jetzt ziemlich heuristisch...
+                    // 500 = Breite des Suchresultates
+                    view.setCenter(new Coordinate(x - (resultPanel.getElement().getOffsetWidth() * view.getResolution()) / 2, y));                    
+                } 
+
+                vlayer.setZIndex(1001);
+                map.addLayer(vlayer);
+                
+                // Add the extract results to the panel
+                HorizontalPanel headerRow = new HorizontalPanel();
+                headerRow.setVerticalAlignment(HasVerticalAlignment.ALIGN_TOP);
+
+                SimplePanel titlePanel = new SimplePanel();
+                titlePanel.getElement().setAttribute("id", "resultParcelColumn");
+                titlePanel.add(new Label(messages.resultHeader(number)));
+                headerRow.add(titlePanel);
+                
+                SimplePanel expandButtonPanel = new SimplePanel();
+                // TODO 
+                // minus = &#8722;
+                // plus = &#65291;
+				Button expandButton = new Button("&#8722;");
+				expandButton.addClickHandler(event -> {
+					if (resultPanel.getOffsetHeight() > headerRow.getOffsetHeight()) {
+						expandButton.setText(new HTML("&#65291;").getHTML());
+						
+						resultPanel.getElement().getStyle().setProperty("overflowY", "hidden");
+						resultPanel.setHeight(String.valueOf(headerRow.getOffsetHeight()) + "px");
+						fadeoutBottomDiv.setVisible(false);
+						// TODO
+//						resultDiv.setVisibility(com.google.gwt.dom.client.Style.Visibility.HIDDEN);
+					} else {
+						expandButton.setText(new HTML("&#8722;").getHTML());
+						// TODO
+//	                    resultDiv.setVisibility(com.google.gwt.dom.client.Style.Visibility.VISIBLE);						
+						resultPanel.getElement().getStyle().setProperty("overflowY", "auto");
+						resultPanel.getElement().getStyle().setProperty("height", RESULT_CARD_HEIGHT);
+						fadeoutBottomDiv.setVisible(true);
+					}
+				});
+				
+                expandButtonPanel.add(expandButton);
+                headerRow.add(expandButtonPanel);
+
+                SimplePanel closeButtonPanel = new SimplePanel();
+                // smaller icon -> &#215;
+				Button closeButton = new Button("&#10005;", new ClickHandler() {
+					public void onClick(ClickEvent sender) {
+						resetGui();
+					}
+				});				
+				closeButtonPanel.add(closeButton);
+                headerRow.add(closeButtonPanel);
+                
+
+                headerRow.setCellVerticalAlignment(expandButtonPanel, HasVerticalAlignment.ALIGN_MIDDLE);
+                headerRow.setCellVerticalAlignment(closeButtonPanel, HasVerticalAlignment.ALIGN_MIDDLE);
+                headerRow.setCellHorizontalAlignment(expandButtonPanel, HasHorizontalAlignment.ALIGN_RIGHT);
+                headerRow.setCellHorizontalAlignment(closeButtonPanel, HasHorizontalAlignment.ALIGN_RIGHT);
+                headerRow.setCellWidth(titlePanel, "400px");
+                headerRow.setCellWidth(expandButtonPanel, "50px");
+                headerRow.setCellWidth(closeButtonPanel, "50px");
+                
+                resultPanelContent.add(headerRow);
+                
+                // TODO ?
 //                resultDiv = new Div();
 //                resultDiv.setId("resultDiv");
 //                resultDiv.setBackgroundColor(Color.GREY_LIGHTEN_5);
 //
-//                resultHeaderRow = new MaterialRow();
-//                resultHeaderRow.setId("resultHeaderRow");
+
+                
+        		TabLayoutPanel p = new TabLayoutPanel(1.5, Unit.EM);
+        		p.add(new HTML("tab1 content"), "TAB1");
+        		p.add(new HTML("tab2 content"), "TAB2");
+        		p.add(new HTML("tab3 content"), "TAB3");
+
+        		LayoutPanel foo = new LayoutPanel();
+        		foo.add(p);
+        		resultPanelContent.add(foo);
+        		
+        		
+//                TabLayoutPanel tabPanel = new TabLayoutPanel(2.5, Unit.EM);
+//                tabPanel.setAnimationDuration(1000);
+//                tabPanel.getElement().getStyle().setMarginBottom(10.0, Unit.PX);
 //
-//                MaterialColumn resultParcelColumn = new MaterialColumn();
-//                resultParcelColumn.setId("resultParcelColumn");
-//                resultParcelColumn.setGrid("s8");
+//                // Add a home tab
+//                String[] tabTitles = {"Amtl. Vermessung", "Grundbuch", "ÖREB"};
 //
-//                String lblString = messages.resultHeader(number);
-//                Label lbl = new Label(lblString);
-//                resultParcelColumn.add(lbl);
-//                resultHeaderRow.add(resultParcelColumn);
+//                HTML homeText = new HTML("av");
+//                tabPanel.add(homeText, tabTitles[0]);
 //
-//                MaterialColumn resultButtonColumn = new MaterialColumn();
-//                resultButtonColumn.setId("resultButtonColumn");
-//                resultButtonColumn.setGrid("s4");
+//                // Add a tab with an image
+//                SimplePanel imageContainer = new SimplePanel();
+//                imageContainer.setWidget(new Label("Grundbuch stuff"));
+//                tabPanel.add(imageContainer, tabTitles[1]);
 //
-//                MaterialButton deleteExtractButton = new MaterialButton();
-//                deleteExtractButton.setId("deleteExtractButton");
-//                deleteExtractButton.setIconType(IconType.CLOSE);
-//                deleteExtractButton.setType(ButtonType.FLOATING);
-//                deleteExtractButton.setTooltip(messages.resultCloseTooltip());
-//                deleteExtractButton.setTooltipPosition(Position.TOP);
-//                deleteExtractButton.addClickHandler(event -> {
-//                    resetGui();
-//                });
-//                resultButtonColumn.add(deleteExtractButton);
+//                // Add a tab
+//                HTML moreInfo = new HTML("öreb");
+//                tabPanel.add(moreInfo, tabTitles[2]);
 //
-//                MaterialButton minMaxExtractButton = new MaterialButton();
-//                minMaxExtractButton.setId("minmaxExtractButton");
-//                minMaxExtractButton.setMarginLeft(10);
-//                minMaxExtractButton.setIconType(IconType.REMOVE);
-//                minMaxExtractButton.setType(ButtonType.FLOATING);
-//                minMaxExtractButton.setTooltip(messages.resultMinimizeTooltip());
-//                minMaxExtractButton.setTooltipPosition(Position.TOP);
-//
-//                minMaxExtractButton.addClickHandler(event -> {
-//                    if (resultCard.getOffsetHeight() > resultHeaderRow.getOffsetHeight()) {
-//                        minMaxExtractButton.setIconType(IconType.ADD);
-//                        minMaxExtractButton.setTooltip(messages.resultMaximizeTooltip());
-//
-//                        resultCard.getElement().getStyle().setProperty("overflowY", "hidden");
-//                        resultCard.setHeight(String.valueOf(resultHeaderRow.getOffsetHeight()) + "px");
-//                        resultDiv.setVisibility(com.google.gwt.dom.client.Style.Visibility.HIDDEN);
-//                    } else {
-//                        minMaxExtractButton.setIconType(IconType.REMOVE);
-//                        minMaxExtractButton.setTooltip(messages.resultMinimizeTooltip());
-//
-//                        resultDiv.setVisibility(com.google.gwt.dom.client.Style.Visibility.VISIBLE);
-//                        resultCard.getElement().getStyle().setProperty("overflowY", "auto");
-//                        resultCard.getElement().getStyle().setProperty("height", RESULT_CARD_HEIGHT);
-//                    }
-//                });
-//                resultButtonColumn.add(minMaxExtractButton);
-//
-//                resultHeaderRow.add(resultButtonColumn);
-//                resultCardContent.add(resultHeaderRow);  
+//                // Return the content
+//                tabPanel.selectTab(0);
+//                tabPanel.ensureDebugId("cwTabPanel");
 //                
+//                resultPanel.add(tabPanel);
+                
+                
 //                MaterialRow tabRow = new MaterialRow();
 //                tabRow.setId("tabRow");
 //
@@ -721,9 +692,9 @@ public class AppEntryPoint implements EntryPoint {
 //                resultDiv.add(tabRow);
 //
 //                resultCardContent.add(resultDiv);
-//                resultCard.getElement().getStyle().setProperty("height", RESULT_CARD_HEIGHT);
-//                resultCard.getElement().getStyle().setProperty("overflowY", "auto");
-//                resultCard.getElement().getStyle().setProperty("visibility", "visible");
+                resultPanel.getElement().getStyle().setProperty("height", RESULT_CARD_HEIGHT);
+                resultPanel.getElement().getStyle().setProperty("overflowY", "auto");
+                resultPanel.getElement().getStyle().setProperty("visibility", "visible");
             }
         });
     }
@@ -1425,57 +1396,10 @@ public class AppEntryPoint implements EntryPoint {
     public final class MapSingleClickListener implements EventListener<MapBrowserEvent> {
         @Override
         public void onEvent(MapBrowserEvent event) {
-//            MaterialLoader.loading(true);
+            Loader.show(true);
             
             Coordinate coordinate = event.getCoordinate();
             sendCoordinateToServer(coordinate.toStringXY(3), event);
-            
-            // does not return egrid :(
-            /*
-            //https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=2607381.2857129965,1228422.772096185&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=2607182.461501755,1228369.7490333454,2607507.9384982456,1228510.9109666548&returnGeometry=true&sr=2056&tolerance=10
-            //String requestUrl = "https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=2607381.2857129965,1228422.772096185&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=2607182.461501755,1228369.7490333454,2607507.9384982456,1228510.9109666548&returnGeometry=true&sr=2056&tolerance=10";
-            //String requestUrl = "https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=2607389.224071799,1228423.0556600185&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=2607182.461501755,1228369.7490333454,2607507.9384982456,1228510.9109666548&returnGeometry=true&sr=2056&tolerance=10";
-            String identifyRequest = format(identifyRequestTemplate, String.valueOf(coordinate.getX()), String.valueOf(coordinate.getY()), String.valueOf(coordinate.getX()), String.valueOf(coordinate.getY()), String.valueOf(coordinate.getX()), String.valueOf(coordinate.getY()));
-            
-            fetch(identifyRequest)
-            .then(Response::json)
-            .then(data -> {
-                // Create a valid GeoJSON from returned JSON. 
-                // Later on we can create an ol3 vector layer with the GeoJSON features.
-                JSONObject newFeatureCollection = new JSONObject();
-                newFeatureCollection.put("type", new JSONString("FeatureCollection"));
-                JSONArray newFeaturesArray = new JSONArray();
-
-                JSONObject obj = new JSONObject(JsonUtils.safeEval(Global.JSON.stringify(data)));
-                JSONArray array = obj.get("results").isArray();
-                for (int i=0; i<array.size(); i++) {
-                    
-                    JSONObject feature = array.get(i).isObject();
-                    JSONObject geometry = feature.get("geometry").isObject();
-                    JSONObject properties = feature.get("properties").isObject();
-                    
-                    JSONObject newFeature = new JSONObject();
-                    newFeature.put("type",  new JSONString("Feature"));
-                    newFeature.put("properties", properties);
-                    newFeature.put("geometry", geometry);
-                    
-                    newFeaturesArray.set(i, newFeature);
-                }
-                newFeatureCollection.put("features", newFeaturesArray);
-                
-                Feature[] features = (new GeoJson()).readFeatures(newFeatureCollection.toString());
-                
-                for (Feature feature : features) {
-                    console.log(feature.getProperties().get("label"));
-                    console.log(feature.getGeometry().getExtent().getLowerLeftX());
-                }
-                return null;
-            }).
-            catch_(error -> {
-                console.log(error);
-                return null;
-            }); 
-            */ 
         }
     }
     

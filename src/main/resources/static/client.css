@@ -2,16 +2,12 @@ body , html {
     margin: 0px;
     padding: 0px;
     background: #fafafa; /* #f5f5f5 */
-    /*font-family: Barlow, 'IBM Plex Sans', sans-serif;*/    
     /*font-size: 16px;*/
     height:100%;  
     font-weight: 300;     
 }
 
 body, div {
-    /*font-family: 'Barlow Semi Condensed', Barlow, sans-serif;   
-    font-family: 'IBM Plex Sans', sans-serif;   
-    font-family: 'IBM Plex Sans Condensed', sans-serif;*/   
     font-family: Roboto, sans-serif;   
     font-weight: 300;   
     /*font-family: 'Roboto Condensed', sans-serif;*/
@@ -40,6 +36,7 @@ body .black{
 #searchCard {
     background-color: white; /* GREY_LIGHTEN_5 #fafafa */
     box-shadow: rgba(0, 0, 0, 0.16) 0px 2px 5px 0px, rgba(0, 0, 0, 0.12) 0px 2px 10px 0px;
+	border-radius: 3px;    
     position: absolute;
     margin-top: 0px;
     margin-left: 0px;
@@ -83,8 +80,9 @@ body .black{
 */
 
 #resultCard {
-    background-color: #fafafa; /* GREY_LIGHTEN_5 */
-    transition: height 0.5s;
+    background-color: white; /* GREY_LIGHTEN_5 #fafafa */
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 2px 5px 0px, rgba(0, 0, 0, 0.12) 0px 2px 10px 0px;
+	border-radius: 3px;        
     position: absolute;
     margin-top: 0px;
     margin-left: 0px;
@@ -100,6 +98,21 @@ body .black{
 
 #resultCardContent {
     padding: 0px 15px 15px 15px;
+}
+
+#resultCardContent .gwt-Button {
+	background: #white;
+	border: 1px solid #260101; 
+	border-radius: 3px;	
+	color: #260101;
+	width: 34px;
+	height: 28px;
+	padding: 0px;
+	margin: 0px;	
+	cursor: default;
+	font-family: Roboto, sans-serif;
+	font-weight: bold;
+    font-size: 20px;
 }
 
 #fadeoutBottomDiv {
@@ -121,11 +134,11 @@ body .black{
     height: 58px;
 }
 
-#resultParcelColumn {
+#resultParcelColumn .gwt-Label {
     margin: 0px;
     padding: 0px !important;
     font-size: 18px;
-    font-weight: 700;
+    font-weight: bold;
     height: 58px;
     line-height: 58px;    
 }
