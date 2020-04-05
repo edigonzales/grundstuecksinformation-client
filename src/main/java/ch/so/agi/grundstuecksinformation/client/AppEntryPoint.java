@@ -15,6 +15,8 @@ import com.google.gwt.dom.client.Style.FontStyle;
 import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.VerticalAlign;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.RequestBuilder;
@@ -218,11 +220,25 @@ public class AppEntryPoint implements EntryPoint {
         // You only get the text then. But we definitely need the object.
         // The chip can be made invisible with CSS. But the size
         // must be also set to zero.
-        //autocomplete.setType(AutocompleteType.TEXT);
+//        autocomplete.setType(AutocompleteType.TEXT);
         autocomplete.setPlaceholder(messages.searchPlaceholder());
         autocomplete.setAutoSuggestLimit(5);
         autocomplete.setLimit(1);
         autocomplete.addValueChangeHandler(new SearchValueChangeHandler());
+        
+        // TODO TEST 
+        // Es scheint, dass man so "autocomplete.setType(AutocompleteType.TEXT);"
+        // verwenden kann und die hässlichen invisible und Lösch-Workarounds
+        // unnötig werden?
+        autocomplete.addSelectionHandler(new SelectionHandler<Suggestion>() {
+			@Override
+			public void onSelection(SelectionEvent<Suggestion> event) {
+				SearchSuggestion searchSuggestion = (SearchSuggestion) event.getSelectedItem();
+				SearchResult searchResult = searchSuggestion.getSearchResult();
+				
+				GWT.log(searchResult.getBbox().toString());
+			}
+        });
         
         searchRow.add(autocomplete);
         searchCardContent.add(searchRow);
