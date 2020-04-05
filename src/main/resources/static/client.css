@@ -370,7 +370,7 @@ input[type="range"] {
 
 .opacitySliderRowLeft {
     font-size: 14px;
-    padding: 0px !important;    
+    padding: 15px 0px 0px 0px !important;    
 }
 
 .layerInfoHeaderRow {
@@ -519,7 +519,7 @@ ul.multiValueSuggestBox-list li input {
     /*margin-top: 0px !important;*/
 }
 .range-field {
-    padding: 0px !important;
+    padding: 15px 0px 0px 0px !important;
 }
 
 input[type=range] {
