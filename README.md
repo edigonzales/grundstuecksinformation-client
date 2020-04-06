@@ -17,10 +17,23 @@ Or simple devmode (which worked better for java.xml.bind on client side):
 mvn gwt:generate-module gwt:devmode 
 ```
 
+Docker:
+
+```
+docker-compose -f docker-compose.yml up
+docker-compose -f docker-compose.yml up
+```
+
+
+## Build
+
 Build fat jar and docker image:
 ```
 BUILD_NUMBER=9999 mvn package
 ```
+
+
+
 
 ## Run 
 ```

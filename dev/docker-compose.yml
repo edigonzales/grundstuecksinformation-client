@@ -1,0 +1,37 @@
+version: '3'
+services:
+  db:
+    hostname: primary
+    image: sogis/oereb-db:latest
+    environment:
+      PG_DATABASE: grundstuecksinformation
+      PG_LOCALE: de_CH.UTF-8
+      PG_PRIMARY_PORT: 5432
+      PG_MODE: primary
+      PG_USER: admin
+      PG_PASSWORD: admin
+      PG_PRIMARY_USER: repl
+      PG_PRIMARY_PASSWORD: repl
+      PG_ROOT_PASSWORD: secret
+      PG_WRITE_USER: gretl
+      PG_WRITE_PASSWORD: gretl
+      PG_READ_USER: ogc_server
+      PG_READ_PASSWORD: ogc_server
+    ports:
+      - "54321:5432"
+    volumes:
+       - ~/pgdata-grundstuecksinformation:/pgdata:delegated
+    restart: always
+  cadastre-web-service:
+    depends_on:
+      - db
+    image: sogis/cadastre-web-service:latest
+    environment:
+      DBURL: jdbc:postgresql://db:5432/grundstuecksinformation
+      DBUSR: gretl
+      DBPWD: gretl
+      DBSCHEMA: live
+      SERVER_PORT: 8080
+    ports:
+      - "8282:8080"
+    restart: always

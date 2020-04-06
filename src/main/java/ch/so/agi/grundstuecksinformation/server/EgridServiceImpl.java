@@ -93,24 +93,6 @@ public class EgridServiceImpl extends RemoteServiceServlet implements EgridServi
             egridObj.setNumber(egridXmlList.get(i+1).getValue());
             egridObj.setIdentDN(egridXmlList.get(i+2).getValue());
             egridObj.setOerebServiceBaseUrl(oerebBaseUrl);
-            
-            // Does not work either since RESF (Liegenschaften) are
-            // too slow to query.
-            // No index on EGRIS_EGRID?
-            /*
-            for (String wfsUrlTemplate : wfsUrlTemplateList) {
-                String wfsUrl = String.format(wfsUrlTemplate, egridObj.getEgrid());
-                logger.info("wfs url: " + wfsUrl);
-                
-                URL url = new URL(wfsUrl);
-                String content;
-                try (Scanner scanner = new Scanner(url.openStream(), String.valueOf("UTF-8"))) {
-                    content = scanner.useDelimiter("\\A").next();
-                }
-                logger.info(content);
-            }
-            */
-
             logger.info(egridObj.toString());
             egridList.add(egridObj);
         }
