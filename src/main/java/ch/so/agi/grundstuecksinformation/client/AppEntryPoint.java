@@ -182,7 +182,7 @@ public class AppEntryPoint implements EntryPoint {
         });
     }
 
-    private void init() {                        
+	private void init() {                        
         // Add the almighty map.
         Div mapDiv = new Div();
         mapDiv.setId("map");
@@ -216,28 +216,48 @@ public class AppEntryPoint implements EntryPoint {
         SearchOracle searchOracle = new SearchOracle(SEARCH_SERVICE_URL);
         autocomplete = new MaterialAutoComplete(searchOracle);
         autocomplete.setId("autocomplete");
-        // It's not possible to get the object with AutocompleteType.TEXT.
-        // You only get the text then. But we definitely need the object.
-        // The chip can be made invisible with CSS. But the size
-        // must be also set to zero.
-//        autocomplete.setType(AutocompleteType.TEXT);
+        // TODO fix css for the chip (not necessary anymore to hide it)
+        autocomplete.setType(AutocompleteType.TEXT);
         autocomplete.setPlaceholder(messages.searchPlaceholder());
         autocomplete.setAutoSuggestLimit(5);
         autocomplete.setLimit(1);
-        autocomplete.addValueChangeHandler(new SearchValueChangeHandler());
         
-        // TODO: TEST 
-        // Es scheint, dass man so "autocomplete.setType(AutocompleteType.TEXT);"
-        // verwenden kann und die hässlichen invisible und Lösch-Workarounds
-        // unnötig werden?
         autocomplete.addSelectionHandler(new SelectionHandler<Suggestion>() {
 			@Override
-			public void onSelection(SelectionEvent<Suggestion> event) {
+			public void onSelection(SelectionEvent<Suggestion> event) {				
+	            autocomplete.reset();
+	            autocomplete.clear();
+	            
+	            MaterialLoader.loading(true);
+	            resetGui();
+
 				SearchSuggestion searchSuggestion = (SearchSuggestion) event.getSelectedItem();
 				SearchResult searchResult = searchSuggestion.getSearchResult();
-				
-				GWT.log(searchResult.getBbox().toString());
+	            
+	            /*
+	            String[] coords = searchResult.getBbox().substring(4,searchResult.getBbox().length()-1).split(",");
+	            String[] coordLL = coords[0].split(" ");
+	            String[] coordUR = coords[1].split(" ");
+	            Extent extent = new Extent(Double.valueOf(coordLL[0]).doubleValue(), Double.valueOf(coordLL[1]).doubleValue(), 
+	                    Double.valueOf(coordUR[0]).doubleValue(), Double.valueOf(coordUR[1]).doubleValue());
+	            */
+	            
+	            double easting = Double.valueOf(searchResult.getEasting()).doubleValue();
+	            double northing = Double.valueOf(searchResult.getNorthing()).doubleValue();
+	            
+	            Coordinate coordinate = new Coordinate(easting, northing);
+	            sendCoordinateToServer(coordinate.toStringXY(3), null);
 			}
+        });
+        
+        // TODO: Ohne value change handler wird Text nicht
+        // gelöscht. ??
+        autocomplete.addValueChangeHandler(new ValueChangeHandler() {
+			@Override
+			public void onValueChange(ValueChangeEvent event) {
+	            autocomplete.reset();
+			}
+        	
         });
         
         searchRow.add(autocomplete);
@@ -1345,37 +1365,6 @@ public class AppEntryPoint implements EntryPoint {
             fakeColumn.addStyleName("fakeColumn mt15");
             fakeColumn.setGrid("s12");
             cadastralSurveyingResultColumn.add(fakeColumn);
-        }
-    }
-    
-    public class SearchValueChangeHandler implements ValueChangeHandler {
-        @Override
-        public void onValueChange(ValueChangeEvent event) {
-            // Remove the chip from the text field. Even if it is not visible.
-            // This is needed to get further value change events.
-            autocomplete.reset();
-            
-            MaterialLoader.loading(true);
-            resetGui();
-
-            // We only allow one result in the autocomplete widget.
-            List<? extends SuggestOracle.Suggestion> values = (List<? extends Suggestion>) event.getValue();
-            SearchSuggestion searchSuggestion = (SearchSuggestion) values.get(0);
-            SearchResult searchResult = searchSuggestion.getSearchResult();
-            
-            /*
-            String[] coords = searchResult.getBbox().substring(4,searchResult.getBbox().length()-1).split(",");
-            String[] coordLL = coords[0].split(" ");
-            String[] coordUR = coords[1].split(" ");
-            Extent extent = new Extent(Double.valueOf(coordLL[0]).doubleValue(), Double.valueOf(coordLL[1]).doubleValue(), 
-                    Double.valueOf(coordUR[0]).doubleValue(), Double.valueOf(coordUR[1]).doubleValue());
-            */
-            
-            double easting = Double.valueOf(searchResult.getEasting()).doubleValue();
-            double northing = Double.valueOf(searchResult.getNorthing()).doubleValue();
-            
-            Coordinate coordinate = new Coordinate(easting, northing);
-            sendCoordinateToServer(coordinate.toStringXY(3), null);
         }
     }
 
