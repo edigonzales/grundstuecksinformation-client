@@ -11,6 +11,6 @@ public class CadastreExtractService {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    Jaxb2Marshaller marshaller;
+    Jaxb2Marshaller marshaller;  
 
 }
