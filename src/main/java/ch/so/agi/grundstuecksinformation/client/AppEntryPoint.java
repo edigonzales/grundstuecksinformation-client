@@ -7,24 +7,29 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.dominokit.domino.ui.button.Button;
+import org.dominokit.domino.ui.button.ButtonSize;
 import org.dominokit.domino.ui.cards.Card;
 import org.dominokit.domino.ui.dropdown.DropDownMenu;
 import org.dominokit.domino.ui.dropdown.DropDownPosition;
 import org.dominokit.domino.ui.forms.SuggestBox;
 import org.dominokit.domino.ui.forms.SuggestBoxStore;
 import org.dominokit.domino.ui.forms.SuggestItem;
+import org.dominokit.domino.ui.grid.Column;
+import org.dominokit.domino.ui.grid.Row;
 import org.dominokit.domino.ui.icons.Icons;
 import org.dominokit.domino.ui.loaders.Loader;
 import org.dominokit.domino.ui.loaders.LoaderEffect;
 import org.dominokit.domino.ui.notifications.Notification;
 import org.dominokit.domino.ui.style.ColorScheme;
+import org.dominokit.domino.ui.style.StyleType;
 import org.dominokit.domino.ui.themes.Theme;
 import org.dominokit.domino.ui.utils.HasSelectionHandler;
 import org.dominokit.domino.ui.utils.HasSelectionHandler.SelectionHandler;
-import org.gwtproject.event.shared.HandlerRegistration;
 import org.jboss.elemento.HtmlContentBuilder;
 import org.dominokit.domino.ui.forms.SuggestBox.DropDownPositionDown;
 import org.dominokit.domino.ui.forms.SuggestBox.PopupPositionTopDown;
+import static org.dominokit.domino.ui.style.Unit.px;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -188,13 +193,11 @@ public class AppEntryPoint implements EntryPoint {
     private Overlay realEstatePopup;
 //    private MaterialCard searchCard;  
 //    private MaterialAutoComplete autocomplete;    
-//    private MaterialCard resultCard;    
-//    private MaterialCardContent searchCardContent;   
-//    private MaterialCardContent resultCardContent;    
-//    private MaterialWindow realEstateWindow;
-//    private MaterialRow resultHeaderRow;
+    private HTMLElement resultCard;    
+    private HTMLElement resultCardContent;    
+    private Row headerRow;
 //    private MaterialTab resultTab;
-//    private Div resultDiv;
+    private HTMLElement resultDiv;
 //    private MaterialColumn cadastralSurveyingResultColumn;
 //    private MaterialColumn oerebResultColumn;
 //    private String expandedOerebLayerId;
@@ -336,112 +339,22 @@ public class AppEntryPoint implements EntryPoint {
                 sendCoordinateToServer(coordinate.toStringXY(3), null);
                 
                 // TODO: remove focus
-                // -> ask gitter
+                // -> Tried a lot but failed. Ask the authors.
             }
         });
         
         HTMLElement suggestBoxDiv = div().id("suggestBoxDiv").add(suggestBox).element();
         searchCard.appendChild(suggestBoxDiv);
         
-
-//      body().add(Card.create("Card Title", "Description text here...").element());
-
-        // Add the almighty map.
-//        Div mapDiv = new Div();
-//        mapDiv.setId("map");
-
-//        RootPanel.get().add(mapDiv);
-
-        // Search card on in the top left corner.
-//        searchCard = new MaterialCard();
-//        searchCard.setId("searchCard");
-//
-//        searchCardContent = new MaterialCardContent();
-//        searchCardContent.setId("searchCardContent");
-//     
-//        MaterialRow logoRow = new MaterialRow();
-//
-//        com.google.gwt.user.client.ui.Image plrImage = new com.google.gwt.user.client.ui.Image();
-//        plrImage.setUrl(GWT.getHostPageBaseURL() + "logo-grundstuecksinformation.png");
-//        plrImage.setWidth("65%");
-//
-//        MaterialColumn logoColumn = new MaterialColumn();
-//        logoColumn.setId("logoColumn");
-//        logoColumn.setGrid("s12");
-//        logoColumn.add(plrImage);
-//
-//        logoRow.add(logoColumn);
-//        searchCardContent.add(logoRow);
-//        
-//        MaterialRow searchRow = new MaterialRow();
-//        searchRow.setId("searchRow");
-//
-//        SearchOracle searchOracle = new SearchOracle(SEARCH_SERVICE_URL);
-//        autocomplete = new MaterialAutoComplete(searchOracle);
-//        autocomplete.setId("autocomplete");
-//        // TODO fix css for the chip (not necessary anymore to hide it)
-//        autocomplete.setType(AutocompleteType.TEXT);
-//        autocomplete.setPlaceholder(messages.searchPlaceholder());
-//        autocomplete.setAutoSuggestLimit(5);
-//        autocomplete.setLimit(1);
-//        
-//        autocomplete.addSelectionHandler(new SelectionHandler<Suggestion>() {
-//          @Override
-//          public void onSelection(SelectionEvent<Suggestion> event) {             
-//              autocomplete.reset();
-//              autocomplete.clear();
-//              
-//              MaterialLoader.loading(true);
-//              resetGui();
-//
-//              SearchSuggestion searchSuggestion = (SearchSuggestion) event.getSelectedItem();
-//              SearchResult searchResult = searchSuggestion.getSearchResult();
-//              
-//              /*
-//              String[] coords = searchResult.getBbox().substring(4,searchResult.getBbox().length()-1).split(",");
-//              String[] coordLL = coords[0].split(" ");
-//              String[] coordUR = coords[1].split(" ");
-//              Extent extent = new Extent(Double.valueOf(coordLL[0]).doubleValue(), Double.valueOf(coordLL[1]).doubleValue(), 
-//                      Double.valueOf(coordUR[0]).doubleValue(), Double.valueOf(coordUR[1]).doubleValue());
-//              */
-//              
-//              double easting = Double.valueOf(searchResult.getEasting()).doubleValue();
-//              double northing = Double.valueOf(searchResult.getNorthing()).doubleValue();
-//              
-//              Coordinate coordinate = new Coordinate(easting, northing);
-//              sendCoordinateToServer(coordinate.toStringXY(3), null);
-//          }
-//        });
-//        
-//        // TODO: Ohne value change handler wird Text nicht
-//        // gelöscht. ??
-//        autocomplete.addValueChangeHandler(new ValueChangeHandler() {
-//          @Override
-//          public void onValueChange(ValueChangeEvent event) {
-//              autocomplete.reset();
-//          }
-//          
-//        });
-//        
-//        searchRow.add(autocomplete);
-//        searchCardContent.add(searchRow);
-//        searchCard.add(searchCardContent);
-//        
-//        RootPanel.get().add(searchCard);
-//        
-//        // Card that shows the results from the extracts.
-//        resultCard = new MaterialCard();
-//        resultCard.setId("resultCard");
-//
-//        resultCardContent = new MaterialCardContent();
-//        resultCardContent.setId("resultCardContent");
-//        resultCard.add(resultCardContent);
-//        
-//        Div fadeoutBottomDiv = new Div();
-//        fadeoutBottomDiv.setId("fadeoutBottomDiv");
-//        resultCard.add(fadeoutBottomDiv);
-//        
-//        RootPanel.get().add(resultCard);
+        // Card that shows the results from the extracts.
+        resultCard = div().id("resultCard").element();
+        resultCardContent = div().id("resultCardContent").element();
+        resultCard.appendChild(resultCardContent); // TODO: what is this good for?
+        
+        HTMLDivElement fadeoutBottomDiv = div().id("fadeoutBottomDiv").element();
+        resultCard.appendChild(fadeoutBottomDiv);
+        
+        body().add(resultCard);
 
         // It seems that initializing the map and/or adding the click listener
         // must be done after adding the value changed handler of the search.
@@ -449,46 +362,8 @@ public class AppEntryPoint implements EntryPoint {
         map = MapPresets.getBlackAndWhiteMap(mapDiv.id);
         map.addSingleClickListener(new MapSingleClickListener());
 
-        // Info button.
-//        MaterialButton infoButton = new MaterialButton();
-//        infoButton.setId("infoButton");
-//        infoButton.setMargin(8);
-//        infoButton.setType(ButtonType.FLOATING);
-//        infoButton.setSize(ButtonSize.LARGE);
-//        infoButton.setBackgroundColor(Color.RED_LIGHTEN_1);
-//        infoButton.setIconType(IconType.INFO_OUTLINE);
-//        
-//        infoButton.addClickHandler(event -> {
-//           GWT.log(event.toString()); 
-//           
-//           MaterialWindow infoWindow = new MaterialWindow();
-//           infoWindow.setTitle("Grundstücksinformation");
-//           infoWindow.setFontSize("16px");
-//           infoWindow.setTop(15);
-//           infoWindow.setMarginLeft(0);
-//           infoWindow.setMarginRight(0);
-//           infoWindow.setWidth("400px");
-//           infoWindow.setToolbarColor(Color.RED_LIGHTEN_1);
-//           infoWindow.getElement().getStyle().setProperty("margin", "auto");
-//
-//           MaterialIcon maximizeIcon = infoWindow.getIconMaximize();
-//           maximizeIcon.getElement().getStyle().setProperty("visibility", "hidden");
-//
-//           infoWindow.setMaximize(false);
-//
-//           MaterialPanel infoWindowPanel = new MaterialPanel();
-//           infoWindowPanel.setPadding(5);
-//           HTML infoHTML = new HTML("<b>fubar</b>");
-//           infoWindowPanel.add(infoHTML);
-//           
-//           infoWindow.add(infoWindowPanel);
-//           infoWindow.open();
-//        });
-//        
-//        //RootPanel.get().add(infoButton);
-//        
-//        // If there is an egrid query parameter in the url,
-//        // we request the extract without further interaction.
+        // If there is an egrid query parameter in the url,
+        // we request the extract without further interaction.
 //        if (Window.Location.getParameter("egrid") != null) {
 //            String egrid = Window.Location.getParameter("egrid").toString();
 //            MaterialLoader.loading(true);
@@ -504,19 +379,19 @@ public class AppEntryPoint implements EntryPoint {
 
 //        expandedOerebLayerId = null;
 //
-//        if (resultDiv != null) {
-//            resultCardContent.remove(resultDiv);
-//        }
+        if (resultDiv != null) {
+            resultDiv.remove();
+        }
 
         if (realEstatePopup != null) {
             map.removeOverlay(realEstatePopup);
         }
 
-//        if (resultHeaderRow != null) {
-//            resultHeaderRow.removeFromParent();
-//        }
-//
-//        resultCard.getElement().getStyle().setProperty("visibility", "hidden");
+        if (headerRow != null) {
+            headerRow.remove();
+        }
+
+        resultCard.style.visibility = "hidden";
     }
 
     private void sendCoordinateToServer(String XY, MapBrowserEvent event) {
@@ -619,7 +494,7 @@ public class AppEntryPoint implements EntryPoint {
     }
 
     private void sendEgridToServer(Egrid egrid) {
-        console.log(egrid.getEgrid());
+        console.log("sendEgridToServer: " + egrid.getEgrid());
         extractService.extractServer(egrid, new AsyncCallback<ExtractResponse>() {
 
             @Override
@@ -631,107 +506,107 @@ public class AppEntryPoint implements EntryPoint {
 
             @Override
             public void onSuccess(ExtractResponse result) {
-                console.log("sendEgridToServer success");
                 loader.stop();
-//                MaterialLoader.loading(false);
-//                
-//                String newUrl = Window.Location.getProtocol() + "//" + Window.Location.getHost() + Window.Location.getPath() + "?egrid=" + egrid.getEgrid();
+                String newUrl = Window.Location.getProtocol() + "//" + Window.Location.getHost() + Window.Location.getPath() + "?egrid=" + egrid.getEgrid();
 //                updateURLWithoutReloading(newUrl);
-//                
-//                removeOerebWmsLayers();
-//                
-//                RealEstateDPR realEstateDPR = result.getRealEstateDPR();
-//                String number = realEstateDPR.getNumber();
-//                String municipality = realEstateDPR.getMunicipality();
-//                String subunitOfLandRegister = realEstateDPR.getSubunitOfLandRegister();
-//                String canton = realEstateDPR.getCanton();
-//                String egrid = realEstateDPR.getEgrid();
-//                int area = realEstateDPR.getLandRegistryArea();
-//                String realEstateType = realEstateDPR.getRealEstateType();
-//                
-//                ol.layer.Vector vlayer = createRealEstateVectorLayer(realEstateDPR.getLimit());
-//                
-//                if (realEstateDPR.getLimit() != null) {
-//                    Geometry geometry = new Wkt().readGeometry(realEstateDPR.getLimit());
-//                    Extent extent = geometry.getExtent();
-//                    
-//                    View view = map.getView();
-//                    double resolution = view.getResolutionForExtent(extent);
-//                    view.setZoom(Math.floor(view.getZoomForResolution(resolution)) - 1);
-//
-//                    double x = extent.getLowerLeftX() + extent.getWidth() / 2;
-//                    double y = extent.getLowerLeftY() + extent.getHeight() / 2;
-//
-//                    // Das ist jetzt ziemlich heuristisch...
-//                    // 500 = Breite des Suchresultates
-//                    view.setCenter(new Coordinate(x - (resultCard.getWidth() * view.getResolution()) / 2, y));                    
-//                } 
-//
-//                vlayer.setZIndex(1001);
-//                map.addLayer(vlayer);
-//                
-//                // Add the extract results to the card.
-//                resultDiv = new Div();
-//                resultDiv.setId("resultDiv");
-//                resultDiv.setBackgroundColor(Color.GREY_LIGHTEN_5);
-//
-//                resultHeaderRow = new MaterialRow();
-//                resultHeaderRow.setId("resultHeaderRow");
-//
-//                MaterialColumn resultParcelColumn = new MaterialColumn();
-//                resultParcelColumn.setId("resultParcelColumn");
-//                resultParcelColumn.setGrid("s8");
-//
-//                String lblString = messages.resultHeader(number);
-//                Label lbl = new Label(lblString);
-//                resultParcelColumn.add(lbl);
-//                resultHeaderRow.add(resultParcelColumn);
-//
-//                MaterialColumn resultButtonColumn = new MaterialColumn();
-//                resultButtonColumn.setId("resultButtonColumn");
-//                resultButtonColumn.setGrid("s4");
-//
-//                MaterialButton deleteExtractButton = new MaterialButton();
-//                deleteExtractButton.setId("deleteExtractButton");
-//                deleteExtractButton.setIconType(IconType.CLOSE);
-//                deleteExtractButton.setType(ButtonType.FLOATING);
-//                deleteExtractButton.setTooltip(messages.resultCloseTooltip());
-//                deleteExtractButton.setTooltipPosition(Position.TOP);
-//                deleteExtractButton.addClickHandler(event -> {
-//                    resetGui();
-//                });
-//                resultButtonColumn.add(deleteExtractButton);
-//
-//                MaterialButton minMaxExtractButton = new MaterialButton();
-//                minMaxExtractButton.setId("minmaxExtractButton");
-//                minMaxExtractButton.setMarginLeft(10);
-//                minMaxExtractButton.setIconType(IconType.REMOVE);
-//                minMaxExtractButton.setType(ButtonType.FLOATING);
-//                minMaxExtractButton.setTooltip(messages.resultMinimizeTooltip());
-//                minMaxExtractButton.setTooltipPosition(Position.TOP);
-//
-//                minMaxExtractButton.addClickHandler(event -> {
-//                    if (resultCard.getOffsetHeight() > resultHeaderRow.getOffsetHeight()) {
-//                        minMaxExtractButton.setIconType(IconType.ADD);
-//                        minMaxExtractButton.setTooltip(messages.resultMaximizeTooltip());
-//
-//                        resultCard.getElement().getStyle().setProperty("overflowY", "hidden");
-//                        resultCard.setHeight(String.valueOf(resultHeaderRow.getOffsetHeight()) + "px");
-//                        resultDiv.setVisibility(com.google.gwt.dom.client.Style.Visibility.HIDDEN);
-//                    } else {
-//                        minMaxExtractButton.setIconType(IconType.REMOVE);
-//                        minMaxExtractButton.setTooltip(messages.resultMinimizeTooltip());
-//
-//                        resultDiv.setVisibility(com.google.gwt.dom.client.Style.Visibility.VISIBLE);
-//                        resultCard.getElement().getStyle().setProperty("overflowY", "auto");
-//                        resultCard.getElement().getStyle().setProperty("height", RESULT_CARD_HEIGHT);
-//                    }
-//                });
-//                resultButtonColumn.add(minMaxExtractButton);
-//
-//                resultHeaderRow.add(resultButtonColumn);
-//                resultCardContent.add(resultHeaderRow);  
-//                
+                
+                removeOerebWmsLayers();
+                
+                RealEstateDPR realEstateDPR = result.getRealEstateDPR();
+                String number = realEstateDPR.getNumber();
+                String municipality = realEstateDPR.getMunicipality();
+                String subunitOfLandRegister = realEstateDPR.getSubunitOfLandRegister();
+                String canton = realEstateDPR.getCanton();
+                String egrid = realEstateDPR.getEgrid();
+                int area = realEstateDPR.getLandRegistryArea();
+                String realEstateType = realEstateDPR.getRealEstateType();
+                
+                ol.layer.Vector vlayer = createRealEstateVectorLayer(realEstateDPR.getLimit());
+                
+                if (realEstateDPR.getLimit() != null) {
+                    Geometry geometry = new Wkt().readGeometry(realEstateDPR.getLimit());
+                    Extent extent = geometry.getExtent();
+                    
+                    View view = map.getView();
+                    double resolution = view.getResolutionForExtent(extent);
+                    view.setZoom(Math.floor(view.getZoomForResolution(resolution)) - 1);
+
+                    double x = extent.getLowerLeftX() + extent.getWidth() / 2;
+                    double y = extent.getLowerLeftY() + extent.getHeight() / 2;
+
+                    // TODO:
+                    // Das ist jetzt ziemlich heuristisch...
+                    // 500 = Breite des Suchresultates
+                    view.setCenter(new Coordinate(x - (resultCard.offsetWidth * view.getResolution()) / 2, y));                    
+                } 
+
+                vlayer.setZIndex(1001);
+                map.addLayer(vlayer);
+                
+                // Add the extract results to the card.
+                // But not the header itself.
+                resultDiv = div().id("resultDiv").element();
+
+                // Header row with some buttons.
+                HTMLElement closeButton = span().add(Icons.ALL.close_mdi()).element();                    
+
+                
+                Button closeBtn = Button.createPrimary(Icons.ALL.clear())
+                .circle()
+                .setSize(ButtonSize.SMALL)
+                .setButtonType(StyleType.PRIMARY)
+                .setTooltip(messages.resultCloseTooltip())
+                .style()
+                .setMargin(px.of(0)).get();
+                
+                closeBtn.addClickListener(event -> {
+                   resetGui();
+                });
+                                
+                Button expandBtn = Button.createPrimary(Icons.ALL.remove())
+                .circle()
+                .setSize(ButtonSize.SMALL)
+                .setButtonType(StyleType.PRIMARY)
+                .setTooltip(messages.resultMinimizeTooltip())                
+                .style()
+                .setMargin(px.of(0)).get();
+                                
+                expandBtn.addClickListener(event -> {
+                    if (resultCard.offsetHeight > headerRow.element().offsetHeight) {
+                        expandBtn.setIcon(Icons.ALL.add());
+                        expandBtn.setTooltip(messages.resultMaximizeTooltip());
+
+                        resultCard.style.overflow = "hidden";
+                        resultCard.style.height = CSSProperties.HeightUnionType.of(String.valueOf(headerRow.element().offsetHeight) + "px");
+                        resultDiv.style.visibility = "hidden";
+                        
+                    } else {
+                        expandBtn.setIcon(Icons.ALL.remove());
+                        expandBtn.setTooltip(messages.resultMinimizeTooltip());
+
+                        resultDiv.style.visibility = "visible";
+                        resultCard.style.overflow = "auto";
+                        resultCard.style.height = CSSProperties.HeightUnionType.of(RESULT_CARD_HEIGHT);
+                    }
+                });
+                
+                headerRow = Row.create().setId("resultHeaderRow")
+                        .appendChild(
+                            Column.span10().setId("resultParcelSpan").setTextContent(messages.resultHeader(number))
+                        )
+                        .appendChild(
+                            Column.span1().setId("closeExtractButton").style().setTextAlign("right").get().appendChild(closeBtn.element())
+                        )
+                        .appendChild(
+                            Column.span1().setId("expandExtractButton").style().setTextAlign("right").get().appendChild(expandBtn.element())
+                        );
+                       
+                resultCardContent.appendChild(headerRow.element());
+                
+                resultCard.style.height = CSSProperties.HeightUnionType.of(RESULT_CARD_HEIGHT);
+                resultCard.style.overflow = "auto";
+                resultCard.style.visibility = "visible";
+      
 //                MaterialRow tabRow = new MaterialRow();
 //                tabRow.setId("tabRow");
 //
