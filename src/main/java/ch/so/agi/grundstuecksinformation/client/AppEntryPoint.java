@@ -23,12 +23,15 @@ import org.dominokit.domino.ui.loaders.LoaderEffect;
 import org.dominokit.domino.ui.notifications.Notification;
 import org.dominokit.domino.ui.style.ColorScheme;
 import org.dominokit.domino.ui.style.StyleType;
+import org.dominokit.domino.ui.tabs.Tab;
+import org.dominokit.domino.ui.tabs.TabsPanel;
 import org.dominokit.domino.ui.themes.Theme;
 import org.dominokit.domino.ui.utils.HasSelectionHandler;
 import org.dominokit.domino.ui.utils.HasSelectionHandler.SelectionHandler;
 import org.jboss.elemento.HtmlContentBuilder;
 import org.dominokit.domino.ui.forms.SuggestBox.DropDownPositionDown;
 import org.dominokit.domino.ui.forms.SuggestBox.PopupPositionTopDown;
+import org.dominokit.domino.ui.style.Color;
 import static org.dominokit.domino.ui.style.Unit.px;
 
 import com.google.gwt.core.client.EntryPoint;
@@ -39,6 +42,7 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Style.Cursor;
 import com.google.gwt.dom.client.Style.FontStyle;
 import com.google.gwt.dom.client.Style.FontWeight;
+import com.google.gwt.dom.client.Style.TextAlign;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.dom.client.Style.VerticalAlign;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -603,10 +607,33 @@ public class AppEntryPoint implements EntryPoint {
                        
                 resultCardContent.appendChild(headerRow.element());
                 
+      
+                
+                HTMLElement tabsPanel = TabsPanel.create().setId("resultTabs")
+                    .setBackgroundColor(Color.WHITE)
+                    .setColor(Color.BLUE)
+                    .appendChild(
+                            Tab.create(messages.tabTitleCadastralSurveying().toUpperCase())
+                            .style().setWidth("33%").get()
+                            .appendChild(span().textContent("asdfa asdf")))
+                    .appendChild( 
+                            Tab.create(messages.tabTitleLandRegister().toUpperCase())
+                            .style().setWidth("33%").get()
+                            .appendChild(span().textContent("Grundbuch")))
+                    .appendChild( 
+                            Tab.create(messages.tabTitlePlr().toUpperCase())
+                            .style().setWidth("33%").get()                           
+                            .appendChild(span().textContent("ölkj lökj ")))
+                    .element();
+           
+                resultDiv.appendChild(tabsPanel);
+                resultCardContent.appendChild(resultDiv);
                 resultCard.style.height = CSSProperties.HeightUnionType.of(RESULT_CARD_HEIGHT);
                 resultCard.style.overflow = "auto";
                 resultCard.style.visibility = "visible";
-      
+
+                
+                
 //                MaterialRow tabRow = new MaterialRow();
 //                tabRow.setId("tabRow");
 //

@@ -145,6 +145,16 @@ body .black{
     line-height: 58px; 
 }
 
+#resultTabs div.flex-layout {
+    justify-content: center;
+    color:#2196F3;
+}
+
+
+
+
+
+
 
 
 #searchCardContent {
