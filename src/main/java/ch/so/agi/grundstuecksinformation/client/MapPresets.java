@@ -216,6 +216,7 @@ public class MapPresets {
 //        Coordinate centerCoordinate = new Coordinate(2616491, 1240287);
 //        Coordinate centerCoordinate = new Coordinate(2600593,1215639); // Messen
         Coordinate centerCoordinate = new Coordinate(2600470,1215425); // Messen
+//        Coordinate centerCoordinate = new Coordinate(2626873,1241448); // Egerkingen 1293 
 
         view.setCenter(centerCoordinate);
 //        view.setZoom(6);
