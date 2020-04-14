@@ -502,7 +502,6 @@ public class AppEntryPoint implements EntryPoint {
     }
 
     private void sendEgridToServer(Egrid egrid) {
-        console.log("sendEgridToServer: " + egrid.getEgrid());
         extractService.extractServer(egrid, new AsyncCallback<ExtractResponse>() {
 
             @Override
@@ -595,22 +594,6 @@ public class AppEntryPoint implements EntryPoint {
                     }
                 });
                 
-//                Column btnColumn = Column.span3().setId("closeExtractButton").style().setTextAlign("right").get();
-//                btnColumn.appendChild(expandBtn.element());
-//                btnColumn.appendChild(closeBtn.element());
-//                
-//                Column.span2().setId("closeExtractButton").style().setTextAlign("right").get().appendChild(closeBtn.element()).appendChild(expandBtn).element()
-//                
-//                headerRow = Row.create().setId("resultHeaderRow")
-//                        .appendChild(
-//                            Column.span9().setId("resultParcelSpan").setTextContent(messages.resultHeader(number))
-//                        )
-//                        .appendChild(
-//                                btnColumn
-//                        );
-//                        .appendChild(
-//                            Column.span1().setId("expandExtractButton").style().setTextAlign("right").get().appendChild(expandBtn.element())
-//                        );
                 headerRow = div().id("resultHeaderRow").element(); 
                 HTMLElement resultParcelSpan  = span().id("resultParcelSpan").textContent(messages.resultHeader(number)).element();
                 
@@ -620,12 +603,9 @@ public class AppEntryPoint implements EntryPoint {
                 
                 headerRow.appendChild(resultParcelSpan);
                 headerRow.appendChild(resultButtonSpan);
-                
-//                resultCardContent.appendChild(headerRow.element());
                 resultCardContent.appendChild(headerRow);
                 
-                // Create the tabs objects. We need them later to 
-                // add stuff.
+                // Create the tabs objects. We need them later to add stuff.
                 Tab tabCadastre = Tab.create(messages.tabTitleCadastralSurveying().toUpperCase())
                         .style()
                         .setWidth("33%")
@@ -644,18 +624,23 @@ public class AppEntryPoint implements EntryPoint {
                     .setColor(Color.BLUE)
                     .appendChild(tabCadastre)
                     .appendChild(tabLandRegister.appendChild(span().textContent("N/A")))
-                    .appendChild(tabPlr                          
-                            .appendChild(span().textContent("ölkj lökj ")))
+                    .appendChild(tabPlr)
                     .element();
            
-                // Add specific cadastre content.
-                HTMLElement cadastralSurveyingContent = addCadastralSurveyingContent(realEstateDPR);
-//                tabRow.add(cadastralSurveyingResultColumn);
+                // Add cadastre content.
+                HTMLElement cadastralSurveyingContent = addCadastralSurveyingContent(realEstateDPR);                
+                tabCadastre.appendChild(cadastralSurveyingContent);
+                
+                // Add oereb content.
+                HTMLElement oerebContent = addOerebContent(realEstateDPR);
+                tabPlr.appendChild(oerebContent);
 
                 
                 
-                tabCadastre.appendChild(cadastralSurveyingContent);
-                
+                tabPlr.addClickListener(event -> {
+                    console.log("oereb tab clicked");
+                    console.log(tabPlr.isActive());
+                });
                 
                 
                 
@@ -769,7 +754,22 @@ public class AppEntryPoint implements EntryPoint {
         });
     }
 
-    private void addOerebContent(RealEstateDPR realEstateDPR) {
+    private HTMLDivElement addOerebContent(RealEstateDPR realEstateDPR) {
+        HTMLDivElement div = div().element();
+
+        Button pdfBtn = Button.create(Icons.ALL.file_pdf_box_outline_mdi())
+        .setContent("PDF")
+        .setBackground(Color.LIGHT_BLUE)
+        .style()
+        .setPadding("5px 5px 5px 0px;")
+        .setMinWidth(px.of(120)).get();
+        
+        pdfBtn.addClickListener(event -> {
+            Window.open(realEstateDPR.getOerebPdfExtractUrl(), "_blank", null);
+        });
+           
+        div.appendChild(pdfBtn.element());
+
         {
 //            MaterialRow pdfRow = new MaterialRow();
 //            pdfRow.setId("oerebPdfRow");
@@ -1427,6 +1427,8 @@ public class AppEntryPoint implements EntryPoint {
         }
 
 //        oerebResultColumn.add(oerebCollapsibleDiv);
+        
+        return div;
     }
 
     private HTMLElement addCadastralSurveyingContent(RealEstateDPR realEstateDPR) {
@@ -1467,7 +1469,6 @@ public class AppEntryPoint implements EntryPoint {
     public final class MapSingleClickListener implements EventListener<MapBrowserEvent> {
         @Override
         public void onEvent(MapBrowserEvent event) {
-            console.log("map click");
             loader.start();
             Coordinate coordinate = event.getCoordinate();
             sendCoordinateToServer(coordinate.toStringXY(3), event);
