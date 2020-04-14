@@ -171,19 +171,55 @@ body .black{
     width: 40%;
 }
 
-/*
-.cadastralSurveyingInfoKeyColumn {
-    font-weight: bold;
-    vertical-align: middle;
-}
-*/
-
 .fakeColumn {
     padding: 5px 0px 5px 0px;
     border-bottom: 1px #bdbdbd solid;
 }
 
+/* Always same color in accordion.
+Copy/paste.... */
+.panel-title>a, .panel-title>small, .panel-title>.small, .panel-title>small>a, .panel-title>.small>a {
+    color: black !important;
+}
 
+.panel-group .panel+.panel {
+	margin-top: 15px !important;
+}
+
+.panel-body {
+	padding: 0px;
+}
+
+.oerebAccordionPanelHeaderElement h4.panel-title {
+    display: inline-block; 
+    width: 80%;
+}
+
+.oerebAccordionPanelHeaderChip {
+    display: inline-block;
+    width: 20%;
+	text-align: right;
+	color: black;
+}
+
+.oerebAccordionPanelHeaderChip div.chip-value {
+	text-align:center;
+}
+
+.oerebAccordionPanelTheme {
+	border: 1px solid #e0e0e0;
+    margin: 0px 0px 0px 0px;
+} 
+
+.oerebAccordionPanelTheme ul {
+    margin-bottom: 0px !important; 
+} 
+
+.themeList {	
+    border: 1px solid #e0e0e0;
+    margin: 0px -1px 0px -1px;
+	
+}
 
 /*
 #searchCardContent {

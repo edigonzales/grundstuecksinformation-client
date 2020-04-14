@@ -7,9 +7,15 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.dominokit.domino.ui.badges.Badge;
 import org.dominokit.domino.ui.button.Button;
 import org.dominokit.domino.ui.button.ButtonSize;
 import org.dominokit.domino.ui.cards.Card;
+import org.dominokit.domino.ui.chips.Chip;
+import org.dominokit.domino.ui.collapsible.Accordion;
+import org.dominokit.domino.ui.collapsible.AccordionPanel;
+import org.dominokit.domino.ui.collapsible.Collapsible;
+import org.dominokit.domino.ui.collapsible.Collapsible.ShowCompletedHandler;
 import org.dominokit.domino.ui.dropdown.DropDownMenu;
 import org.dominokit.domino.ui.dropdown.DropDownPosition;
 import org.dominokit.domino.ui.forms.SuggestBox;
@@ -18,20 +24,28 @@ import org.dominokit.domino.ui.forms.SuggestItem;
 import org.dominokit.domino.ui.grid.Column;
 import org.dominokit.domino.ui.grid.Column.Span;
 import org.dominokit.domino.ui.grid.Row;
+import org.dominokit.domino.ui.grid.flex.FlexItem;
+import org.dominokit.domino.ui.grid.flex.FlexLayout;
 import org.dominokit.domino.ui.icons.Icons;
+import org.dominokit.domino.ui.lists.ListGroup;
 import org.dominokit.domino.ui.loaders.Loader;
 import org.dominokit.domino.ui.loaders.LoaderEffect;
 import org.dominokit.domino.ui.notifications.Notification;
 import org.dominokit.domino.ui.style.ColorScheme;
+import org.dominokit.domino.ui.style.Elevation;
 import org.dominokit.domino.ui.style.StyleType;
+import org.dominokit.domino.ui.style.Styles;
 import org.dominokit.domino.ui.tabs.Tab;
 import org.dominokit.domino.ui.tabs.TabsPanel;
 import org.dominokit.domino.ui.themes.Theme;
+import org.dominokit.domino.ui.utils.DominoElement;
 import org.dominokit.domino.ui.utils.HasSelectionHandler;
 import org.dominokit.domino.ui.utils.HasSelectionHandler.SelectionHandler;
+import org.dominokit.domino.ui.utils.TextNode;
 import org.gwtproject.safehtml.shared.SafeHtml;
 import org.gwtproject.safehtml.shared.SafeHtmlBuilder;
 import org.gwtproject.safehtml.shared.SafeHtmlUtils;
+import org.jboss.elemento.EventType;
 import org.jboss.elemento.HtmlContentBuilder;
 import org.dominokit.domino.ui.forms.SuggestBox.DropDownPositionDown;
 import org.dominokit.domino.ui.forms.SuggestBox.PopupPositionTopDown;
@@ -99,6 +113,8 @@ import elemental2.dom.DataTransfer;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.DragEvent;
 import elemental2.dom.Element;
+import elemental2.dom.Event;
+import elemental2.dom.EventListener;
 import elemental2.dom.HTMLDivElement;
 import elemental2.dom.HTMLDocument;
 import elemental2.dom.HTMLElement;
@@ -112,7 +128,6 @@ import ol.OLFactory;
 import ol.Overlay;
 import ol.OverlayOptions;
 import ol.View;
-import ol.event.EventListener;
 import ol.format.GeoJson;
 import ol.format.Wkt;
 import ol.geom.Geometry;
@@ -215,6 +230,11 @@ public class AppEntryPoint implements EntryPoint {
 //    private MaterialCollapsible oerebCollapsibleThemesWithoutData;
 //    private MaterialCollapsible oerebCollapsibleGeneralInformation;
 
+    private boolean oerebAccordionPanelConcernedThemeState = false;
+    private boolean oerebAccordionPanelNotConcernedThemeState = false;
+    private boolean oerebAccordionPanelThemesWithoutDataState = false;
+    
+    
     private String identifyRequestTemplate = "https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=%s,%s&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=%s,%s,%s,%s&returnGeometry=true&sr=2056&tolerance=10";
 
     // List with all oereb wms layer that will be added to the ol3 map
@@ -757,48 +777,70 @@ public class AppEntryPoint implements EntryPoint {
     private HTMLDivElement addOerebContent(RealEstateDPR realEstateDPR) {
         HTMLDivElement div = div().element();
 
-        Button pdfBtn = Button.create(Icons.ALL.file_pdf_box_outline_mdi())
-        .setContent("PDF")
-        .setBackground(Color.LIGHT_BLUE)
-        .style()
-        .setPadding("5px 5px 5px 0px;")
-        .setMinWidth(px.of(120)).get();
-        
-        pdfBtn.addClickListener(event -> {
-            Window.open(realEstateDPR.getOerebPdfExtractUrl(), "_blank", null);
-        });
-           
-        div.appendChild(pdfBtn.element());
-
         {
-//            MaterialRow pdfRow = new MaterialRow();
-//            pdfRow.setId("oerebPdfRow");
-//
-//            MaterialColumn pdfButtonColumn = new MaterialColumn();
-//            pdfButtonColumn.setId("plrPdfButtonColumn");
-//            pdfButtonColumn.setGrid("s4");
-//            MaterialButton pdfButton = new MaterialButton();
-//            pdfButton.setType(ButtonType.OUTLINED);
-//            pdfButton.setBackgroundColor(Color.WHITE);
-//            pdfButton.setBorder("1px solid #f44336");
-//            pdfButton.setTextColor(Color.RED_LIGHTEN_1);
-//            pdfButton.setText("PDF");
-//            // pdfButton.setIconType(IconType.INSERT_DRIVE_FILE);
-//            pdfButton.setWidth("100%");
-//            pdfButton.setTooltip(messages.resultPDFTooltip());
-//            pdfButtonColumn.add(pdfButton);
-//
-//            pdfRow.add(pdfButtonColumn);
-//            oerebResultColumn.add(pdfRow);
-//            
-//            pdfButton.addClickHandler(event -> {
-//                Window.open(realEstateDPR.getOerebPdfExtractUrl(), "_blank", null);
-//            });
+            Button pdfBtn = Button.create(Icons.ALL.file_pdf_box_outline_mdi())
+                .setContent("PDF")
+                .setBackground(Color.LIGHT_BLUE)
+                .style()
+                .setPadding("5px 5px 5px 0px;")
+                .setMinWidth(px.of(120)).get();
+                    
+            pdfBtn.addClickListener(event -> {
+                Window.open(realEstateDPR.getOerebPdfExtractUrl(), "_blank", null);
+            });
+                       
+            div.appendChild(pdfBtn.element());
         }
 
+
 //        Div oerebCollapsibleDiv = new Div();
+        
+        
+        // TODO: eventuell brauche ich das gar nicht. 
+        // Drei einzelne Accordions?
+        Accordion oerebAccordion = Accordion.create()
+                .setHeaderBackground(Color.GREY_LIGHTEN_2)
+                .style()
+                .setMarginTop("20px")
+                .get();
+        
+        // Darf man das bereits hier einhängen?
+        div.appendChild(oerebAccordion.element());
+        
 
         {
+//            AccordionPanel oerebAccordionPanelConcernedTheme = AccordionPanel.create(messages.concernedThemes());
+//            oerebAccordion.appendChild(oerebAccordionPanelConcernedTheme);
+
+
+            
+            
+            
+//            oerebAccordionPanelNotConcernedTheme.addClickListener(event -> {
+//                List<AccordionPanel> accordionPanels = oerebAccordion.getPanels();
+//                accordionPanels.forEach(accordionPanel -> {
+//                    console.log(accordionPanel);
+//                        accordionPanel.hide();
+//                });
+//                
+////                event.preventDefault();
+////                event.stopPropagation();
+////                
+////                console.log("oerebAccordionPanelNotConcernedThemeState " + oerebAccordionPanelNotConcernedThemeState);
+////                if (!oerebAccordionPanelNotConcernedThemeState) {
+////                    oerebAccordionPanelNotConcernedTheme.show();                    
+////                    oerebAccordionPanelNotConcernedThemeState = true;
+////                } else {
+////                    oerebAccordionPanelNotConcernedTheme.hide();
+////                    oerebAccordionPanelNotConcernedThemeState = false;
+//////                    oerebAccordionPanelNotConcernedTheme.getCollapsible().toggleDisplay();
+////                }                
+//            });
+            
+
+            
+            
+            
 //            oerebCollapsibleConcernedTheme = new MaterialCollapsible();
 //            oerebCollapsibleConcernedTheme.addStyleName("plrTopLevelCollapsible");
 //            oerebCollapsibleConcernedTheme.setShadow(0);
@@ -1238,6 +1280,46 @@ public class AppEntryPoint implements EntryPoint {
         }
 
         {
+            
+            
+            AccordionPanel oerebAccordionPanelNotConcernedTheme = AccordionPanel.create(messages.notConcernedThemes());
+            oerebAccordionPanelNotConcernedTheme.css("oerebAccordionPanelTheme");
+            DominoElement<HTMLDivElement> oerebAccordionPanelNotConcernedThemeHeaderElement = oerebAccordionPanelNotConcernedTheme.getHeaderElement();
+            oerebAccordionPanelNotConcernedThemeHeaderElement.addCss("oerebAccordionPanelHeaderElement");
+            
+            Chip chip = Chip.create().setValue(String.valueOf(realEstateDPR.getOerebNotConcernedThemes().size()))
+                    .setColor(Color.GREY_LIGHTEN_1)
+                    .style()
+                    .setPadding("0px")
+                    .setMargin("4px")
+                    .setTextAlign("center").get();
+            oerebAccordionPanelNotConcernedThemeHeaderElement.appendChild(span().css("oerebAccordionPanelHeaderChip").add(chip));
+            
+            List<String> notConcernedThemeItems = realEstateDPR.getOerebNotConcernedThemes().stream().map(NotConcernedTheme::getName).collect(Collectors.toList());
+            ListGroup<String> listGroup = ListGroup.<String>create()
+                    .setBordered(false)
+                    .setItemRenderer((listGroup1, listItem) -> {
+                        listItem.appendChild(div()
+                                .css(Styles.padding_10)
+                                .css("themeList")
+                                .add(span().textContent(listItem.getValue())));                        
+                    })
+                    .setItems(notConcernedThemeItems);
+            oerebAccordionPanelNotConcernedTheme.setContent(listGroup);
+            oerebAccordion.appendChild(oerebAccordionPanelNotConcernedTheme);
+
+            oerebAccordionPanelNotConcernedTheme.addEventListener(EventType.click, new EventListener() {
+                @Override
+                public void handleEvent(Event evt) {
+                    if (!oerebAccordionPanelNotConcernedThemeState) {
+                        oerebAccordionPanelNotConcernedTheme.show();
+                        oerebAccordionPanelNotConcernedThemeState = true;
+                    } else {
+                        oerebAccordionPanelNotConcernedTheme.hide();
+                        oerebAccordionPanelNotConcernedThemeState = false;
+                    }            
+                }
+            });            
 //            oerebCollapsibleNotConcernedTheme = new MaterialCollapsible();
 //            oerebCollapsibleNotConcernedTheme.addStyleName("plrTopLevelCollapsible");
 //            oerebCollapsibleNotConcernedTheme.setShadow(0);
@@ -1302,6 +1384,45 @@ public class AppEntryPoint implements EntryPoint {
         }
 
         {
+            AccordionPanel oerebAccordionPanelThemesWithoutData = AccordionPanel.create(messages.themesWithoutData());
+            oerebAccordionPanelThemesWithoutData.css("oerebAccordionPanelTheme");            
+            DominoElement<HTMLDivElement> oerebAccordionPanelNotConcernedThemeHeaderElement = oerebAccordionPanelThemesWithoutData.getHeaderElement();
+            oerebAccordionPanelNotConcernedThemeHeaderElement.addCss("oerebAccordionPanelHeaderElement");
+            
+            Chip chip = Chip.create().setValue(String.valueOf(realEstateDPR.getOerebThemesWithoutData().size()))
+                    .setColor(Color.GREY_LIGHTEN_1)
+                    .style()
+                    .setPadding("0px")
+                    .setMargin("4px")
+                    .setTextAlign("center").get();
+            oerebAccordionPanelNotConcernedThemeHeaderElement.appendChild(span().css("oerebAccordionPanelHeaderChip").add(chip));
+            
+            List<String> notConcernedThemeItems = realEstateDPR.getOerebThemesWithoutData().stream().map(ThemeWithoutData::getName).collect(Collectors.toList());
+            ListGroup<String> listGroup = ListGroup.<String>create()
+                    .setBordered(false)
+                    .setItemRenderer((listGroup1, listItem) -> {
+                        listItem.appendChild(div()
+                                .css(Styles.padding_10)
+                                .css("themeList")
+                                .add(span().textContent(listItem.getValue())));                        
+                    })
+                    .setItems(notConcernedThemeItems);
+            oerebAccordionPanelThemesWithoutData.setContent(listGroup);
+            oerebAccordion.appendChild(oerebAccordionPanelThemesWithoutData);
+
+            oerebAccordionPanelThemesWithoutData.addEventListener(EventType.click, new EventListener() {
+                @Override
+                public void handleEvent(Event evt) {
+                    if (!oerebAccordionPanelThemesWithoutDataState) {
+                        oerebAccordionPanelThemesWithoutData.show();
+                        oerebAccordionPanelThemesWithoutDataState = true;
+                    } else {
+                        oerebAccordionPanelThemesWithoutData.hide();
+                        oerebAccordionPanelThemesWithoutDataState = false;
+                    }            
+                }
+            });            
+            
 //            oerebCollapsibleThemesWithoutData = new MaterialCollapsible();
 //            oerebCollapsibleThemesWithoutData.addStyleName("plrTopLevelCollapsible");
 //            oerebCollapsibleThemesWithoutData.setShadow(0);
@@ -1466,7 +1587,7 @@ public class AppEntryPoint implements EntryPoint {
 //        }
     }
 
-    public final class MapSingleClickListener implements EventListener<MapBrowserEvent> {
+    public final class MapSingleClickListener implements ol.event.EventListener<MapBrowserEvent> {
         @Override
         public void onEvent(MapBrowserEvent event) {
             loader.start();
