@@ -91,4 +91,7 @@ public interface MainMessages extends Messages {
     
     @DefaultMessage("Point(s)")
     String plrNrOfPoints();
+    
+    @DefaultMessage("Ups! Something went wrong.")    
+    String errorMessage();
 }

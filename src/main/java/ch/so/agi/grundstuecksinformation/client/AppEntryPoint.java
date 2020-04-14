@@ -16,6 +16,7 @@ import org.dominokit.domino.ui.collapsible.Accordion;
 import org.dominokit.domino.ui.collapsible.AccordionPanel;
 import org.dominokit.domino.ui.collapsible.Collapsible;
 import org.dominokit.domino.ui.collapsible.Collapsible.ShowCompletedHandler;
+import org.dominokit.domino.ui.dialogs.MessageDialog;
 import org.dominokit.domino.ui.dropdown.DropDownMenu;
 import org.dominokit.domino.ui.dropdown.DropDownPosition;
 import org.dominokit.domino.ui.forms.SuggestBox;
@@ -233,7 +234,7 @@ public class AppEntryPoint implements EntryPoint {
     private boolean oerebAccordionPanelConcernedThemeState = false;
     private boolean oerebAccordionPanelNotConcernedThemeState = false;
     private boolean oerebAccordionPanelThemesWithoutDataState = false;
-    
+    private boolean oerebAccordionPanelGeneralInformationState = false;
     
     private String identifyRequestTemplate = "https://api3.geo.admin.ch/rest/services/all/MapServer/identify?geometry=%s,%s&geometryFormat=geojson&geometryType=esriGeometryPoint&imageDisplay=1780,772,96&lang=de&layers=all:ch.kantone.cadastralwebmap-farbe&limit=10&mapExtent=%s,%s,%s,%s&returnGeometry=true&sr=2056&tolerance=10";
 
@@ -427,7 +428,8 @@ public class AppEntryPoint implements EntryPoint {
             @Override
             public void onFailure(Throwable caught) {
                 loader.stop();
-                Notification.createDanger(caught.getMessage()).setPosition(Notification.TOP_CENTER).show();
+                MessageDialog warningMessage = MessageDialog.createMessage("", messages.errorMessage()).setId("errorModal").error();
+                warningMessage.open();
                 console.log("error: " + caught.getMessage());
             }
 
@@ -437,7 +439,8 @@ public class AppEntryPoint implements EntryPoint {
 
                 if (result.getResponseCode() != 200) {
                     loader.stop();
-                    Notification.createWarning("E-GRID not found.").setPosition(Notification.TOP_CENTER).show();
+                    MessageDialog warningMessage = MessageDialog.createMessage("", messages.errorMessage()).setId("errorModal").warning();
+                    warningMessage.open();
                     return;
                 }
                 
@@ -514,7 +517,13 @@ public class AppEntryPoint implements EntryPoint {
                     sendEgridToServer(egridList.get(0));                    
                 } else {
                     console.log("Get extract from a map click (single click result): " + egridList.get(0).getEgrid());
-                    loader.start();
+                    if (egridList.get(0).getEgrid() == null) {
+                        loader.stop();                    
+                        MessageDialog warningMessage = MessageDialog.createMessage("", messages.errorMessage()).setId("errorModal").warning();
+                        warningMessage.open();
+                        return;
+                    }
+                    loader.start();                    
                     sendEgridToServer(egridList.get(0));
                 }               
             }
@@ -523,11 +532,11 @@ public class AppEntryPoint implements EntryPoint {
 
     private void sendEgridToServer(Egrid egrid) {
         extractService.extractServer(egrid, new AsyncCallback<ExtractResponse>() {
-
             @Override
             public void onFailure(Throwable caught) {
                 loader.stop();
-                Notification.createDanger(caught.getMessage()).setPosition(Notification.TOP_CENTER).show();
+                MessageDialog warningMessage = MessageDialog.createMessage("", messages.errorMessage()).setId("errorModal").warning();
+                warningMessage.open();
                 console.log("error: " + caught.getMessage());
             }
 
@@ -535,6 +544,7 @@ public class AppEntryPoint implements EntryPoint {
             public void onSuccess(ExtractResponse result) {
                 loader.stop();
                 String newUrl = Window.Location.getProtocol() + "//" + Window.Location.getHost() + Window.Location.getPath() + "?egrid=" + egrid.getEgrid();
+                // TODO:
 //                updateURLWithoutReloading(newUrl);
                 
                 removeOerebWmsLayers();
@@ -812,7 +822,44 @@ public class AppEntryPoint implements EntryPoint {
 //            AccordionPanel oerebAccordionPanelConcernedTheme = AccordionPanel.create(messages.concernedThemes());
 //            oerebAccordion.appendChild(oerebAccordionPanelConcernedTheme);
 
+            AccordionPanel oerebAccordionPanelConcernedTheme = AccordionPanel.create(messages.concernedThemes());
+            oerebAccordionPanelConcernedTheme.css("oerebAccordionPanelTheme");
+            DominoElement<HTMLDivElement> oerebAccordionPanelConcernedThemeHeaderElement = oerebAccordionPanelConcernedTheme.getHeaderElement();
+            oerebAccordionPanelConcernedThemeHeaderElement.addCss("oerebAccordionPanelHeaderElement");
+            
+            Chip chip = Chip.create().setValue(String.valueOf(realEstateDPR.getOerebConcernedThemes().size()))
+                    .setColor(Color.GREY_LIGHTEN_1)
+                    .style()
+                    .setPadding("0px")
+                    .setMargin("4px")
+                    .setTextAlign("center").get();
+            oerebAccordionPanelConcernedThemeHeaderElement.appendChild(span().css("oerebAccordionPanelHeaderChip").add(chip));
+            
+            List<String> concernedThemeItems = realEstateDPR.getOerebConcernedThemes().stream().map(ConcernedTheme::getName).collect(Collectors.toList());
+            ListGroup<String> listGroup = ListGroup.<String>create()
+                    .setBordered(false)
+                    .setItemRenderer((listGroup1, listItem) -> {
+                        listItem.appendChild(div()
+                                .css(Styles.padding_10)
+                                .css("themeList")
+                                .add(span().textContent(listItem.getValue())));                        
+                    })
+                    .setItems(concernedThemeItems);
+            oerebAccordionPanelConcernedTheme.setContent(listGroup);
+            oerebAccordion.appendChild(oerebAccordionPanelConcernedTheme);
 
+            oerebAccordionPanelConcernedTheme.addEventListener(EventType.click, new EventListener() {
+                @Override
+                public void handleEvent(Event evt) {
+                    if (!oerebAccordionPanelConcernedThemeState) {
+                        oerebAccordionPanelConcernedTheme.show();
+                        oerebAccordionPanelConcernedThemeState = true;
+                    } else {
+                        oerebAccordionPanelConcernedTheme.hide();
+                        oerebAccordionPanelConcernedThemeState = false;
+                    }            
+                }
+            });  
             
             
             
@@ -1280,8 +1327,6 @@ public class AppEntryPoint implements EntryPoint {
         }
 
         {
-            
-            
             AccordionPanel oerebAccordionPanelNotConcernedTheme = AccordionPanel.create(messages.notConcernedThemes());
             oerebAccordionPanelNotConcernedTheme.css("oerebAccordionPanelTheme");
             DominoElement<HTMLDivElement> oerebAccordionPanelNotConcernedThemeHeaderElement = oerebAccordionPanelNotConcernedTheme.getHeaderElement();
@@ -1386,8 +1431,8 @@ public class AppEntryPoint implements EntryPoint {
         {
             AccordionPanel oerebAccordionPanelThemesWithoutData = AccordionPanel.create(messages.themesWithoutData());
             oerebAccordionPanelThemesWithoutData.css("oerebAccordionPanelTheme");            
-            DominoElement<HTMLDivElement> oerebAccordionPanelNotConcernedThemeHeaderElement = oerebAccordionPanelThemesWithoutData.getHeaderElement();
-            oerebAccordionPanelNotConcernedThemeHeaderElement.addCss("oerebAccordionPanelHeaderElement");
+            DominoElement<HTMLDivElement> oerebAccordionPanelThemesWithoutDataElement = oerebAccordionPanelThemesWithoutData.getHeaderElement();
+            oerebAccordionPanelThemesWithoutDataElement.addCss("oerebAccordionPanelHeaderElement");
             
             Chip chip = Chip.create().setValue(String.valueOf(realEstateDPR.getOerebThemesWithoutData().size()))
                     .setColor(Color.GREY_LIGHTEN_1)
@@ -1395,9 +1440,9 @@ public class AppEntryPoint implements EntryPoint {
                     .setPadding("0px")
                     .setMargin("4px")
                     .setTextAlign("center").get();
-            oerebAccordionPanelNotConcernedThemeHeaderElement.appendChild(span().css("oerebAccordionPanelHeaderChip").add(chip));
+            oerebAccordionPanelThemesWithoutDataElement.appendChild(span().css("oerebAccordionPanelHeaderChip").add(chip));
             
-            List<String> notConcernedThemeItems = realEstateDPR.getOerebThemesWithoutData().stream().map(ThemeWithoutData::getName).collect(Collectors.toList());
+            List<String> themesWithoutDataItems = realEstateDPR.getOerebThemesWithoutData().stream().map(ThemeWithoutData::getName).collect(Collectors.toList());
             ListGroup<String> listGroup = ListGroup.<String>create()
                     .setBordered(false)
                     .setItemRenderer((listGroup1, listItem) -> {
@@ -1406,7 +1451,7 @@ public class AppEntryPoint implements EntryPoint {
                                 .css("themeList")
                                 .add(span().textContent(listItem.getValue())));                        
                     })
-                    .setItems(notConcernedThemeItems);
+                    .setItems(themesWithoutDataItems);
             oerebAccordionPanelThemesWithoutData.setContent(listGroup);
             oerebAccordion.appendChild(oerebAccordionPanelThemesWithoutData);
 
@@ -1487,6 +1532,35 @@ public class AppEntryPoint implements EntryPoint {
 //            oerebCollapsibleDiv.add(oerebCollapsibleThemesWithoutData);
         }
         {
+            AccordionPanel oerebAccordionPanelGeneralInformation = AccordionPanel.create(messages.generalInformation());
+            oerebAccordionPanelGeneralInformation.css("oerebAccordionPanelTheme");            
+            DominoElement<HTMLDivElement> oerebAccordionPanelNotConcernedThemeHeaderElement = oerebAccordionPanelGeneralInformation.getHeaderElement();
+            oerebAccordionPanelNotConcernedThemeHeaderElement.addCss("oerebAccordionPanelHeaderElement");
+            
+            Office office = realEstateDPR.getOerebCadastreAuthority();
+            HTMLDivElement content = div().css(Styles.padding_10, "generalInformation")
+                   .add(div().css(Styles.font_bold).textContent("Katasterverantwortliche Stelle"))
+                   .add(div().textContent(office.getName()))
+                   .add(div().textContent(office.getStreet() + office.getNumber()))
+                   .add(div().textContent(office.getPostalCode() + office.getCity())).element();
+            
+            oerebAccordionPanelGeneralInformation.setContent(content);
+            oerebAccordion.appendChild(oerebAccordionPanelGeneralInformation);
+
+            oerebAccordionPanelGeneralInformation.addEventListener(EventType.click, new EventListener() {
+                @Override
+                public void handleEvent(Event evt) {
+                    if (!oerebAccordionPanelGeneralInformationState) {
+                        oerebAccordionPanelGeneralInformation.show();
+                        oerebAccordionPanelGeneralInformationState = true;
+                    } else {
+                        oerebAccordionPanelGeneralInformation.hide();
+                        oerebAccordionPanelGeneralInformationState = false;
+                    }            
+                }
+            });            
+            
+            
 //            oerebCollapsibleGeneralInformation = new MaterialCollapsible();
 //            oerebCollapsibleGeneralInformation.addStyleName("plrTopLevelCollapsible");
 //            oerebCollapsibleGeneralInformation.setShadow(0);

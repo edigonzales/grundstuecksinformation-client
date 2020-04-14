@@ -176,8 +176,8 @@ body .black{
     border-bottom: 1px #bdbdbd solid;
 }
 
-/* Always same color in accordion.
-Copy/paste.... */
+/* Damit die Farbe des Textes immer gleich ist und nicht aufgrund der Hintergrundfarbe
+ * automagisch ändert */
 .panel-title>a, .panel-title>small, .panel-title>.small, .panel-title>small>a, .panel-title>.small>a {
     color: black !important;
 }
@@ -218,7 +218,14 @@ Copy/paste.... */
 .themeList {	
     border: 1px solid #e0e0e0;
     margin: 0px -1px 0px -1px;
-	
+}
+
+.generalInformation {
+    color: black;	
+}
+
+#errorModal p {
+	text-align: left;
 }
 
 /*
