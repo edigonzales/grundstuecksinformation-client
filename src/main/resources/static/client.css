@@ -106,6 +106,10 @@ body .black{
     max-width: calc(100% - 30px);
 }
 
+#resultCardContent {
+    padding: 0px 15px 15px 15px;
+}
+
 #fadeoutBottomDiv {
     position: sticky;
     bottom: 0px;
@@ -134,7 +138,9 @@ body .black{
     padding: 0px;
     font-size: 18px;
     font-weight: bold;
-    line-height: 58px; 
+    line-height: 58px;
+    display: inline-block; /* needed for setting width of span element */    
+    width: 70%; /* Zeilenumbrüche mit line-height sind schlecht. Eventuell mit den Prozenten spielen, damit es im Bedarfsfall nicht allzu schlecht aussieht. */     
 }
 
 #closeExtractButton {
@@ -145,18 +151,41 @@ body .black{
     line-height: 58px; 
 }
 
+#resultButtonSpan {
+    margin: 0px;
+    padding: 0px;
+    line-height: 58px;
+    text-align: right;
+    display: inline-block;
+    width: 30%;     
+}
+
 #resultTabs div.flex-layout {
     justify-content: center;
     color:#2196F3;
 }
 
+.cadastralSurveyingInfoKey {
+    font-weight: bold;
+    display: inline-block; /* needed for setting width of span element */    
+    width: 40%;
+}
+
+/*
+.cadastralSurveyingInfoKeyColumn {
+    font-weight: bold;
+    vertical-align: middle;
+}
+*/
+
+.fakeColumn {
+    padding: 5px 0px 5px 0px;
+    border-bottom: 1px #bdbdbd solid;
+}
 
 
 
-
-
-
-
+/*
 #searchCardContent {
     padding: 15px;
 }
@@ -179,6 +208,7 @@ body .black{
 #resultCardContent {
     padding: 0px 15px 15px 15px;
 }
+*/
 
 /*
 #fadeoutBottomDiv {
@@ -225,11 +255,6 @@ body .black{
     padding: 15px 0px 0px 0px !important;    
 }
 
-.fakeColumn {
-    padding: 0px !important;
-    border-bottom: 1px #bdbdbd solid;
-}
-
 .mt15 {
     margin: 15px 0px 0px 0px !important;
 
@@ -238,13 +263,6 @@ body .black{
 .cadastralSurveyingInfoHeader {
     padding: 0px !important;
     margin: 15px 0px 0px 0px !important;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.cadastralSurveyingInfoKeyColumn {
-    padding: 0px !important;
-    margin: 0px !important;
     font-size: 14px;
     font-weight: 700;
 }

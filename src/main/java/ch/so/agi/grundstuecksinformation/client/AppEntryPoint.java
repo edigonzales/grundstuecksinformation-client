@@ -16,6 +16,7 @@ import org.dominokit.domino.ui.forms.SuggestBox;
 import org.dominokit.domino.ui.forms.SuggestBoxStore;
 import org.dominokit.domino.ui.forms.SuggestItem;
 import org.dominokit.domino.ui.grid.Column;
+import org.dominokit.domino.ui.grid.Column.Span;
 import org.dominokit.domino.ui.grid.Row;
 import org.dominokit.domino.ui.icons.Icons;
 import org.dominokit.domino.ui.loaders.Loader;
@@ -28,6 +29,9 @@ import org.dominokit.domino.ui.tabs.TabsPanel;
 import org.dominokit.domino.ui.themes.Theme;
 import org.dominokit.domino.ui.utils.HasSelectionHandler;
 import org.dominokit.domino.ui.utils.HasSelectionHandler.SelectionHandler;
+import org.gwtproject.safehtml.shared.SafeHtml;
+import org.gwtproject.safehtml.shared.SafeHtmlBuilder;
+import org.gwtproject.safehtml.shared.SafeHtmlUtils;
 import org.jboss.elemento.HtmlContentBuilder;
 import org.dominokit.domino.ui.forms.SuggestBox.DropDownPositionDown;
 import org.dominokit.domino.ui.forms.SuggestBox.PopupPositionTopDown;
@@ -199,7 +203,7 @@ public class AppEntryPoint implements EntryPoint {
 //    private MaterialAutoComplete autocomplete;    
     private HTMLElement resultCard;    
     private HTMLElement resultCardContent;    
-    private Row headerRow;
+    private HTMLDivElement headerRow;
 //    private MaterialTab resultTab;
     private HTMLElement resultDiv;
 //    private MaterialColumn cadastralSurveyingResultColumn;
@@ -552,16 +556,13 @@ public class AppEntryPoint implements EntryPoint {
                 resultDiv = div().id("resultDiv").element();
 
                 // Header row with some buttons.
-                HTMLElement closeButton = span().add(Icons.ALL.close_mdi()).element();                    
-
-                
                 Button closeBtn = Button.createPrimary(Icons.ALL.clear())
                 .circle()
                 .setSize(ButtonSize.SMALL)
                 .setButtonType(StyleType.PRIMARY)
                 .setTooltip(messages.resultCloseTooltip())
                 .style()
-                .setMargin(px.of(0)).get();
+                .setMargin(px.of(3)).get();
                 
                 closeBtn.addClickListener(event -> {
                    resetGui();
@@ -573,15 +574,15 @@ public class AppEntryPoint implements EntryPoint {
                 .setButtonType(StyleType.PRIMARY)
                 .setTooltip(messages.resultMinimizeTooltip())                
                 .style()
-                .setMargin(px.of(0)).get();
+                .setMargin(px.of(3)).get();
                                 
                 expandBtn.addClickListener(event -> {
-                    if (resultCard.offsetHeight > headerRow.element().offsetHeight) {
+                    if (resultCard.offsetHeight > headerRow.offsetHeight) {
                         expandBtn.setIcon(Icons.ALL.add());
                         expandBtn.setTooltip(messages.resultMaximizeTooltip());
 
                         resultCard.style.overflow = "hidden";
-                        resultCard.style.height = CSSProperties.HeightUnionType.of(String.valueOf(headerRow.element().offsetHeight) + "px");
+                        resultCard.style.height = CSSProperties.HeightUnionType.of(String.valueOf(headerRow.offsetHeight) + "px");
                         resultDiv.style.visibility = "hidden";
                         
                     } else {
@@ -594,38 +595,70 @@ public class AppEntryPoint implements EntryPoint {
                     }
                 });
                 
-                headerRow = Row.create().setId("resultHeaderRow")
-                        .appendChild(
-                            Column.span10().setId("resultParcelSpan").setTextContent(messages.resultHeader(number))
-                        )
-                        .appendChild(
-                            Column.span1().setId("closeExtractButton").style().setTextAlign("right").get().appendChild(closeBtn.element())
-                        )
-                        .appendChild(
-                            Column.span1().setId("expandExtractButton").style().setTextAlign("right").get().appendChild(expandBtn.element())
-                        );
-                       
-                resultCardContent.appendChild(headerRow.element());
+//                Column btnColumn = Column.span3().setId("closeExtractButton").style().setTextAlign("right").get();
+//                btnColumn.appendChild(expandBtn.element());
+//                btnColumn.appendChild(closeBtn.element());
+//                
+//                Column.span2().setId("closeExtractButton").style().setTextAlign("right").get().appendChild(closeBtn.element()).appendChild(expandBtn).element()
+//                
+//                headerRow = Row.create().setId("resultHeaderRow")
+//                        .appendChild(
+//                            Column.span9().setId("resultParcelSpan").setTextContent(messages.resultHeader(number))
+//                        )
+//                        .appendChild(
+//                                btnColumn
+//                        );
+//                        .appendChild(
+//                            Column.span1().setId("expandExtractButton").style().setTextAlign("right").get().appendChild(expandBtn.element())
+//                        );
+                headerRow = div().id("resultHeaderRow").element(); 
+                HTMLElement resultParcelSpan  = span().id("resultParcelSpan").textContent(messages.resultHeader(number)).element();
                 
-      
+                HTMLElement resultButtonSpan = span().id("resultButtonSpan").element();
+                resultButtonSpan.appendChild(expandBtn.element());
+                resultButtonSpan.appendChild(closeBtn.element());
                 
+                headerRow.appendChild(resultParcelSpan);
+                headerRow.appendChild(resultButtonSpan);
+                
+//                resultCardContent.appendChild(headerRow.element());
+                resultCardContent.appendChild(headerRow);
+                
+                // Create the tabs objects. We need them later to 
+                // add stuff.
+                Tab tabCadastre = Tab.create(messages.tabTitleCadastralSurveying().toUpperCase())
+                        .style()
+                        .setWidth("33%")
+                        .get();
+                Tab tabLandRegister = Tab.create(messages.tabTitleLandRegister().toUpperCase())
+                        .style()
+                        .setWidth("33%")
+                        .get();
+                Tab tabPlr = Tab.create(messages.tabTitlePlr().toUpperCase())
+                        .style()
+                        .setWidth("33%")
+                        .get();
+
                 HTMLElement tabsPanel = TabsPanel.create().setId("resultTabs")
                     .setBackgroundColor(Color.WHITE)
                     .setColor(Color.BLUE)
-                    .appendChild(
-                            Tab.create(messages.tabTitleCadastralSurveying().toUpperCase())
-                            .style().setWidth("33%").get()
-                            .appendChild(span().textContent("asdfa asdf")))
-                    .appendChild( 
-                            Tab.create(messages.tabTitleLandRegister().toUpperCase())
-                            .style().setWidth("33%").get()
-                            .appendChild(span().textContent("Grundbuch")))
-                    .appendChild( 
-                            Tab.create(messages.tabTitlePlr().toUpperCase())
-                            .style().setWidth("33%").get()                           
+                    .appendChild(tabCadastre)
+                    .appendChild(tabLandRegister.appendChild(span().textContent("N/A")))
+                    .appendChild(tabPlr                          
                             .appendChild(span().textContent("ölkj lökj ")))
                     .element();
            
+                // Add specific cadastre content.
+                HTMLElement cadastralSurveyingContent = addCadastralSurveyingContent(realEstateDPR);
+//                tabRow.add(cadastralSurveyingResultColumn);
+
+                
+                
+                tabCadastre.appendChild(cadastralSurveyingContent);
+                
+                
+                
+                
                 resultDiv.appendChild(tabsPanel);
                 resultCardContent.appendChild(resultDiv);
                 resultCard.style.height = CSSProperties.HeightUnionType.of(RESULT_CARD_HEIGHT);
@@ -1396,32 +1429,33 @@ public class AppEntryPoint implements EntryPoint {
 //        oerebResultColumn.add(oerebCollapsibleDiv);
     }
 
-    private void addCadastralSurveyingContent(RealEstateDPR realEstateDPR) {
-//        String number = realEstateDPR.getNumber();
-//        String identnd = realEstateDPR.getIdentND();
-//        String egrid = realEstateDPR.getEgrid();
-//        int area = realEstateDPR.getLandRegistryArea();
-//        String type = realEstateDPR.getRealEstateType();
-//        String municipality = realEstateDPR.getMunicipality();
-//        String subunitOfLandRegister = realEstateDPR.getSubunitOfLandRegister();
-//
-//        addCadastralSurveyingContentKeyValue(new Label("E-GRID:"), new Label(egrid));
-//        addCadastralSurveyingContentKeyValue(new Label("NBIdent:"), new Label(identnd == null ? "N/A" : identnd));
-//        addCadastralSurveyingContentKeyValue(new HTML("&nbsp;"), new HTML("&nbsp;"));
-//
-//        addCadastralSurveyingContentKeyValue(new Label("Grundstücksart:"), new Label(type));
-//        addCadastralSurveyingContentKeyValue(new Label("Grundstücksfläche:"),
-//                new HTML(fmtDefault.format(area) + " m<sup>2</sup>"));
-//        addCadastralSurveyingContentKeyValue(new HTML("&nbsp;"), new HTML("&nbsp;"));
-//
-//        addCadastralSurveyingContentKeyValue(new Label("Gemeinde:"), new Label(municipality));
-//                
-//        addCadastralSurveyingContentKeyValue(new Label("Grundbuch:"), new Label(subunitOfLandRegister == null ? "N/A" : subunitOfLandRegister));
-//        addCadastralSurveyingContentKeyValue(new HTML("&nbsp;"), new HTML("&nbsp;"));
-//
-//        //addCadastralSurveyingContentKeyValue(new Label("Flurnamen:"), new Label(String.join(", ", localNames)));
-//        addCadastralSurveyingContentKeyValue(new Label("Flurnamen:"), new Label("N/A"));
-//
+    private HTMLElement addCadastralSurveyingContent(RealEstateDPR realEstateDPR) {
+        String number = realEstateDPR.getNumber();
+        String identnd = realEstateDPR.getIdentND();
+        String egrid = realEstateDPR.getEgrid();
+        int area = realEstateDPR.getLandRegistryArea();
+        String type = realEstateDPR.getRealEstateType();
+        String municipality = realEstateDPR.getMunicipality();
+        String subunitOfLandRegister = realEstateDPR.getSubunitOfLandRegister();
+
+        HTMLDivElement div = div().element();
+        
+        div.appendChild(addCadastralSurveyingContentKeyValue("E-GRID:", egrid));
+        div.appendChild(addCadastralSurveyingContentKeyValue("NBIdent:", new String(identnd == null ? "&ndash;" : identnd)));
+        div.appendChild(addCadastralSurveyingContentKeyValue("&nbsp;", "&nbsp;"));
+        div.appendChild(addCadastralSurveyingContentKeyValue("Grundstücksart:", type));
+        div.appendChild(addCadastralSurveyingContentKeyValue("Grundstücksfläche:", fmtDefault.format(area) + " m<sup>2</sup>"));
+        div.appendChild(addCadastralSurveyingContentKeyValue("&nbsp;", "&nbsp;"));        
+        div.appendChild(addCadastralSurveyingContentKeyValue("Gemeinde:", municipality));
+        div.appendChild(addCadastralSurveyingContentKeyValue("Grundbuch:",  new String(subunitOfLandRegister == null ? "&ndash;" : subunitOfLandRegister)));
+        div.appendChild(addCadastralSurveyingContentKeyValue("&nbsp;", "&nbsp;"));
+        //addCadastralSurveyingContentKeyValue(new Label("Flurnamen:"), new Label(String.join(", ", localNames)));
+        div.appendChild(addCadastralSurveyingContentKeyValue("Flurnamen:", "&ndash;"));
+
+        div.appendChild(div().css("fakeColumn").element());
+        
+        return div;
+
 //        {
 //            MaterialColumn fakeColumn = new MaterialColumn();
 //            fakeColumn.addStyleName("fakeColumn mt15");
@@ -1576,21 +1610,14 @@ public class AppEntryPoint implements EntryPoint {
     }
 
     // Add a key / value to cadastral surveying result column
-    private void addCadastralSurveyingContentKeyValue(Label key, Label value) {
-//        Div row = new Div();
-//        row.addStyleName("cadastralSurveyingInfoRow");
-//
-//        Div keyColumn = new Div();
-//        keyColumn.addStyleName("cadastralSurveyingInfoKeyColumn");
-//        keyColumn.setGrid("s5");
-//        keyColumn.add(key);
-//        cadastralSurveyingResultColumn.add(keyColumn);
-//
-//        Div valueColumn = new Div();
-//        valueColumn.addStyleName("cadastralSurveyingInfoValueColumn");
-//        valueColumn.setGrid("s7");
-//        valueColumn.add(value);
-//        cadastralSurveyingResultColumn.add(valueColumn);
+    private HTMLElement addCadastralSurveyingContentKeyValue(String key, String value) {
+        HTMLDivElement row = div().element();
+        HTMLElement keyElement = span().css("cadastralSurveyingInfoKey").innerHtml(SafeHtmlUtils.fromTrustedString(key)).element();
+        HTMLElement valueElement = span().innerHtml(SafeHtmlUtils.fromTrustedString(value)).element();
+        
+        row.appendChild(keyElement);
+        row.appendChild(valueElement);
+        return row;        
     }
 
     // Create the vector layer for highlighting the
