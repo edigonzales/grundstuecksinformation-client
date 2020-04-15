@@ -326,6 +326,11 @@ public class AppEntryPoint implements EntryPoint {
         }
 
         resultCard.style.visibility = "hidden";
+        
+        oerebAccordionPanelConcernedThemeState = false;
+        oerebAccordionPanelNotConcernedThemeState = false;
+        oerebAccordionPanelThemesWithoutDataState = false;
+        oerebAccordionPanelGeneralInformationState = false;        
     }
 
     private void sendCoordinateToServer(String XY, MapBrowserEvent event) {
