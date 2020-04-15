@@ -732,10 +732,10 @@ public class AppEntryPoint implements EntryPoint {
                     
                     // Damit wird der Click Event nicht in das Tab Panel weitergereicht.
                     // Und somit wird nicht unnötiger Code ausgeführt.
-                    accordionPanel.addEventListener(EventType.click, new EventListener() {
+                    accordionPanel.getHeaderElement().addEventListener(EventType.click, new EventListener() {
                         @Override
                         public void handleEvent(Event evt) {
-                            console.log("vorher: " + accordionPanel.getId() + " " + innerOerebPanelStateMap.get(accordionPanel.getId()));
+                            //console.log("vorher: " + accordionPanel.getId() + " " + innerOerebPanelStateMap.get(accordionPanel.getId()));
                             if (innerOerebPanelStateMap.get(accordionPanel.getId())) {
                                 innerOerebPanelStateMap.put(accordionPanel.getId(), false);
                                 accordionPanel.hide();
@@ -743,7 +743,7 @@ public class AppEntryPoint implements EntryPoint {
                                 innerOerebPanelStateMap.put(accordionPanel.getId(), true);
                                 accordionPanel.show();
                             }
-                            console.log("nachher: " + accordionPanel.getId() + " " + innerOerebPanelStateMap.get(accordionPanel.getId()));
+                            //console.log("nachher: " + accordionPanel.getId() + " " + innerOerebPanelStateMap.get(accordionPanel.getId()));
 
                             evt.stopPropagation();
                         }
