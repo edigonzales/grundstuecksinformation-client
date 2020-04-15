@@ -7,84 +7,43 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.dominokit.domino.ui.badges.Badge;
 import org.dominokit.domino.ui.button.Button;
 import org.dominokit.domino.ui.button.ButtonSize;
-import org.dominokit.domino.ui.cards.Card;
 import org.dominokit.domino.ui.chips.Chip;
 import org.dominokit.domino.ui.collapsible.Accordion;
 import org.dominokit.domino.ui.collapsible.AccordionPanel;
-import org.dominokit.domino.ui.collapsible.Collapsible;
 import org.dominokit.domino.ui.collapsible.Collapsible.HideCompletedHandler;
 import org.dominokit.domino.ui.collapsible.Collapsible.ShowCompletedHandler;
 import org.dominokit.domino.ui.dialogs.MessageDialog;
 import org.dominokit.domino.ui.dropdown.DropDownMenu;
-import org.dominokit.domino.ui.dropdown.DropDownPosition;
 import org.dominokit.domino.ui.forms.SuggestBox;
 import org.dominokit.domino.ui.forms.SuggestBoxStore;
 import org.dominokit.domino.ui.forms.SuggestItem;
-import org.dominokit.domino.ui.grid.Column;
-import org.dominokit.domino.ui.grid.Column.Span;
-import org.dominokit.domino.ui.grid.Row;
-import org.dominokit.domino.ui.grid.flex.FlexItem;
-import org.dominokit.domino.ui.grid.flex.FlexLayout;
 import org.dominokit.domino.ui.icons.Icons;
 import org.dominokit.domino.ui.lists.ListGroup;
 import org.dominokit.domino.ui.loaders.Loader;
 import org.dominokit.domino.ui.loaders.LoaderEffect;
 import org.dominokit.domino.ui.notifications.Notification;
-import org.dominokit.domino.ui.style.ColorScheme;
-import org.dominokit.domino.ui.style.Elevation;
 import org.dominokit.domino.ui.style.StyleType;
 import org.dominokit.domino.ui.style.Styles;
 import org.dominokit.domino.ui.tabs.Tab;
 import org.dominokit.domino.ui.tabs.TabsPanel;
-import org.dominokit.domino.ui.themes.Theme;
 import org.dominokit.domino.ui.utils.DominoElement;
-import org.dominokit.domino.ui.utils.HasSelectionHandler;
 import org.dominokit.domino.ui.utils.HasSelectionHandler.SelectionHandler;
-import org.dominokit.domino.ui.utils.TextNode;
-import org.gwtproject.safehtml.shared.SafeHtml;
-import org.gwtproject.safehtml.shared.SafeHtmlBuilder;
+import org.dominokit.domino.ui.forms.SuggestBox.DropDownPositionDown;
+import org.dominokit.domino.ui.style.Color;
 import org.gwtproject.safehtml.shared.SafeHtmlUtils;
 import org.jboss.elemento.EventType;
 import org.jboss.elemento.HtmlContentBuilder;
-import org.dominokit.domino.ui.forms.SuggestBox.DropDownPositionDown;
-import org.dominokit.domino.ui.forms.SuggestBox.PopupPositionTopDown;
-import org.dominokit.domino.ui.style.Color;
 import static org.dominokit.domino.ui.style.Unit.px;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.dom.client.DivElement;
-import com.google.gwt.dom.client.Style.Cursor;
-import com.google.gwt.dom.client.Style.FontStyle;
-import com.google.gwt.dom.client.Style.FontWeight;
-import com.google.gwt.dom.client.Style.TextAlign;
-import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.dom.client.Style.VerticalAlign;
-import com.google.gwt.event.logical.shared.SelectionEvent;
-//import com.google.gwt.event.logical.shared.SelectionHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-//import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.http.client.RequestBuilder;
 import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SuggestOracle;
-import com.google.gwt.user.client.ui.SuggestOracle.Suggestion;
 
-import ch.qos.logback.classic.Logger;
 import ch.so.agi.grundstuecksinformation.shared.EgridResponse;
 import ch.so.agi.grundstuecksinformation.shared.EgridService;
 import ch.so.agi.grundstuecksinformation.shared.EgridServiceAsync;
@@ -225,13 +184,14 @@ public class AppEntryPoint implements EntryPoint {
     private HTMLElement resultDiv;
 //    private MaterialColumn cadastralSurveyingResultColumn;
 //    private MaterialColumn oerebResultColumn;
-//    private String expandedOerebLayerId;
+    private String expandedOerebLayerId;
 //    private MaterialCollapsible oerebCollapsibleConcernedTheme;
 //    private MaterialCollapsible oerebInnerCollapsibleConcernedTheme;
 //    private MaterialCollapsible oerebCollapsibleNotConcernedTheme;
 //    private MaterialCollapsible oerebCollapsibleThemesWithoutData;
 //    private MaterialCollapsible oerebCollapsibleGeneralInformation;
 
+    private Accordion oerebInnerAccordion;
     private boolean oerebAccordionPanelConcernedThemeState = false;
     private boolean oerebAccordionPanelNotConcernedThemeState = false;
     private boolean oerebAccordionPanelThemesWithoutDataState = false;
@@ -261,21 +221,12 @@ public class AppEntryPoint implements EntryPoint {
     
     @SuppressWarnings("unchecked")
     private void init() {
-        GWT.log("Rock the Casbah!");
-        
         loader = Loader.create((HTMLElement) DomGlobal.document.body, LoaderEffect.ROTATION).setLoadingText(null);
-
-//      Theme theme = new Theme(ColorScheme.BLACK);
-//      theme.apply();
         
         mapDiv = div().id("map").element();
         body().add(mapDiv);
 
         HTMLElement searchCard = div().id("searchCard").element();
-//      searchCard.style.position = "absolute";
-//      searchCard.style.top = "200px";
-//      searchCard.style.left = "200px";
-//      searchCard.appendChild(span().add("Hallo Welt.").element());
         body().add(searchCard);
 
         HTMLElement logoDiv = div().id("logoDiv")
@@ -394,21 +345,21 @@ public class AppEntryPoint implements EntryPoint {
 
         // If there is an egrid query parameter in the url,
         // we request the extract without further interaction.
-//        if (Window.Location.getParameter("egrid") != null) {
-//            String egrid = Window.Location.getParameter("egrid").toString();
-//            MaterialLoader.loading(true);
-//            resetGui();
-//            Egrid egridObj = new Egrid();
-//            egridObj.setEgrid(egrid);
-//            sendEgridToServer(egridObj);
-//        }
+        if (Window.Location.getParameter("egrid") != null) {
+            String egrid = Window.Location.getParameter("egrid").toString();
+            loader.start();
+            resetGui();
+            Egrid egridObj = new Egrid();
+            egridObj.setEgrid(egrid);
+            sendEgridToServer(egridObj);
+        }
     }
 
     private void resetGui() {
         removeOerebWmsLayers();
 
-//        expandedOerebLayerId = null;
-//
+        expandedOerebLayerId = null;
+
         if (resultDiv != null) {
             resultDiv.remove();
         }
@@ -543,8 +494,7 @@ public class AppEntryPoint implements EntryPoint {
             public void onSuccess(ExtractResponse result) {
                 loader.stop();
                 String newUrl = Window.Location.getProtocol() + "//" + Window.Location.getHost() + Window.Location.getPath() + "?egrid=" + egrid.getEgrid();
-                // TODO:
-//                updateURLWithoutReloading(newUrl);
+                updateURLWithoutReloading(newUrl);
                 
                 removeOerebWmsLayers();
                 
@@ -664,14 +614,41 @@ public class AppEntryPoint implements EntryPoint {
                 HTMLElement oerebContent = addOerebContent(realEstateDPR);
                 tabPlr.appendChild(oerebContent);
 
+//                tabPlr.addClickListener(event -> {
+//                    console.log("oereb tab clicked");
+//                    console.log(tabPlr.isActive());
+//                    List<AccordionPanel> panels = oerebInnerAccordion.getPanels();
+//                });
                 
-                
-                tabPlr.addClickListener(event -> {
-                    console.log("oereb tab clicked");
-                    console.log(tabPlr.isActive());
+                tabsPanel.addEventListener("click", new EventListener() {
+                    @Override
+                    public void handleEvent(Event evt) { 
+                        if (!tabPlr.isActive()) {
+                            for (String layerId : oerebWmsLayers) {
+                                Image wmsLayer = (Image) getMapLayerById(layerId);
+                                wmsLayer.setVisible(false); 
+                                
+                            }
+                        } else {
+//                            if (expandedOerebLayerId != null) {
+//                                Image wmsLayer = (Image) getMapLayerById(expandedOerebLayerId);
+//                                wmsLayer.setVisible(true);     
+//                            }
+                            List<AccordionPanel> panels = oerebInnerAccordion.getPanels();
+                            for (AccordionPanel panel : panels) {
+                                console.log(panel.getId() + panel.isHidden());
+                                if (!panel.isHidden()) {
+                                    Image wmsLayer = (Image) getMapLayerById(expandedOerebLayerId);
+                                    wmsLayer.setVisible(true);
+                                }
+                            }
+                            
+//                            oerebInnerAccordion.getPanels().get(0).isHidden()
+          
+                        }
+                    }
+                    
                 });
-                
-                
                 
                 resultDiv.appendChild(tabsPanel);
                 resultCardContent.appendChild(resultDiv);
@@ -817,14 +794,10 @@ public class AppEntryPoint implements EntryPoint {
                 .setMarginTop("20px")
                 .get();
         
-        // Darf man das bereits hier einhängen?
         div.appendChild(oerebAccordion.element());
         
 
         {
-//            AccordionPanel oerebAccordionPanelConcernedTheme = AccordionPanel.create(messages.concernedThemes());
-//            oerebAccordion.appendChild(oerebAccordionPanelConcernedTheme);
-
             AccordionPanel oerebAccordionPanelConcernedTheme = AccordionPanel.create(messages.concernedThemes());
             oerebAccordionPanelConcernedTheme.elevate(0);
             oerebAccordionPanelConcernedTheme.css("oerebAccordionPanelTheme");
@@ -841,9 +814,11 @@ public class AppEntryPoint implements EntryPoint {
             
             oerebAccordion.appendChild(oerebAccordionPanelConcernedTheme);
 
-            //TODO
+            // TODO / FIXME
             // Event listener nur auf dem Header Element. Ansonsten schliesst es sich 
             // auch wenn ich auf einen Sub-Panel klicke.
+            // Funktioniert gefühlt aber immer noch nicht so toll. Manchmal braucht es zwei 
+            // Klicks, damit sich was tut.
             oerebAccordionPanelConcernedTheme.getHeaderElement().addEventListener(EventType.click, new EventListener() {
                 @Override
                 public void handleEvent(Event evt) {
@@ -858,7 +833,7 @@ public class AppEntryPoint implements EntryPoint {
                 }
             });  
             
-            Accordion accordion = Accordion.create()
+            oerebInnerAccordion = Accordion.create()
                     .setId("oerebAccordionConcernedTheme")
                     .setHeaderBackground(Color.WHITE);
             
@@ -898,6 +873,7 @@ public class AppEntryPoint implements EntryPoint {
                         @Override
                         public void onShown() {
                             console.log("inner accordion panel clicked (onShown)");
+                            expandedOerebLayerId = layerId;
                             Image wmsLayer = (Image) getMapLayerById(layerId);
                             wmsLayer.setVisible(true); 
                         } 
@@ -907,19 +883,29 @@ public class AppEntryPoint implements EntryPoint {
                         @Override
                         public void onHidden() {
                             console.log("inner accordion panel clicked (onHidden)");
+                            expandedOerebLayerId = null;
                             Image wmsLayer = (Image) getMapLayerById(layerId);
                             wmsLayer.setVisible(false); 
                         } 
                     });
                     
+                    // Damit wird der Click Event nicht in das Tab Panel weitergereicht.
+                    // Und somit wird nicht unnötiger Code ausgeführt.
+                    accordionPanel.addEventListener(EventType.click, new EventListener() {
+                        @Override
+                        public void handleEvent(Event evt) {
+                            evt.stopPropagation();
+                        }
+ 
+                    });
                     
-                    accordion.appendChild(accordionPanel);
+                    oerebInnerAccordion.appendChild(accordionPanel);
                 }
                 
                 
                 // Handle visibility of oereb wms layers.
                 // Show them only if oereb tab is selected.
-                accordion.addEventListener(EventType.click, new EventListener() {
+                oerebInnerAccordion.addEventListener(EventType.click, new EventListener() {
                     @Override
                     public void handleEvent(Event evt) {
                         
@@ -967,7 +953,7 @@ public class AppEntryPoint implements EntryPoint {
 //              });
                 
                 
-                oerebAccordionPanelConcernedTheme.appendChild(accordion);
+                oerebAccordionPanelConcernedTheme.appendChild(oerebInnerAccordion);
             }
             
             
@@ -1652,7 +1638,7 @@ public class AppEntryPoint implements EntryPoint {
             
             Office office = realEstateDPR.getOerebCadastreAuthority();
             HTMLDivElement content = div().css(Styles.padding_10, "generalInformation")
-                   .add(div().css(Styles.font_bold).textContent("Katasterverantwortliche Stelle"))
+                   .add(div().css("fontSemiBold").textContent("Katasterverantwortliche Stelle"))
                    .add(div().textContent(office.getName()))
                    .add(div().textContent(office.getStreet() + office.getNumber()))
                    .add(div().textContent(office.getPostalCode() + office.getCity())).element();
@@ -2017,16 +2003,17 @@ public class AppEntryPoint implements EntryPoint {
         $wnd.history.pushState(newUrl, "", newUrl);
     }-*/;
 
+    // TODO: braucht es das noch?
     // String.format() is not available in GWT hence we need to
     // create our own implementation.
-    private static String format(final String format, final String... args) {
-        String[] split = format.split("%s");
-        final StringBuffer msg = new StringBuffer();
-        for (int pos = 0; pos < split.length - 1; pos += 1) {
-            msg.append(split[pos]);
-            msg.append(args[pos]);
-        }
-        msg.append(split[split.length - 1]);
-        return msg.toString();
-    }
+//    private static String format(final String format, final String... args) {
+//        String[] split = format.split("%s");
+//        final StringBuffer msg = new StringBuffer();
+//        for (int pos = 0; pos < split.length - 1; pos += 1) {
+//            msg.append(split[pos]);
+//            msg.append(args[pos]);
+//        }
+//        msg.append(split[split.length - 1]);
+//        return msg.toString();
+//    }
 }

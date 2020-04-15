@@ -171,6 +171,10 @@ body .black{
     width: 40%;
 }
 
+.fontSemiBold {
+	font-weight: 600;
+}
+
 .fakeColumn {
     padding: 5px 0px 5px 0px;
     border-bottom: 1px #bdbdbd solid;
