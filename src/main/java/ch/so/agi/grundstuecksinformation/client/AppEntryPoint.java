@@ -1,7 +1,6 @@
 package ch.so.agi.grundstuecksinformation.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
@@ -19,19 +18,28 @@ import org.dominokit.domino.ui.dropdown.DropDownMenu;
 import org.dominokit.domino.ui.forms.SuggestBox;
 import org.dominokit.domino.ui.forms.SuggestBoxStore;
 import org.dominokit.domino.ui.forms.SuggestItem;
+import org.dominokit.domino.ui.grid.Column;
+import org.dominokit.domino.ui.grid.Row;
 import org.dominokit.domino.ui.icons.Icons;
 import org.dominokit.domino.ui.lists.ListGroup;
 import org.dominokit.domino.ui.loaders.Loader;
 import org.dominokit.domino.ui.loaders.LoaderEffect;
 import org.dominokit.domino.ui.notifications.Notification;
+import org.dominokit.domino.ui.sliders.Slider;
 import org.dominokit.domino.ui.style.StyleType;
 import org.dominokit.domino.ui.style.Styles;
 import org.dominokit.domino.ui.tabs.Tab;
 import org.dominokit.domino.ui.tabs.TabsPanel;
+import org.dominokit.domino.ui.themes.Theme;
 import org.dominokit.domino.ui.utils.DominoElement;
+import org.dominokit.domino.ui.utils.TextNode;
 import org.dominokit.domino.ui.utils.HasSelectionHandler.SelectionHandler;
 import org.dominokit.domino.ui.forms.SuggestBox.DropDownPositionDown;
 import org.dominokit.domino.ui.style.Color;
+import org.dominokit.domino.ui.style.ColorScheme;
+import org.dominokit.domino.ui.grid.flex.FlexItem;
+import org.dominokit.domino.ui.grid.flex.FlexLayout;
+
 import org.gwtproject.safehtml.shared.SafeHtmlUtils;
 import org.jboss.elemento.EventType;
 import org.jboss.elemento.HtmlContentBuilder;
@@ -64,20 +72,13 @@ import ch.so.agi.grundstuecksinformation.shared.models.Restriction;
 import ch.so.agi.grundstuecksinformation.shared.models.ThemeWithoutData;
 import elemental2.core.Global;
 import elemental2.core.JsArray;
-import elemental2.core.JsMap;
-import elemental2.core.JsObject;
-import elemental2.core.JsSet;
 import elemental2.core.JsString;
 import elemental2.core.JsNumber;
 import elemental2.dom.CSSProperties;
-import elemental2.dom.DataTransfer;
 import elemental2.dom.DomGlobal;
-import elemental2.dom.DragEvent;
-import elemental2.dom.Element;
 import elemental2.dom.Event;
 import elemental2.dom.EventListener;
 import elemental2.dom.HTMLDivElement;
-import elemental2.dom.HTMLDocument;
 import elemental2.dom.HTMLElement;
 import ol.Coordinate;
 import ol.Extent;
@@ -104,49 +105,12 @@ import ol.source.VectorOptions;
 import ol.style.Stroke;
 import ol.style.Style;
 
-import static elemental2.dom.DomGlobal.fetch;
 import static elemental2.dom.DomGlobal.console;
-import elemental2.dom.Response;
 import jsinterop.base.Js;
 import jsinterop.base.JsPropertyMap;
 
 import static org.jboss.elemento.Elements.*;
 import static org.jboss.elemento.EventType.*;
-
-//import gwt.material.design.addins.client.autocomplete.MaterialAutoComplete;
-//import gwt.material.design.addins.client.autocomplete.constants.AutocompleteType;
-//import gwt.material.design.addins.client.window.MaterialWindow;
-//import gwt.material.design.client.constants.ButtonSize;
-//import gwt.material.design.client.constants.ButtonType;
-//import gwt.material.design.client.constants.Color;
-//import gwt.material.design.client.constants.Display;
-//import gwt.material.design.client.constants.IconType;
-//import gwt.material.design.client.constants.Position;
-//import gwt.material.design.client.constants.TextAlign;
-//import gwt.material.design.client.constants.WavesType;
-//import gwt.material.design.client.ui.MaterialButton;
-//import gwt.material.design.client.ui.MaterialCard;
-//import gwt.material.design.client.ui.MaterialCardContent;
-//import gwt.material.design.client.ui.MaterialChip;
-//import gwt.material.design.client.ui.MaterialCollapsible;
-//import gwt.material.design.client.ui.MaterialCollapsibleBody;
-//import gwt.material.design.client.ui.MaterialCollapsibleHeader;
-//import gwt.material.design.client.ui.MaterialCollapsibleItem;
-//import gwt.material.design.client.ui.MaterialCollection;
-//import gwt.material.design.client.ui.MaterialCollectionItem;
-//import gwt.material.design.client.ui.MaterialColumn;
-//import gwt.material.design.client.ui.MaterialIcon;
-//import gwt.material.design.client.ui.MaterialLabel;
-//import gwt.material.design.client.ui.MaterialLink;
-//import gwt.material.design.client.ui.MaterialLoader;
-//import gwt.material.design.client.ui.MaterialPanel;
-//import gwt.material.design.client.ui.MaterialRange;
-//import gwt.material.design.client.ui.MaterialRow;
-//import gwt.material.design.client.ui.MaterialTab;
-//import gwt.material.design.client.ui.MaterialTabItem;
-//import gwt.material.design.client.ui.MaterialToast;
-//import gwt.material.design.client.ui.html.Div;
-//import gwt.material.design.client.ui.html.Span;
 
 public class AppEntryPoint implements EntryPoint {
     private MainMessages messages = GWT.create(MainMessages.class);
@@ -175,21 +139,10 @@ public class AppEntryPoint implements EntryPoint {
     private Map map;
     private HTMLElement mapDiv;
     private Overlay realEstatePopup;
-//    private MaterialCard searchCard;  
-//    private MaterialAutoComplete autocomplete;    
     private HTMLElement resultCard;    
     private HTMLElement resultCardContent;    
     private HTMLDivElement headerRow;
-//    private MaterialTab resultTab;
     private HTMLElement resultDiv;
-//    private MaterialColumn cadastralSurveyingResultColumn;
-//    private MaterialColumn oerebResultColumn;
-    private String expandedOerebLayerId;
-//    private MaterialCollapsible oerebCollapsibleConcernedTheme;
-//    private MaterialCollapsible oerebInnerCollapsibleConcernedTheme;
-//    private MaterialCollapsible oerebCollapsibleNotConcernedTheme;
-//    private MaterialCollapsible oerebCollapsibleThemesWithoutData;
-//    private MaterialCollapsible oerebCollapsibleGeneralInformation;
 
     private Accordion oerebInnerAccordion;
     private boolean oerebAccordionPanelConcernedThemeState = false;
@@ -221,6 +174,9 @@ public class AppEntryPoint implements EntryPoint {
     
     @SuppressWarnings("unchecked")
     private void init() {
+        Theme theme = new Theme(ColorScheme.BLUE);
+        theme.apply();
+
         loader = Loader.create((HTMLElement) DomGlobal.document.body, LoaderEffect.ROTATION).setLoadingText(null);
         
         mapDiv = div().id("map").element();
@@ -305,7 +261,6 @@ public class AppEntryPoint implements EntryPoint {
 
                 SuggestItem<SearchResult> item = (SuggestItem<SearchResult>) value;
                 SearchResult result = (SearchResult) item.getValue();
-                console.log(result.getLabel());
                 
                 String[] coords = result.getBbox().substring(4,result.getBbox().length()-1).split(",");
                 String[] coordLL = coords[0].split(" ");
@@ -357,8 +312,6 @@ public class AppEntryPoint implements EntryPoint {
 
     private void resetGui() {
         removeOerebWmsLayers();
-
-        expandedOerebLayerId = null;
 
         if (resultDiv != null) {
             resultDiv.remove();
@@ -614,12 +567,7 @@ public class AppEntryPoint implements EntryPoint {
                 HTMLElement oerebContent = addOerebContent(realEstateDPR);
                 tabPlr.appendChild(oerebContent);
 
-//                tabPlr.addClickListener(event -> {
-//                    console.log("oereb tab clicked");
-//                    console.log(tabPlr.isActive());
-//                    List<AccordionPanel> panels = oerebInnerAccordion.getPanels();
-//                });
-                
+                // Hide wms layers only if ÖREB tab is active.
                 tabsPanel.addEventListener("click", new EventListener() {
                     @Override
                     public void handleEvent(Event evt) { 
@@ -627,27 +575,17 @@ public class AppEntryPoint implements EntryPoint {
                             for (String layerId : oerebWmsLayers) {
                                 Image wmsLayer = (Image) getMapLayerById(layerId);
                                 wmsLayer.setVisible(false); 
-                                
                             }
                         } else {
-//                            if (expandedOerebLayerId != null) {
-//                                Image wmsLayer = (Image) getMapLayerById(expandedOerebLayerId);
-//                                wmsLayer.setVisible(true);     
-//                            }
                             List<AccordionPanel> panels = oerebInnerAccordion.getPanels();
                             for (AccordionPanel panel : panels) {
-                                console.log(panel.getId() + panel.isHidden());
                                 if (!panel.isHidden()) {
-                                    Image wmsLayer = (Image) getMapLayerById(expandedOerebLayerId);
+                                    Image wmsLayer = (Image) getMapLayerById(panel.getId());
                                     wmsLayer.setVisible(true);
                                 }
-                            }
-                            
-//                            oerebInnerAccordion.getPanels().get(0).isHidden()
-          
+                            }          
                         }
                     }
-                    
                 });
                 
                 resultDiv.appendChild(tabsPanel);
@@ -655,107 +593,6 @@ public class AppEntryPoint implements EntryPoint {
                 resultCard.style.height = CSSProperties.HeightUnionType.of(RESULT_CARD_HEIGHT);
                 resultCard.style.overflow = "auto";
                 resultCard.style.visibility = "visible";
-
-                
-                
-//                MaterialRow tabRow = new MaterialRow();
-//                tabRow.setId("tabRow");
-//
-//                MaterialColumn tabHeaderColumn = new MaterialColumn();
-//                tabHeaderColumn.setId("tabHeaderColumn");
-//                tabHeaderColumn.setGrid("s12");
-//
-//                resultTab = new MaterialTab();
-//                resultTab.setId("resultTab");
-//                resultTab.setShadow(1);
-//                // #e8c432
-//                // #aed634
-//                // #52b1a7
-//                // #75a5d4
-//                resultTab.setBackgroundColor(Color.RED_LIGHTEN_1);
-//                resultTab.setIndicatorColor(Color.WHITE);
-//
-//                // Cadastral Surveying Tab
-//                MaterialTabItem cadastralSurveyingHeaderTabItem = new MaterialTabItem();
-//                cadastralSurveyingHeaderTabItem.setWaves(WavesType.LIGHT);
-//                cadastralSurveyingHeaderTabItem.setGrid("s4");
-//
-//                MaterialLink cadastralSurveyingHeaderTabLink = new MaterialLink();
-//                cadastralSurveyingHeaderTabLink.setText(messages.tabTitleCadastralSurveying());
-//                cadastralSurveyingHeaderTabLink.setHref("#cadastralSurveyingResultColumn");
-//                cadastralSurveyingHeaderTabLink.setTextColor(Color.WHITE);
-//                cadastralSurveyingHeaderTabItem.add(cadastralSurveyingHeaderTabLink);
-//                resultTab.add(cadastralSurveyingHeaderTabItem);
-//
-//                // Land Register Tab
-//                MaterialTabItem grundbuchHeaderTabItem = new MaterialTabItem();
-//                grundbuchHeaderTabItem.setWaves(WavesType.LIGHT);
-//                grundbuchHeaderTabItem.setGrid("s4");
-//                grundbuchHeaderTabItem.setEnabled(false);
-//
-//                MaterialLink grundbuchHeaderTabLink = new MaterialLink();
-//                grundbuchHeaderTabLink.setText(messages.tabTitleLandRegister());
-//                grundbuchHeaderTabLink.setHref("#tab2");
-//                grundbuchHeaderTabLink.setTextColor(Color.WHITE);
-//                grundbuchHeaderTabItem.add(grundbuchHeaderTabLink);
-//                resultTab.add(grundbuchHeaderTabItem);
-//
-//                // OEREB Tab
-//                MaterialTabItem oerebHeaderTabItem = new MaterialTabItem();
-//                oerebHeaderTabItem.setWaves(WavesType.LIGHT);
-//                oerebHeaderTabItem.setGrid("s4");
-//
-//                MaterialLink oerebHeaderTabLink = new MaterialLink();
-//                oerebHeaderTabLink.setText(messages.tabTitlePlr());
-//                oerebHeaderTabLink.setHref("#oerebResultColumn");
-//                oerebHeaderTabLink.setTextColor(Color.WHITE);
-//                oerebHeaderTabItem.add(oerebHeaderTabLink);
-//                resultTab.add(oerebHeaderTabItem);
-//
-//                tabHeaderColumn.add(resultTab);
-//                tabRow.add(tabHeaderColumn);
-//
-//                // Add specific cadastre content.
-//                cadastralSurveyingResultColumn = new MaterialColumn();
-//                cadastralSurveyingResultColumn.setId("cadastralSurveyingResultColumn");
-//                cadastralSurveyingResultColumn.addStyleName("resultColumn");
-//                cadastralSurveyingResultColumn.setGrid("s12");
-//                addCadastralSurveyingContent(realEstateDPR);
-//                tabRow.add(cadastralSurveyingResultColumn);
-//
-//                // Add specific oereb content.
-//                oerebResultColumn = new MaterialColumn();
-//                oerebResultColumn.setId("oerebResultColumn");
-//                oerebResultColumn.addStyleName("resultColumn");
-//                oerebResultColumn.setGrid("s12");
-//                addOerebContent(realEstateDPR);
-//                tabRow.add(oerebResultColumn);
-//
-//                resultTab.addSelectionHandler(event -> {
-//                    // 2 == OEREB
-//                    if (event.getSelectedItem() == 2) {                        
-//                        for (String layerId : oerebWmsLayers) {
-//                            Image wmsLayer = (Image) getMapLayerById(layerId);
-//                            if (layerId.equalsIgnoreCase(expandedOerebLayerId)) {
-//                                wmsLayer.setVisible(true);
-//                            } else {
-//                                wmsLayer.setVisible(false);
-//                            }
-//                        }
-//                    } else {
-//                        for (String layerId : oerebWmsLayers) {
-//                            Image wmsLayer = (Image) getMapLayerById(layerId);
-//                            wmsLayer.setVisible(false);
-//                        }
-//                    }
-//                });
-//
-//                resultDiv.add(tabRow);
-//
-//                resultCardContent.add(resultDiv);
-//                resultCard.getElement().getStyle().setProperty("height", RESULT_CARD_HEIGHT);
-//                resultCard.getElement().getStyle().setProperty("overflowY", "auto");
-//                resultCard.getElement().getStyle().setProperty("visibility", "visible");
             }
         });
     }
@@ -768,8 +605,10 @@ public class AppEntryPoint implements EntryPoint {
                 .setContent("PDF")
 //                .setBackground(Color.LIGHT_BLUE)
                 .setBackground(Color.WHITE)
+                .elevate(0)
                 .style()
                 .setColor("#2196F3")
+                .setBorder("1px #2196F3 solid")
                 .setPadding("5px 5px 5px 0px;")
                 .setMinWidth(px.of(120)).get();
             
@@ -782,14 +621,10 @@ public class AppEntryPoint implements EntryPoint {
             div.appendChild(pdfBtn.element());
         }
 
-
-//        Div oerebCollapsibleDiv = new Div();
-        
-        
         // TODO: eventuell brauche ich das gar nicht. 
         // Drei einzelne Accordions?
         Accordion oerebAccordion = Accordion.create()
-                .setHeaderBackground(Color.GREY_LIGHTEN_4)
+                .setHeaderBackground(Color.GREY_LIGHTEN_3)
                 .style()
                 .setMarginTop("20px")
                 .get();
@@ -817,15 +652,15 @@ public class AppEntryPoint implements EntryPoint {
             // TODO / FIXME
             // Event listener nur auf dem Header Element. Ansonsten schliesst es sich 
             // auch wenn ich auf einen Sub-Panel klicke.
-            // Funktioniert gefühlt aber immer noch nicht so toll. Manchmal braucht es zwei 
-            // Klicks, damit sich was tut.
             oerebAccordionPanelConcernedTheme.getHeaderElement().addEventListener(EventType.click, new EventListener() {
                 @Override
                 public void handleEvent(Event evt) {
-                    console.log("Betroffene Themen Panel Header clicked.");
                     if (!oerebAccordionPanelConcernedThemeState) {
                         oerebAccordionPanelConcernedTheme.show();
                         oerebAccordionPanelConcernedThemeState = true;
+                        oerebAccordionPanelNotConcernedThemeState = false;
+                        oerebAccordionPanelThemesWithoutDataState = false;
+                        oerebAccordionPanelGeneralInformationState = false;
                     } else {
                         oerebAccordionPanelConcernedTheme.hide();
                         oerebAccordionPanelConcernedThemeState = false;
@@ -835,7 +670,7 @@ public class AppEntryPoint implements EntryPoint {
             
             oerebInnerAccordion = Accordion.create()
                     .setId("oerebAccordionConcernedTheme")
-                    .setHeaderBackground(Color.WHITE);
+                    .setHeaderBackground(Color.GREY_LIGHTEN_4);
             
             if (realEstateDPR.getOerebConcernedThemes().size() > 0) {
                 for (ConcernedTheme theme : realEstateDPR.getOerebConcernedThemes()) {
@@ -862,18 +697,14 @@ public class AppEntryPoint implements EntryPoint {
                     } else {
                         panelTitle = theme.getName();
                     }
-//                 
                     
                     AccordionPanel accordionPanel = AccordionPanel.create(panelTitle).css("oerebAccordionPanelConcernedTheme");
-                    accordionPanel.setContent(div().css("oerebThemeContent").textContent(theme.getReferenceWMS().getLayers()));
                     accordionPanel.elevate(0);
                     accordionPanel.setId(layerId);
                     
                     accordionPanel.addShowListener(new ShowCompletedHandler() {
                         @Override
                         public void onShown() {
-                            console.log("inner accordion panel clicked (onShown)");
-                            expandedOerebLayerId = layerId;
                             Image wmsLayer = (Image) getMapLayerById(layerId);
                             wmsLayer.setVisible(true); 
                         } 
@@ -882,8 +713,6 @@ public class AppEntryPoint implements EntryPoint {
                     accordionPanel.addHideListener(new HideCompletedHandler() {
                         @Override
                         public void onHidden() {
-                            console.log("inner accordion panel clicked (onHidden)");
-                            expandedOerebLayerId = null;
                             Image wmsLayer = (Image) getMapLayerById(layerId);
                             wmsLayer.setVisible(false); 
                         } 
@@ -896,530 +725,201 @@ public class AppEntryPoint implements EntryPoint {
                         public void handleEvent(Event evt) {
                             evt.stopPropagation();
                         }
- 
                     });
                     
+                    // Create a div element for the content.
+                    HTMLDivElement contentDiv = div().css("oerebThemeContent").element();
+                    
+                    // Slider
+                    int opacity;
+                    if (Double.valueOf(theme.getReferenceWMS().getLayerOpacity()) != null && theme.getReferenceWMS().getLayerOpacity() != 0) {
+                        opacity = Double.valueOf((theme.getReferenceWMS().getLayerOpacity() * 100)).intValue();
+                    } else {
+                        opacity = 60;
+                    }
+                    Slider slider = Slider.create(100).setMinValue(0).setValue(opacity).withoutThumb();
+                    slider.addChangeHandler(handler -> {
+                        wmsLayer.setOpacity(handler.intValue() / 100.0);
+                    });
+                                            
+                    FlexLayout sliderRow = FlexLayout.create();
+                    sliderRow.appendChild(FlexItem.create().setFlexGrow(0).style().setPaddingRight("20px").get().appendChild(span().textContent(messages.resultOpacity()).element()));
+                    sliderRow.appendChild(FlexItem.create().setFlexGrow(1).appendChild(slider.element()));
+                    contentDiv.appendChild(sliderRow.element());
+                    
+                    contentDiv.appendChild(div().css("fakeColumn").element());
+                    contentDiv.appendChild(div().css(Styles.padding_10).element());
+                    
+                    // Eigentumsbeschränkungen
+                    Row restrictionHeaderRow = Row.create();
+                    restrictionHeaderRow.appendChild(Column.span6().style().setFontSize(SMALL_FONT_SIZE).get().setTextContent(messages.resultType()));
+                    restrictionHeaderRow.appendChild(Column.span1().style().setFontSize(SMALL_FONT_SIZE).get().setTextContent(""));
+                    restrictionHeaderRow.appendChild(Column.span3().style().setFontSize(SMALL_FONT_SIZE).setTextAlign("right").get().setTextContent(messages.resultShare()));
+                    restrictionHeaderRow.appendChild(Column.span2().style().setFontSize(SMALL_FONT_SIZE).setTextAlign("right").get().setTextContent(messages.resultShareInPercent()));
+                    contentDiv.appendChild(restrictionHeaderRow.element());
+
+                    for (Restriction restriction : theme.getRestrictions()) {
+                        if (restriction.getAreaShare() != null) {
+                            contentDiv.appendChild(processRestrictionRow(restriction, GeometryType.POLYGON));
+                        }
+
+                        if (restriction.getLengthShare() != null) {
+                            contentDiv.appendChild(processRestrictionRow(restriction, GeometryType.LINE));
+                        }
+
+                        if (restriction.getNrOfPoints() != null) {
+                            contentDiv.appendChild(processRestrictionRow(restriction, GeometryType.POINT));
+                        }
+
+                        // TODO / FIXME (?) Falls kein Share mitgeliefert wird (z.B. ZH). Ist es mandatory?
+                        if (restriction.getNrOfPoints() == null && restriction.getLengthShare() == null
+                                && restriction.getAreaShare() == null) {
+                            // do something
+                        }
+                    }
+
+                    contentDiv.appendChild(div().css("fakeColumn").element());
+                    contentDiv.appendChild(div().css(Styles.padding_10).element());
+
+                    // Legende
+                    if (theme.getLegendAtWeb() != null) {
+                        String legendAtWeb = theme.getLegendAtWeb();
+
+                        if (legendAtWeb.toLowerCase().endsWith(".xml") || legendAtWeb.toLowerCase().endsWith(".html") || legendAtWeb.toLowerCase().endsWith(".pdf")) {
+                            // other cantons
+                            HTMLElement legendLink = a().attr("class", "resultLink")
+                                    .attr("href", legendAtWeb)
+                                    .attr("target", "_blank")
+                                    .add(TextNode.of(legendAtWeb)).element();
+                            contentDiv.appendChild(div().add(legendLink).element());
+                        } else {
+                            HTMLElement legendLink = a()
+                                    .attr("class", "resultLink")
+                                    .add(TextNode.of(messages.resultShowLegend())).element();
+                            contentDiv.appendChild(div().add(legendLink).element());
+
+                            HTMLElement legendImage = img()
+                                    .attr("src", theme.getLegendAtWeb())
+                                    .attr("alt", "Legende").element();
+                            legendImage.style.display = "none";
+                            contentDiv.appendChild(legendImage);
+
+                            legendLink.addEventListener("click", new EventListener() {
+                                @Override
+                                public void handleEvent(Event evt) {
+                                    if (legendImage.style.display == "none") {
+                                        legendImage.style.display = "block";
+                                        legendLink.innerHTML = messages.resultHideLegend();
+                                    } else {
+                                        legendImage.style.display = "none";
+                                        legendLink.innerHTML = messages.resultShowLegend();
+                                    }
+                                }
+                            });
+                        }
+                        contentDiv.appendChild(div().css("fakeColumn").element());
+                        contentDiv.appendChild(div().css(Styles.padding_10).element());
+                    }
+                    
+                    // Rechtsvorschriften
+                    contentDiv.appendChild(div().css("fontSemiBold").textContent(messages.legalProvisions()).element());
+                    
+                    for (Document legalProvision : theme.getLegalProvisions()) {
+                        String linkName;
+                        if (legalProvision.getOfficialTitle() != null) {
+                            linkName = legalProvision.getOfficialTitle();
+                        } else {
+                            linkName = legalProvision.getTitle();
+                        }
+                        HTMLElement link = a().css("resultLink")
+                                .attr("href", legalProvision.getTextAtWeb())
+                                .attr("target", "_blank")
+                                .add(TextNode.of(linkName)).element();
+                        contentDiv.appendChild(div().add(link).element());
+
+                        String additionalText = legalProvision.getTitle();
+                        if (legalProvision.getOfficialNumber() != null) {
+                            additionalText += " Nr. " + legalProvision.getOfficialNumber();
+                        }
+                        contentDiv.appendChild(div().add(TextNode.of(additionalText)).element());
+                        contentDiv.appendChild(div().css(Styles.padding_5).element());
+                    }
+                    
+                    // Gesetze
+                    contentDiv.appendChild(div().css(Styles.padding_5).element());                    
+                    contentDiv.appendChild(div().css("fontSemiBold").textContent(messages.laws()).element());
+
+                    for (Document law : theme.getLaws()) {
+                        String linkName;
+                        if (law.getOfficialTitle() != null) {
+                            linkName = law.getOfficialTitle();
+                        } else {
+                            linkName = law.getTitle();
+                        }
+                        
+                        if (law.getAbbreviation() != null) {
+                            linkName += " (" + law.getAbbreviation() + ")";
+                        }
+                        
+                        if (law.getOfficialNumber() != null) {
+                            linkName += ", " + law.getOfficialNumber();
+                        }
+                            
+                        HTMLElement link = a().css("resultLink")
+                                .attr("href", law.getTextAtWeb())
+                                .attr("target", "_blank")
+                                .add(TextNode.of(linkName)).element();
+                        contentDiv.appendChild(div().add(link).element());
+                        contentDiv.appendChild(div().css(Styles.padding_5).element());
+                    }
+                    
+                    // Hinweise
+                    if (theme.getHints().size() > 0) {
+                        contentDiv.appendChild(div().css(Styles.padding_5).element());                    
+                        contentDiv.appendChild(div().css("fontSemiBold").textContent(messages.hints()).element());
+ 
+                        for (Document hint : theme.getHints()) {
+                            String linkName = "";
+                            if (hint.getOfficialTitle() != null) {
+                                linkName = hint.getOfficialTitle();
+                            } else {
+                                linkName = hint.getTitle();
+                            }
+                            if (hint.getAbbreviation() != null) {
+                                linkName += " (" + hint.getAbbreviation() + ")";
+                            }
+                            if (hint.getOfficialNumber() != null) {
+                                linkName += ", " + hint.getOfficialNumber();
+                            }
+                            
+                            HTMLElement link = a().css("resultLink")
+                                    .attr("href", hint.getTextAtWeb())
+                                    .attr("target", "_blank")
+                                    .add(TextNode.of(linkName)).element();
+                            contentDiv.appendChild(div().add(link).element());
+                            contentDiv.appendChild(div().css(Styles.padding_5).element());
+                        }
+                    }
+                    
+                    contentDiv.appendChild(div().css("fakeColumn").element());
+                    contentDiv.appendChild(div().css(Styles.padding_10).element());
+
+                    // Zuständige Stelle(n)
+                    contentDiv.appendChild(div().css("fontSemiBold").textContent(messages.responsibleOffice()).element());
+
+                    for (Office office : theme.getResponsibleOffice()) {
+                        HTMLElement link = a().css("resultLink")
+                                .attr("href", office.getOfficeAtWeb())
+                                .attr("target", "_blank")
+                                .add(TextNode.of(office.getName())).element();
+                        contentDiv.appendChild(div().add(link).element());
+                        contentDiv.appendChild(div().css(Styles.padding_5).element());
+                    }
+                    accordionPanel.setContent(contentDiv);
                     oerebInnerAccordion.appendChild(accordionPanel);
                 }
-                
-                
-                // Handle visibility of oereb wms layers.
-                // Show them only if oereb tab is selected.
-                oerebInnerAccordion.addEventListener(EventType.click, new EventListener() {
-                    @Override
-                    public void handleEvent(Event evt) {
-                        
-                    }
-                });
-                
-                
-                
-//              oerebInnerCollapsibleConcernedTheme.addExpandHandler(event -> {
-//                  expandedOerebLayerId = event.getTarget().getId();
-//                  if (resultTab.getTabIndex() == 2) {
-//                      for (String layerId : oerebWmsLayers) {
-//                          Image wmsLayer = (Image) getMapLayerById(layerId);
-//                          if (layerId.equalsIgnoreCase(expandedOerebLayerId)) {
-//                              wmsLayer.setVisible(true);
-//                          } else {
-//                              wmsLayer.setVisible(false);
-//                          }
-//                      }
-////                    MaterialCollapsibleItem item = event.getTarget();
-////                    MaterialCollapsibleHeader header = item.getHeader();
-////                    List<Widget> children = header.getChildrenList();
-////                    for (Widget child : children) {
-////                        if (child instanceof gwt.material.design.client.ui.MaterialLink) {
-////                            MaterialLink link = (MaterialLink) child;
-////                            link.setIconType(IconType.EXPAND_LESS);
-////                        }
-////                    }
-//                  }
-//              });
-//
-//              oerebInnerCollapsibleConcernedTheme.addCollapseHandler(event -> {
-//                  expandedOerebLayerId = null;
-//                  Image wmsLayer = (Image) getMapLayerById(event.getTarget().getId());
-//                  wmsLayer.setVisible(false);
-////                MaterialCollapsibleItem item = event.getTarget();
-////                MaterialCollapsibleHeader header = item.getHeader();
-////                List<Widget> children = header.getChildrenList();
-////                for (Widget child : children) {
-////                    if (child instanceof gwt.material.design.client.ui.MaterialLink) {
-////                        MaterialLink link = (MaterialLink) child;
-////                        link.setIconType(IconType.EXPAND_MORE);
-////                    }
-////                }
-//              });
-                
-                
                 oerebAccordionPanelConcernedTheme.appendChild(oerebInnerAccordion);
             }
-            
-            
-            
-            
-//            oerebAccordionPanelNotConcernedTheme.addClickListener(event -> {
-//                List<AccordionPanel> accordionPanels = oerebAccordion.getPanels();
-//                accordionPanels.forEach(accordionPanel -> {
-//                    console.log(accordionPanel);
-//                        accordionPanel.hide();
-//                });
-//                
-////                event.preventDefault();
-////                event.stopPropagation();
-////                
-////                console.log("oerebAccordionPanelNotConcernedThemeState " + oerebAccordionPanelNotConcernedThemeState);
-////                if (!oerebAccordionPanelNotConcernedThemeState) {
-////                    oerebAccordionPanelNotConcernedTheme.show();                    
-////                    oerebAccordionPanelNotConcernedThemeState = true;
-////                } else {
-////                    oerebAccordionPanelNotConcernedTheme.hide();
-////                    oerebAccordionPanelNotConcernedThemeState = false;
-//////                    oerebAccordionPanelNotConcernedTheme.getCollapsible().toggleDisplay();
-////                }                
-//            });
-            
-
-            
-            
-            
-//            oerebCollapsibleConcernedTheme = new MaterialCollapsible();
-//            oerebCollapsibleConcernedTheme.addStyleName("plrTopLevelCollapsible");
-//            oerebCollapsibleConcernedTheme.setShadow(0);
-//
-//            oerebCollapsibleConcernedTheme.addExpandHandler(event -> {
-//                oerebCollapsibleNotConcernedTheme.closeAll();
-//                oerebCollapsibleThemesWithoutData.closeAll();
-//                oerebCollapsibleGeneralInformation.closeAll();
-//            });
-//
-//            MaterialCollapsibleItem collapsibleConcernedThemeItem = new MaterialCollapsibleItem();
-//
-//            MaterialCollapsibleHeader collapsibleConcernedThemeHeader = new MaterialCollapsibleHeader();
-//            collapsibleConcernedThemeHeader.addStyleName("plrCollapsibleThemeHeader");
-//
-//            MaterialRow collapsibleConcernedThemeHeaderRow = new MaterialRow();
-//            collapsibleConcernedThemeHeaderRow.addStyleName("collapsibleThemeHeaderRow");
-//
-//            MaterialColumn collapsibleConcernedThemeColumnLeft = new MaterialColumn();
-//            collapsibleConcernedThemeColumnLeft.addStyleName("collapsibleThemeColumnLeft");
-//            collapsibleConcernedThemeColumnLeft.setGrid("s10");
-//            MaterialColumn collapsibleConcernedThemeColumnRight = new MaterialColumn();
-//            collapsibleConcernedThemeColumnRight.addStyleName("collapsibleThemeColumnRight");
-//            collapsibleConcernedThemeColumnRight.setGrid("s2");
-//
-//            MaterialLink collapsibleThemesHeaderLink = new MaterialLink();
-//            collapsibleThemesHeaderLink.addStyleName("collapsibleThemesHeaderLink");
-//            collapsibleThemesHeaderLink.setText(messages.concernedThemes());
-//            collapsibleConcernedThemeColumnLeft.add(collapsibleThemesHeaderLink);
-//
-//            MaterialChip collapsibleThemesHeaderChip = new MaterialChip();
-//            collapsibleThemesHeaderChip.addStyleName("collapsibleThemesHeaderChip");
-//            collapsibleThemesHeaderChip.setText(String.valueOf(realEstateDPR.getOerebConcernedThemes().size()));
-//            collapsibleConcernedThemeColumnRight.add(collapsibleThemesHeaderChip);
-//
-//            collapsibleConcernedThemeHeaderRow.add(collapsibleConcernedThemeColumnLeft);
-//            collapsibleConcernedThemeHeaderRow.add(collapsibleConcernedThemeColumnRight);
-//
-//            collapsibleConcernedThemeHeader.add(collapsibleConcernedThemeHeaderRow);
-//
-//            MaterialCollapsibleBody collapsibleConcernedThemeBody = new MaterialCollapsibleBody();
-//            if (realEstateDPR.getOerebConcernedThemes().size() > 0) {
-//                collapsibleConcernedThemeBody.setPadding(0);
-//
-//                oerebInnerCollapsibleConcernedTheme = new MaterialCollapsible();
-//                oerebInnerCollapsibleConcernedTheme.addStyleName("concernedThemeCollapsible");
-//                oerebInnerCollapsibleConcernedTheme.setAccordion(true);
-//                int i = 0;
-//
-//                for (ConcernedTheme theme : realEstateDPR.getOerebConcernedThemes()) {
-//                    i++;
-//
-//                    oerebInnerCollapsibleConcernedTheme.setShadow(0);
-//
-//                    Image wmsLayer = createOerebWmsLayer(theme.getReferenceWMS());
-//                    map.addLayer(wmsLayer);
-//
-//                    MaterialCollapsibleItem item = new MaterialCollapsibleItem();
-//
-//                    // Cannot use the code since all subthemes share the same code.
-//                    String layerId = theme.getReferenceWMS().getLayers();
-//                    item.setId(layerId);
-//                    oerebWmsLayers.add(layerId);
-//
-//                    MaterialCollapsibleHeader header = new MaterialCollapsibleHeader();
-//                    header.addStyleName("collapsibleThemeLayerHeader");
-//                    if (i < realEstateDPR.getOerebConcernedThemes().size()) {
-//                        header.setBorderBottom("1px solid #dddddd");
-//                    } else {
-//                        header.setBorderBottom("0px solid #dddddd");
-//                    }
-//
-//                    Div aParent = new Div();
-//                    aParent.addStyleName("helperParent");
-//
-//                    MaterialLink link = new MaterialLink();
-//                    link.addStyleName("collapsibleThemeLayerLink");
-//                    
-//                    /*
-//                     * Wegen des unterschiedlichen Umgangs mit Subthemen wird
-//                     * es ein klein wenig kompliziert...
-//                     */
-//                    if (theme.getSubtheme() != null && !theme.getSubtheme().isEmpty()) {
-//                        if (!theme.getSubtheme().substring(0,2).equals("ch")) {
-//                            link.setText(theme.getName() + " - " + theme.getSubtheme());
-//                        } else {
-//                            link.setText(theme.getName());
-//                        }
-//                    } else {
-//                        link.setText(theme.getName());
-//                    }
-//                    
-//                    aParent.add(link);
-//                    header.add(aParent);
-//                    item.add(header);
-//
-//                    MaterialCollapsibleBody body = new MaterialCollapsibleBody();
-//                    body.addStyleName("collapsibleThemeLayerBody");
-//                    body.addMouseOverHandler(event -> {
-//                        body.getElement().getStyle().setCursor(Cursor.DEFAULT);
-//                    });
-//                    if (i < realEstateDPR.getOerebConcernedThemes().size()) {
-//                        body.setBorderBottom("1px solid #dddddd");
-//                    } else {
-//                        body.setBorderBottom("0px solid #dddddd");
-//                        body.setBorderTop("1px solid #dddddd");
-//                    }
-//
-//                    MaterialRow sliderRow = new MaterialRow();
-//                    sliderRow.addStyleName("opacitySliderRow");
-//
-//                    MaterialColumn sliderRowLeft = new MaterialColumn();
-//                    sliderRowLeft.setGrid("s3");
-//                    MaterialColumn sliderRowRight = new MaterialColumn();
-//                    sliderRowRight.setGrid("s9");
-//
-//                    MaterialRange slider = new MaterialRange();
-//                    slider.addStyleName("opacitySlider");
-//                    slider.setMin(0);
-//                    slider.setMax(100);
-//                                        
-//                    int opacity;
-//                    if (Double.valueOf(theme.getReferenceWMS().getLayerOpacity()) != null && theme.getReferenceWMS().getLayerOpacity() != 0) {
-//                        opacity = Double.valueOf((theme.getReferenceWMS().getLayerOpacity() * 100)).intValue();
-//                    } else {
-//                        opacity = 60;
-//                    }
-//                    
-//                    slider.setValue(opacity);
-//                    slider.addValueChangeHandler(event -> {
-//                        double sliderOpacity = slider.getValue() / 100.0;
-//                        wmsLayer.setOpacity(sliderOpacity);
-//                    });
-//                    sliderRowLeft.add(new Label(messages.resultOpacity() + ":"));
-//                    sliderRowLeft.addStyleName("opacitySliderRowLeft");
-//
-//                    sliderRowRight.add(slider);
-//                    sliderRow.add(sliderRowLeft);
-//                    sliderRow.add(sliderRowRight);
-//                    body.add(sliderRow);
-//
-//                    {
-//                        MaterialRow informationHeaderRow = new MaterialRow();
-//                        informationHeaderRow.addStyleName("layerInfoHeaderRow");
-//
-//                        MaterialColumn typeColumn = new MaterialColumn();
-//                        typeColumn.addStyleName("layerTypeColumn");
-//                        typeColumn.setGrid("s6");
-//                        typeColumn.add(new Label(messages.resultType()));
-//
-//                        MaterialColumn symbolColumn = new MaterialColumn();
-//                        symbolColumn.addStyleName("layerSymbolColumn");
-//                        symbolColumn.setGrid("s1");
-//                        symbolColumn.add(new HTML("&nbsp;"));
-//
-//                        MaterialColumn shareColumn = new MaterialColumn();
-//                        shareColumn.addStyleName("layerShareColumn");
-//                        shareColumn.setGrid("s3");
-//                        shareColumn.add(new Label(messages.resultShare()));
-//
-//                        MaterialColumn sharePercentColumn = new MaterialColumn();
-//                        sharePercentColumn.addStyleName("layerPercentColumn");
-//                        sharePercentColumn.setGrid("s2");
-//                        sharePercentColumn.add(new Label(messages.resultShareInPercent()));
-//
-//                        informationHeaderRow.add(typeColumn);
-//                        informationHeaderRow.add(symbolColumn);
-//                        informationHeaderRow.add(shareColumn);
-//                        informationHeaderRow.add(sharePercentColumn);
-//                        body.add(informationHeaderRow);
-//                    }
-//
-//                    {
-//                        for (Restriction restriction : theme.getRestrictions()) {
-//                            if (restriction.getAreaShare() != null) {
-//                                MaterialRow informationRow = processRestrictionRow(restriction, GeometryType.POLYGON);
-//                                body.add(informationRow);
-//                            }
-//
-//                            if (restriction.getLengthShare() != null) { 
-//                                MaterialRow informationRow = processRestrictionRow(restriction, GeometryType.LINE);
-//                                body.add(informationRow);
-//                            }
-//
-//                            if (restriction.getNrOfPoints() != null) {
-//                                MaterialRow informationRow = processRestrictionRow(restriction, GeometryType.POINT);
-//                                body.add(informationRow);
-//                            }
-//                            
-//                            // FIXME (?) Falls kein Share mitgeliefert wird (z.B. ZH). Ist es mandatory?
-//                            if (restriction.getNrOfPoints() == null && restriction.getLengthShare() == null && restriction.getAreaShare() == null) {
-//                                MaterialRow informationRow = processRestrictionRow(restriction, null);
-//                                body.add(informationRow);
-//                            }
-//                        }
-//                        MaterialRow fakeRow = new MaterialRow();
-//                        fakeRow.setBorderBottom("1px #bdbdbd solid");
-//                        body.add(fakeRow);
-//                    }
-//
-//                    if (theme.getLegendAtWeb() != null) {
-//                        MaterialRow legendRow = new MaterialRow();
-//                        legendRow.addStyleName("layerLegendRow");
-//
-//                        MaterialColumn legendColumn = new MaterialColumn();
-//                        legendColumn.addStyleName("layerLegendColumn");
-//                        legendColumn.setGrid("s12");
-//
-//                        // TODO: was ist alles möglich?
-//                        // Weil die Extension auch fehlen kann, weiss man nie sicher, ob es 
-//                        // sich um ein Bild oder Dokument handelt.
-//                        String legendAtWeb = theme.getLegendAtWeb();
-//                        if (legendAtWeb.toLowerCase().endsWith(".xml") || legendAtWeb.toLowerCase().endsWith(".html") || legendAtWeb.toLowerCase().endsWith(".pdf")) {
-//                            MaterialLink legendLink = new MaterialLink();
-//                            legendLink.addStyleName("resultLink");
-//                            legendLink.setText(legendAtWeb);
-//                            legendLink.setHref(legendAtWeb);
-//                            legendLink.setTarget("_blank");
-//                            legendColumn.add(legendLink);
-//
-//                            legendRow.add(legendColumn);
-//                            body.add(legendRow);
-//                        } else {
-//                            MaterialLink legendLink = new MaterialLink();
-//                            legendLink.addStyleName("resultLink");
-//                            legendLink.setText(messages.resultShowLegend());
-//                            legendColumn.add(legendLink);
-//
-//                            legendRow.add(legendColumn);
-//                            body.add(legendRow);
-//
-//                            com.google.gwt.user.client.ui.Image legendImage = new com.google.gwt.user.client.ui.Image();
-//                            legendImage.setUrl(theme.getLegendAtWeb());
-//                            legendImage.setVisible(false);
-//                            body.add(legendImage);
-//
-//                            MaterialRow fakeRow = new MaterialRow();
-//                            fakeRow.setBorderBottom("1px #bdbdbd solid");
-//                            body.add(fakeRow);
-//                            
-//                            legendLink.addClickHandler(event -> {
-//                                if (legendImage.isVisible()) {
-//                                    legendImage.setVisible(false);
-//                                    legendLink.setText(messages.resultShowLegend());
-//                                } else {
-//                                    legendImage.setVisible(true);
-//                                    legendLink.setText(messages.resultHideLegend());
-//                                }
-//                            });                            
-//                        }
-//                    }
-//
-//                    {
-//                        MaterialRow legalProvisionsHeaderRow = new MaterialRow();
-//                        legalProvisionsHeaderRow.addStyleName("documentsHeaderRow");
-//                        legalProvisionsHeaderRow.add(new Label(messages.legalProvisions()));
-//                        body.add(legalProvisionsHeaderRow);
-//
-//                        for (Document legalProvision : theme.getLegalProvisions()) {
-//                            MaterialRow row = new MaterialRow();
-//                            row.addStyleName("documentRow");
-//
-//                            MaterialLink legalProvisionLink = new MaterialLink();
-//
-//                            if (legalProvision.getOfficialTitle() != null) {
-//                                legalProvisionLink.setText(legalProvision.getOfficialTitle());
-//                            } else {
-//                                legalProvisionLink.setText(legalProvision.getTitle());
-//                            }
-//                            legalProvisionLink.setHref(legalProvision.getTextAtWeb());
-//                            legalProvisionLink.setTarget("_blank");
-//                            legalProvisionLink.addStyleName("resultLink");
-//                            row.add(legalProvisionLink);
-//                            body.add(row);
-//
-//                            MaterialRow additionalInfoRow = new MaterialRow();
-//                            additionalInfoRow.addStyleName("documentAdditionalInfoRow");
-//
-//                            String labelText = legalProvision.getTitle();
-//                            if (legalProvision.getOfficialNumber() != null) {
-//                                labelText += " Nr. " + legalProvision.getOfficialNumber();
-//                            }
-//                            Label label = new Label(labelText);
-//                            additionalInfoRow.add(label);
-//                            body.add(additionalInfoRow);
-//                        }
-//
-//                        MaterialRow lawsHeaderRow = new MaterialRow();
-//                        lawsHeaderRow.addStyleName("documentsHeaderRow");
-//                        lawsHeaderRow.add(new Label(messages.laws()));
-//                        body.add(lawsHeaderRow);
-//
-//                        for (Document law : theme.getLaws()) {
-//                            MaterialRow row = new MaterialRow();
-//                            row.addStyleName("lawRow");
-//
-//                            MaterialLink lawLink = new MaterialLink();
-//
-//                            String linkText = "";
-//                            if (law.getOfficialTitle() != null) {
-//                                linkText = law.getOfficialTitle();
-//                            } else {
-//                                linkText = law.getTitle();
-//                            }
-//                            if (law.getAbbreviation() != null) {
-//                                linkText += " (" + law.getAbbreviation() + ")";
-//                            }
-//                            if (law.getOfficialNumber() != null) {
-//                                linkText += ", " + law.getOfficialNumber();
-//                            }
-//                            lawLink.setText(linkText);
-//                            lawLink.setHref(law.getTextAtWeb());
-//                            lawLink.setTarget("_blank");
-//                            lawLink.addStyleName("resultLink");
-//                            row.add(lawLink);
-//                            body.add(row);
-//                        }
-//                        
-//                        if (theme.getHints().size() > 0) {
-//                            MaterialRow hintsHeaderRow = new MaterialRow();
-//                            hintsHeaderRow.addStyleName("documentsHeaderRow");
-//                            hintsHeaderRow.add(new Label(messages.hints()));
-//                            body.add(hintsHeaderRow);
-//
-//                            for (Document hint : theme.getHints()) {
-//                                MaterialRow row = new MaterialRow();
-//                                row.addStyleName("hintRow");
-//
-//                                MaterialLink hintLink = new MaterialLink();
-//
-//                                String linkText = "";
-//                                if (hint.getOfficialTitle() != null) {
-//                                    linkText = hint.getOfficialTitle();
-//                                } else {
-//                                    linkText = hint.getTitle();
-//                                }
-//                                if (hint.getAbbreviation() != null) {
-//                                    linkText += " (" + hint.getAbbreviation() + ")";
-//                                }
-//                                if (hint.getOfficialNumber() != null) {
-//                                    linkText += ", " + hint.getOfficialNumber();
-//                                }
-//                                hintLink.setText(linkText);
-//                                hintLink.setHref(hint.getTextAtWeb());
-//                                hintLink.setTarget("_blank");
-//                                hintLink.addStyleName("resultLink");
-//                                row.add(hintLink);
-//                                body.add(row);
-//                            }                
-//                        }
-//                        
-//                        MaterialRow fakeRow = new MaterialRow();
-//                        fakeRow.setBorderBottom("1px #bdbdbd solid");
-//                        fakeRow.setPaddingTop(5);
-//                        body.add(fakeRow);
-//                    }
-//                    {
-//                        MaterialRow responsibleOfficeHeaderRow = new MaterialRow();
-//                        responsibleOfficeHeaderRow.addStyleName("documentsHeaderRow");
-//                        responsibleOfficeHeaderRow.add(new Label(messages.responsibleOffice()));
-//                        body.add(responsibleOfficeHeaderRow);
-//
-//                        for (Office office : theme.getResponsibleOffice()) {
-//                            MaterialRow row = new MaterialRow();
-//                            row.addStyleName("documentRow");
-//
-//                            MaterialLink officeLink = new MaterialLink();
-//                            officeLink.setText(office.getName());
-//                            officeLink.setHref(office.getOfficeAtWeb());
-//                            officeLink.setTarget("_blank");
-//                            officeLink.addStyleName("resultLink");
-//                            row.add(officeLink);
-//                            body.add(row);
-//                        }
-//                    }
-//                    item.add(body);
-//                    oerebInnerCollapsibleConcernedTheme.add(item);
-//                }
-//
-//                // Handle visibility of oereb wms layers.
-//                // Show them only if oereb tab is selected.
-//                oerebInnerCollapsibleConcernedTheme.addExpandHandler(event -> {
-//                    expandedOerebLayerId = event.getTarget().getId();
-//                    if (resultTab.getTabIndex() == 2) {
-//                        for (String layerId : oerebWmsLayers) {
-//                            Image wmsLayer = (Image) getMapLayerById(layerId);
-//                            if (layerId.equalsIgnoreCase(expandedOerebLayerId)) {
-//                                wmsLayer.setVisible(true);
-//                            } else {
-//                                wmsLayer.setVisible(false);
-//                            }
-//                        }
-////                      MaterialCollapsibleItem item = event.getTarget();
-////                      MaterialCollapsibleHeader header = item.getHeader();
-////                      List<Widget> children = header.getChildrenList();
-////                      for (Widget child : children) {
-////                          if (child instanceof gwt.material.design.client.ui.MaterialLink) {
-////                              MaterialLink link = (MaterialLink) child;
-////                              link.setIconType(IconType.EXPAND_LESS);
-////                          }
-////                      }
-//                    }
-//                });
-//
-//                oerebInnerCollapsibleConcernedTheme.addCollapseHandler(event -> {
-//                    expandedOerebLayerId = null;
-//                    Image wmsLayer = (Image) getMapLayerById(event.getTarget().getId());
-//                    wmsLayer.setVisible(false);
-////                  MaterialCollapsibleItem item = event.getTarget();
-////                  MaterialCollapsibleHeader header = item.getHeader();
-////                  List<Widget> children = header.getChildrenList();
-////                  for (Widget child : children) {
-////                      if (child instanceof gwt.material.design.client.ui.MaterialLink) {
-////                          MaterialLink link = (MaterialLink) child;
-////                          link.setIconType(IconType.EXPAND_MORE);
-////                      }
-////                  }
-//                });
-//
-//                // Do not open accordion automatically.
-//                //oerebInnerCollapsibleConcernedTheme.open(1);
-//                collapsibleConcernedThemeBody.add(oerebInnerCollapsibleConcernedTheme);
-//            }
-//
-//            collapsibleConcernedThemeItem.add(collapsibleConcernedThemeHeader);
-//            if (realEstateDPR.getOerebConcernedThemes().size() > 0) {
-//                collapsibleConcernedThemeItem.add(collapsibleConcernedThemeBody);
-//            }
-//
-//            oerebCollapsibleConcernedTheme.add(collapsibleConcernedThemeItem);
-//
-//            if (realEstateDPR.getOerebConcernedThemes().size() > 0) {
-//                oerebCollapsibleConcernedTheme.open(1);
-//            }
-//
-//            oerebCollapsibleDiv.add(oerebCollapsibleConcernedTheme);
         }
 
         {
@@ -1450,79 +950,21 @@ public class AppEntryPoint implements EntryPoint {
             oerebAccordionPanelNotConcernedTheme.setContent(listGroup);
             oerebAccordion.appendChild(oerebAccordionPanelNotConcernedTheme);
 
-            oerebAccordionPanelNotConcernedTheme.addEventListener(EventType.click, new EventListener() {
+            oerebAccordionPanelNotConcernedTheme.getHeaderElement().addEventListener(EventType.click, new EventListener() {
                 @Override
                 public void handleEvent(Event evt) {
                     if (!oerebAccordionPanelNotConcernedThemeState) {
                         oerebAccordionPanelNotConcernedTheme.show();
+                        oerebAccordionPanelConcernedThemeState = false;
                         oerebAccordionPanelNotConcernedThemeState = true;
+                        oerebAccordionPanelThemesWithoutDataState = false;
+                        oerebAccordionPanelGeneralInformationState = false;
                     } else {
                         oerebAccordionPanelNotConcernedTheme.hide();
                         oerebAccordionPanelNotConcernedThemeState = false;
                     }            
                 }
             });            
-//            oerebCollapsibleNotConcernedTheme = new MaterialCollapsible();
-//            oerebCollapsibleNotConcernedTheme.addStyleName("plrTopLevelCollapsible");
-//            oerebCollapsibleNotConcernedTheme.setShadow(0);
-//
-//            oerebCollapsibleNotConcernedTheme.addExpandHandler(event -> {
-//                oerebCollapsibleConcernedTheme.close(1);
-//                oerebCollapsibleThemesWithoutData.closeAll();
-//                oerebCollapsibleGeneralInformation.closeAll();
-//            });
-//
-//            MaterialCollapsibleItem collapsibleNotConcernedThemeItem = new MaterialCollapsibleItem();
-//
-//            MaterialCollapsibleHeader collapsibleNotConcernedThemeHeader = new MaterialCollapsibleHeader();
-//            collapsibleNotConcernedThemeHeader.addStyleName("plrCollapsibleThemeHeader");
-//
-//            MaterialRow collapsibleNotConcernedThemeHeaderRow = new MaterialRow();
-//            collapsibleNotConcernedThemeHeaderRow.addStyleName("collapsibleThemeHeaderRow");
-//
-//            MaterialColumn collapsibleNotConcernedThemeColumnLeft = new MaterialColumn();
-//            collapsibleNotConcernedThemeColumnLeft.addStyleName("collapsibleThemeColumnLeft");
-//            collapsibleNotConcernedThemeColumnLeft.setGrid("s10");
-//            MaterialColumn collapsibleNotConcernedThemeColumnRight = new MaterialColumn();
-//            collapsibleNotConcernedThemeColumnRight.addStyleName("collapsibleThemeColumnRight");
-//            collapsibleNotConcernedThemeColumnRight.setGrid("s2");
-//
-//            MaterialLink collapsibleNotConcernedHeaderLink = new MaterialLink();
-//            collapsibleNotConcernedHeaderLink.addStyleName("collapsibleThemesHeaderLink");
-//            collapsibleNotConcernedHeaderLink.setText(messages.notConcernedThemes());
-//            collapsibleNotConcernedThemeColumnLeft.add(collapsibleNotConcernedHeaderLink);
-//
-//            MaterialChip collapsibleNotConcernedHeaderChip = new MaterialChip();
-//            collapsibleNotConcernedHeaderChip.addStyleName("collapsibleThemesHeaderChip");
-//            collapsibleNotConcernedHeaderChip
-//                    .setText(String.valueOf(realEstateDPR.getOerebNotConcernedThemes().size()));
-//            collapsibleNotConcernedThemeColumnRight.add(collapsibleNotConcernedHeaderChip);
-//
-//            collapsibleNotConcernedThemeHeaderRow.add(collapsibleNotConcernedThemeColumnLeft);
-//            collapsibleNotConcernedThemeHeaderRow.add(collapsibleNotConcernedThemeColumnRight);
-//            collapsibleNotConcernedThemeHeader.add(collapsibleNotConcernedThemeHeaderRow);
-//
-//            MaterialCollapsibleBody collapsibleBody = new MaterialCollapsibleBody();
-//            collapsibleBody.addMouseOverHandler(event -> {
-//                collapsibleBody.getElement().getStyle().setCursor(Cursor.DEFAULT);
-//            });
-//            collapsibleBody.setPadding(0);
-//            MaterialCollection collection = new MaterialCollection();
-//
-//            for (NotConcernedTheme theme : realEstateDPR.getOerebNotConcernedThemes()) {
-//                MaterialCollectionItem item = new MaterialCollectionItem();
-//                MaterialLabel label = new MaterialLabel(theme.getName());
-//                label.addStyleName("notConcernedThemesLabel");
-//                item.add(label);
-//                collection.add(item);
-//            }
-//            collapsibleBody.add(collection);
-//
-//            collapsibleNotConcernedThemeItem.add(collapsibleNotConcernedThemeHeader);
-//            collapsibleNotConcernedThemeItem.add(collapsibleBody);
-//            oerebCollapsibleNotConcernedTheme.add(collapsibleNotConcernedThemeItem);
-//
-//            oerebCollapsibleDiv.add(oerebCollapsibleNotConcernedTheme);
         }
 
         {
@@ -1558,77 +1000,18 @@ public class AppEntryPoint implements EntryPoint {
                 public void handleEvent(Event evt) {
                     if (!oerebAccordionPanelThemesWithoutDataState) {
                         oerebAccordionPanelThemesWithoutData.show();
+                        oerebAccordionPanelConcernedThemeState = false;
+                        oerebAccordionPanelNotConcernedThemeState = false;
                         oerebAccordionPanelThemesWithoutDataState = true;
+                        oerebAccordionPanelGeneralInformationState = false;
                     } else {
                         oerebAccordionPanelThemesWithoutData.hide();
                         oerebAccordionPanelThemesWithoutDataState = false;
                     }            
                 }
             });            
-            
-//            oerebCollapsibleThemesWithoutData = new MaterialCollapsible();
-//            oerebCollapsibleThemesWithoutData.addStyleName("plrTopLevelCollapsible");
-//            oerebCollapsibleThemesWithoutData.setShadow(0);
-//
-//            oerebCollapsibleThemesWithoutData.addExpandHandler(event -> {
-//                oerebCollapsibleConcernedTheme.close(1);
-//                oerebCollapsibleNotConcernedTheme.closeAll();
-//                oerebCollapsibleGeneralInformation.closeAll();
-//            });
-//
-//            MaterialCollapsibleItem collapsibleThemesWithoutDataItem = new MaterialCollapsibleItem();
-//
-//            MaterialCollapsibleHeader collapsibleThemesWithoutDataHeader = new MaterialCollapsibleHeader();
-//            collapsibleThemesWithoutDataHeader.addStyleName("plrCollapsibleThemeHeader");
-//            collapsibleThemesWithoutDataHeader.setBackgroundColor(Color.GREY_LIGHTEN_3);
-//
-//            MaterialRow collapsibleThemesWithoutDataHeaderRow = new MaterialRow();
-//            collapsibleThemesWithoutDataHeaderRow.addStyleName("collapsibleThemeHeaderRow");
-//
-//            MaterialColumn collapsibleThemesWithoutDataColumnLeft = new MaterialColumn();
-//            collapsibleThemesWithoutDataColumnLeft.addStyleName("collapsibleThemeColumnLeft");
-//            collapsibleThemesWithoutDataColumnLeft.setGrid("s10");
-//            MaterialColumn collapsibleThemesWithoutDataColumnRight = new MaterialColumn();
-//            collapsibleThemesWithoutDataColumnRight.addStyleName("collapsibleThemeColumnRight");
-//            collapsibleThemesWithoutDataColumnRight.setGrid("s2");
-//
-//            MaterialLink collapsibleThemesWithoutHeaderLink = new MaterialLink();
-//            collapsibleThemesWithoutHeaderLink.addStyleName("collapsibleThemesHeaderLink");
-//            collapsibleThemesWithoutHeaderLink.setText(messages.themesWithoutData());
-//            collapsibleThemesWithoutDataColumnLeft.add(collapsibleThemesWithoutHeaderLink);
-//
-//            MaterialChip collapsibleThemesWithoutHeaderChip = new MaterialChip();
-//            collapsibleThemesWithoutHeaderChip.addStyleName("collapsibleThemesHeaderChip");
-//            collapsibleThemesWithoutHeaderChip
-//                    .setText(String.valueOf(realEstateDPR.getOerebThemesWithoutData().size()));
-//            collapsibleThemesWithoutDataColumnRight.add(collapsibleThemesWithoutHeaderChip);
-//
-//            collapsibleThemesWithoutDataHeaderRow.add(collapsibleThemesWithoutDataColumnLeft);
-//            collapsibleThemesWithoutDataHeaderRow.add(collapsibleThemesWithoutDataColumnRight);
-//            collapsibleThemesWithoutDataHeader.add(collapsibleThemesWithoutDataHeaderRow);
-//
-//            MaterialCollapsibleBody collapsibleBody = new MaterialCollapsibleBody();
-//            collapsibleBody.addMouseOverHandler(event -> {
-//                collapsibleBody.getElement().getStyle().setCursor(Cursor.DEFAULT);
-//            });
-//            collapsibleBody.setPadding(0);
-//            MaterialCollection collection = new MaterialCollection();
-//
-//            for (ThemeWithoutData theme : realEstateDPR.getOerebThemesWithoutData()) {
-//                MaterialCollectionItem item = new MaterialCollectionItem();
-//                MaterialLabel label = new MaterialLabel(theme.getName());
-//                label.addStyleName("withoutDataThemesLabel");
-//                item.add(label);
-//                collection.add(item);
-//            }
-//            collapsibleBody.add(collection);
-//
-//            collapsibleThemesWithoutDataItem.add(collapsibleThemesWithoutDataHeader);
-//            collapsibleThemesWithoutDataItem.add(collapsibleBody);
-//            oerebCollapsibleThemesWithoutData.add(collapsibleThemesWithoutDataItem);
-//
-//            oerebCollapsibleDiv.add(oerebCollapsibleThemesWithoutData);
         }
+        
         {
             AccordionPanel oerebAccordionPanelGeneralInformation = AccordionPanel.create(messages.generalInformation());
             oerebAccordionPanelGeneralInformation.css("oerebAccordionPanelTheme");            
@@ -1651,6 +1034,9 @@ public class AppEntryPoint implements EntryPoint {
                 public void handleEvent(Event evt) {
                     if (!oerebAccordionPanelGeneralInformationState) {
                         oerebAccordionPanelGeneralInformation.show();
+                        oerebAccordionPanelConcernedThemeState = false;
+                        oerebAccordionPanelNotConcernedThemeState = false;
+                        oerebAccordionPanelThemesWithoutDataState = false;
                         oerebAccordionPanelGeneralInformationState = true;
                     } else {
                         oerebAccordionPanelGeneralInformation.hide();
@@ -1658,70 +1044,7 @@ public class AppEntryPoint implements EntryPoint {
                     }            
                 }
             });            
-            
-            
-//            oerebCollapsibleGeneralInformation = new MaterialCollapsible();
-//            oerebCollapsibleGeneralInformation.addStyleName("plrTopLevelCollapsible");
-//            oerebCollapsibleGeneralInformation.setShadow(0);
-//
-//            oerebCollapsibleGeneralInformation.addExpandHandler(event -> {
-//                oerebCollapsibleConcernedTheme.close(1);
-//                oerebCollapsibleNotConcernedTheme.closeAll();
-//                oerebCollapsibleThemesWithoutData.closeAll();
-//            });
-//
-//            MaterialCollapsibleItem collapsibleGeneralInformationItem = new MaterialCollapsibleItem();
-//
-//            MaterialCollapsibleHeader collapsibleGeneralInformationHeader = new MaterialCollapsibleHeader();
-//            collapsibleGeneralInformationHeader.addStyleName("plrCollapsibleThemeHeader");
-//
-//            MaterialCollapsibleBody body = new MaterialCollapsibleBody();
-//            body.addStyleName("collapsibleGeneralInformationBody");
-//            body.addMouseOverHandler(event -> {
-//                body.getElement().getStyle().setCursor(Cursor.DEFAULT);
-//            });
-//
-//            HTML infoHtml = new HTML();
-//
-//            Office cadastreAuthority = realEstateDPR.getOerebCadastreAuthority();
-//            StringBuilder html = new StringBuilder();
-//            html.append("<b>Katasterverantwortliche Stelle</b>");
-//            html.append("<br>");
-//            html.append(cadastreAuthority.getName());
-//            html.append("<br>");
-//            html.append(cadastreAuthority.getStreet() + " " + cadastreAuthority.getNumber());
-//            html.append("<br>");
-//            html.append(cadastreAuthority.getPostalCode() + " " + cadastreAuthority.getCity());
-//            html.append("<br>");
-//            html.append(makeHtmlLink(cadastreAuthority.getOfficeAtWeb()));
-//
-//            infoHtml.setHTML(html.toString());
-//            body.add(infoHtml);
-//
-//            MaterialRow collapsibleGeneralInformationHeaderRow = new MaterialRow();
-//            collapsibleGeneralInformationHeaderRow.addStyleName("collapsibleThemeHeaderRow");
-//
-//            MaterialColumn collapsibleGeneralInformationColumnLeft = new MaterialColumn();
-//            collapsibleGeneralInformationColumnLeft.addStyleName("collapsibleThemeColumnLeft");
-//            collapsibleGeneralInformationColumnLeft.setGrid("s10");
-//
-//            MaterialLink collapsibleThemesWithoutHeaderLink = new MaterialLink();
-//            collapsibleThemesWithoutHeaderLink.addStyleName("collapsibleThemesHeaderLink");
-//            collapsibleThemesWithoutHeaderLink.setText(messages.generalInformation());
-//            collapsibleGeneralInformationColumnLeft.add(collapsibleThemesWithoutHeaderLink);
-//
-//            collapsibleGeneralInformationHeaderRow.add(collapsibleGeneralInformationColumnLeft);
-//            collapsibleGeneralInformationHeader.add(collapsibleGeneralInformationHeaderRow);
-//
-//            collapsibleGeneralInformationItem.add(collapsibleGeneralInformationHeader);
-//            collapsibleGeneralInformationItem.add(body);
-//            oerebCollapsibleGeneralInformation.add(collapsibleGeneralInformationItem);
-//
-//            oerebCollapsibleDiv.add(oerebCollapsibleGeneralInformation);
         }
-
-//        oerebResultColumn.add(oerebCollapsibleDiv);
-        
         return div;
     }
 
@@ -1751,13 +1074,6 @@ public class AppEntryPoint implements EntryPoint {
         div.appendChild(div().css("fakeColumn").element());
         
         return div;
-
-//        {
-//            MaterialColumn fakeColumn = new MaterialColumn();
-//            fakeColumn.addStyleName("fakeColumn mt15");
-//            fakeColumn.setGrid("s12");
-//            cadastralSurveyingResultColumn.add(fakeColumn);
-//        }
     }
 
     public final class MapSingleClickListener implements ol.event.EventListener<MapBrowserEvent> {
@@ -1769,107 +1085,66 @@ public class AppEntryPoint implements EntryPoint {
         }
     }
 
-    // Creates an material row from the restriction object.
-//    private MaterialRow processRestrictionRow(Restriction restriction, GeometryType type) {
-//        MaterialRow informationRow = new MaterialRow();
-//        informationRow.setMarginBottom(10);
-//
-//        MaterialColumn typeColumn = new MaterialColumn();
-//        typeColumn.setGrid("s6");
-//        typeColumn.setPadding(0);
-//        typeColumn.setMarginRight(0);
-//        typeColumn.setFontSize(BODY_FONT_SIZE);
-//        Label lbl = new Label(restriction.getInformation());
-//        typeColumn.add(lbl);
-//
-//        MaterialColumn symbolColumn = new MaterialColumn();
-//        symbolColumn.setPadding(0);
-//        symbolColumn.setMarginRight(0);
-//        symbolColumn.setGrid("s1");
-//        symbolColumn.setTextAlign(TextAlign.CENTER);
-//        symbolColumn.setVerticalAlign(VerticalAlign.MIDDLE);
-//
-//        Span helper = new Span();
-//        helper.setDisplay(Display.INLINE_BLOCK);
-//        helper.setVerticalAlign(VerticalAlign.MIDDLE);
-//        symbolColumn.add(helper);
-//
-//        com.google.gwt.user.client.ui.Image symbolImage;
-//        if (restriction.getSymbol() != null) {
-//            symbolImage = new com.google.gwt.user.client.ui.Image(restriction.getSymbol());
-//        } else {
-//            symbolImage = new com.google.gwt.user.client.ui.Image(
-//                    UriUtils.fromSafeConstant(restriction.getSymbolRef()));
-//        }
-//        symbolImage.setWidth("30px");
-//        symbolImage.getElement().getStyle().setProperty("border", "1px solid black");
-//        symbolImage.getElement().getStyle().setProperty("verticalAlign", "middle");
-//        symbolColumn.add(symbolImage);
-//
-//        /*
-//         * symbolColumn.addMouseOverHandler(event -> { GWT.log("mouse over symbol"); });
-//         * 
-//         * symbolColumn.addMouseOutHandler(event -> { GWT.log("mouse out symbol"); });
-//         */
-//
-//        MaterialColumn shareColumn = new MaterialColumn();
-//        shareColumn.setTextAlign(TextAlign.RIGHT);
-//        shareColumn.setPadding(0);
-//        shareColumn.setGrid("s3");
-//        shareColumn.setFontSize(BODY_FONT_SIZE);
-//
-//        if (type == GeometryType.POLYGON) {
-//            HTML htmlArea;
-//            if (restriction.getAreaShare() < 0.1) {
-//                htmlArea = new HTML("< 0.1 m<sup>2</sup>");
-//            } else {
-//                htmlArea = new HTML(fmtDefault.format(restriction.getAreaShare()) + " m<sup>2</sup>");
-//            }
-//            shareColumn.add(htmlArea);
-//        }
-//        if (type == GeometryType.LINE) {
-//            HTML htmlLength;
-//            if (restriction.getLengthShare() < 0.1) {
-//                htmlLength = new HTML("< 0.1 m");
-//            } else {
-//                htmlLength = new HTML(fmtDefault.format(restriction.getLengthShare()) + " m");
-//            }
-//            shareColumn.add(htmlLength);
-//        }
-//        if (type == GeometryType.POINT) {
-//            HTML htmlPoints = new HTML(fmtDefault.format(restriction.getNrOfPoints()) + " " + messages.plrNrOfPoints());
-//            shareColumn.add(htmlPoints);
-//        }
-//        if (type == null) {
-//            HTML html = new HTML();
-//            shareColumn.add(html);
-//        }
-//
-//        MaterialColumn sharePercentColumn = new MaterialColumn();
-//        sharePercentColumn.setTextAlign(TextAlign.RIGHT);
-//        sharePercentColumn.setPadding(0);
-//        sharePercentColumn.setGrid("s2");
-//        sharePercentColumn.setFontSize(BODY_FONT_SIZE);
-//
-//        if (type == GeometryType.POLYGON && restriction.getPartInPercent() != null) {
-//            HTML htmlArea;
-//            if (restriction.getPartInPercent() < 0.1) {
-//                htmlArea = new HTML("< 0.1");
-//            } else {
-//                htmlArea = new HTML(fmtPercent.format(restriction.getPartInPercent()));
-//            }
-//            sharePercentColumn.add(htmlArea);
-//        } else {
-//            sharePercentColumn.add(new HTML("&nbsp;"));
-//        }
-//
-//        informationRow.add(typeColumn);
-//        informationRow.add(symbolColumn);
-//        informationRow.add(shareColumn);
-//        informationRow.add(sharePercentColumn);
-//
-//        return informationRow;
-//    }
+    private HTMLElement processRestrictionRow(Restriction restriction, GeometryType type) {
+        Row row = Row.create().css("restrictionRow");
+        
+        row.appendChild(Column.span6().setTextContent(restriction.getInformation()));
+        
+        // TODO
+        // Testen, ob es mit base64 funktionert.
+        // Anhand des base64 Strings sieht man, ob es png ist oder was anderes. 
+        String srcAttr;
+        if (restriction.getSymbol() != null) {
+            srcAttr = "data:image/png;base64, " + restriction.getSymbol();
+        } else {
+            srcAttr = restriction.getSymbolRef();
+        }
+        HTMLElement symbol = img().attr("src", srcAttr)
+                .attr("alt", "Symbol " + restriction.getInformation())
+                .attr("width", "30px")
+                .style("border: 1px solid black").element();
+
+        row.appendChild(Column.span1().appendChild(symbol));
+
+        if (type == GeometryType.POLYGON) {
+            Column col = Column.span3().style().setTextAlign("right").get();
+            if (restriction.getAreaShare() < 0.1) {
+                col.appendChild(span().innerHtml(SafeHtmlUtils.fromTrustedString("< 0.1 m<sup>2</sup>")));
+            } else {
+                col.appendChild(span().innerHtml(SafeHtmlUtils.fromTrustedString(fmtDefault.format(restriction.getAreaShare()) + " m<sup>2</sup>")));
+            }
+            row.appendChild(col);
+        }
+
+        if (type == GeometryType.POLYGON && restriction.getPartInPercent() != null) {
+            Column col = Column.span2().style().setTextAlign("right").get();
+            if (restriction.getPartInPercent() < 0.1) {
+                col.appendChild(span().textContent("< 0.1"));
+            } else {
+                col.appendChild(span().textContent(fmtPercent.format(restriction.getPartInPercent())));
+            }
+            row.appendChild(col);
+        }
+
+        if (type == GeometryType.LINE) {
+            Column col = Column.span3().style().setTextAlign("right").get();            
+            if (restriction.getLengthShare() < 0.1) {
+                col.appendChild(span().textContent("< 0.1 m"));
+            } else {
+                col.appendChild(span().textContent(fmtDefault.format(restriction.getLengthShare()) + " m"));
+
+            }
+            row.appendChild(col);            
+        }
+
+        if (type == GeometryType.POINT) {
+            Column col = Column.span3().style().setTextAlign("right").get();
+            String str = fmtDefault.format(restriction.getNrOfPoints()) + " " + messages.plrNrOfPoints();
+            col.appendChild(span().textContent(str));
+            row.appendChild(col);                        
+        }
+        return row.element();        
+    }
 
     // Creates an ol3 wms layer.
     private Image createOerebWmsLayer(ReferenceWMS referenceWms) {
@@ -1899,6 +1174,8 @@ public class AppEntryPoint implements EntryPoint {
         } else {
             wmsLayer.setOpacity(referenceWms.getLayerOpacity());
         }
+        // Kann leider nicht wirklich angewendet werden, da die 
+        // Hintergrundkarten nicht zwingend transparent sind.
         // wmsLayer.setZIndex(referenceWms.getLayerIndex());
         return wmsLayer;
     }
@@ -2002,18 +1279,4 @@ public class AppEntryPoint implements EntryPoint {
     private static native void updateURLWithoutReloading(String newUrl) /*-{
         $wnd.history.pushState(newUrl, "", newUrl);
     }-*/;
-
-    // TODO: braucht es das noch?
-    // String.format() is not available in GWT hence we need to
-    // create our own implementation.
-//    private static String format(final String format, final String... args) {
-//        String[] split = format.split("%s");
-//        final StringBuffer msg = new StringBuffer();
-//        for (int pos = 0; pos < split.length - 1; pos += 1) {
-//            msg.append(split[pos]);
-//            msg.append(args[pos]);
-//        }
-//        msg.append(split[split.length - 1]);
-//        return msg.toString();
-//    }
 }
