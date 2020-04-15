@@ -32,9 +32,6 @@ Build fat jar and docker image:
 BUILD_NUMBER=9999 mvn package
 ```
 
-
-
-
 ## Run 
 ```
 docker run -p 9090:8080 sogis/grundstuecksinformation-client
@@ -56,7 +53,7 @@ Testrequests:
 - http://grundstuecksinformation.ch/?egrid=CH575291772384 (Unterentfelden)
 - http://grundstuecksinformation.ch/?egrid=CH527789999186 (Züri)
 
-https://map.geo.sz.ch/oereb/wsgi/oereb/extract/reduced/xml/CH207740742262
+- https://map.geo.sz.ch/oereb/wsgi/oereb/extract/reduced/xml/CH207740742262
 
 ```
 https://wfs.geodienste.ch/av/deu?&VERSION=1.0.0&SERVICE=WFS&REQUEST=DescribeFeatureType&TYPENAME=ms:DPRSF
