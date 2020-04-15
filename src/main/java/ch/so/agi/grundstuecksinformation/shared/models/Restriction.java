@@ -11,6 +11,8 @@ public class Restriction implements IsSerializable {
     
     private String typeCode;
     
+    private String typeCodeList;
+    
     private Integer areaShare;
     
     private Integer lengthShare;
@@ -55,6 +57,14 @@ public class Restriction implements IsSerializable {
 
     public void setTypeCode(String typeCode) {
         this.typeCode = typeCode;
+    }
+
+    public String getTypeCodeList() {
+        return typeCodeList;
+    }
+
+    public void setTypeCodeList(String typeCodeList) {
+        this.typeCodeList = typeCodeList;
     }
 
     public Integer getAreaShare() {

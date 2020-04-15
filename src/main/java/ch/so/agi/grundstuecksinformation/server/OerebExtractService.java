@@ -173,7 +173,7 @@ public class OerebExtractService {
          */
         
         /*
-         * Weil Kantone Subthemen völlig anders behandeln und verwenden, muss dies auch beim Verarbeiten
+         * Weil Kantone Subthemen völlig anders behandeln und verwenden, muss dem auch beim Verarbeiten
          * und Darstellen im Client Rechnung getragen werden.
          * Auf Serverseite muss die Kombination Theme.Text.Text + Subtheme gruppiert werden.
          * Im Client für das Beschriften der Handorgeln wir geprüft, ob - falls vorhanden - das Subthema
@@ -227,6 +227,47 @@ public class OerebExtractService {
                     })
                     .collect(Collectors.toMap(Restriction::getTypeCode, Function.identity()));
             logger.debug("Typcode/SimpleRestriction-Map: " + restrictionsMap.toString());
+            
+            
+            Map<TypeTuple, Restriction> restrictionsMapTypeTuple = xmlRestrictions
+                    .stream()
+                    .filter(distinctByKey(r -> {
+                        return new TypeTuple(r.getTypeCode(), r.getTypeCodelist());
+                    }))
+                    .map(r -> {
+                        Restriction restriction = new Restriction();
+                        restriction.setInformation(getLocalisedText(r.getInformation(), DE));
+                        restriction.setTypeCode(r.getTypeCode());
+                        restriction.setTypeCodeList(r.getTypeCodelist());
+                        if (r.getSymbol() != null) {
+                            String encodedImage = Base64.encode(r.getSymbol());
+                            encodedImage = "data:image/png;base64," + encodedImage;
+                            restriction.setSymbol(encodedImage);
+                        } else if (r.getSymbolRef() != null) {
+                            try {
+                                String symbolUrl = URLDecoder.decode(r.getSymbolRef(), StandardCharsets.UTF_8.toString());
+                                restriction.setSymbolRef(symbolUrl);
+                            } catch (UnsupportedEncodingException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        return restriction;
+                    })
+                    .collect(Collectors.toMap(r -> {
+                        return new TypeTuple(r.getTypeCode(), r.getTypeCodeList());
+                    }, Function.identity()));
+
+            logger.info("*********: " + restrictionsMapTypeTuple.toString());
+            
+            
+            // Entweder ist es ne gute Idee und würde vielleicht auch auf Clientseite übersichtlicher
+            // und logischer werden oder es ist scheisse.
+            
+   
+            // Die Shares müssen dann auch über die TypeTuples gehen!
+            // Ebenso alles was sonst an den TypeCode alleine angehängt ist...
+            
+                
 
             // Die Summe der sogenannten Shares (Fläche(prozent)/Länge/Anzahl Punkte) pro
             // Typecode.
@@ -420,9 +461,7 @@ public class OerebExtractService {
                         }
                     }
                     lawsList.add(law);
-                }
-
-                
+                } 
             }
 
             // Because restrictions can share the same legal provision and laws,
@@ -506,8 +545,6 @@ public class OerebExtractService {
         // TODO: 'Generic' sorting of themes... including possible subthemes?!        
         //concernedThemesList.sort(compare);        
         logger.debug("===========Concerned themes===========");
-        
-        
         
         RealEstateDPRType xmlRealEstateDPR = xmlExtract.getRealEstate();
         realEstateDPR.setEgrid(xmlRealEstateDPR.getEGRID());
