@@ -162,11 +162,11 @@ body .black{
 
 #resultTabs div.flex-layout {
     justify-content: center;
-    color:#2196F3;
+    /*color: #2196F3;*/
 }
 
 .cadastralSurveyingInfoKey {
-    font-weight: bold;
+    font-weight: 600;
     display: inline-block; /* needed for setting width of span element */    
     width: 40%;
 }
@@ -182,12 +182,17 @@ body .black{
     color: black !important;
 }
 
+/*
 .panel-group .panel+.panel {
 	margin-top: 15px !important;
 }
-
+*/
 .panel-body {
 	padding: 0px;
+}
+
+.panel-group {
+    margin-bottom: -1px !important;
 }
 
 .oerebAccordionPanelHeaderElement h4.panel-title {
@@ -211,18 +216,42 @@ body .black{
     margin: 0px 0px 0px 0px;
 } 
 
+.oerebAccordionPanelTheme h4 {
+    font-weight: 600;
+}
+
 .oerebAccordionPanelTheme ul {
     margin-bottom: 0px !important; 
 } 
 
 .themeList {	
     border: 1px solid #e0e0e0;
-    margin: 0px -1px 0px -1px;
+    margin: -1px -1px 0px -1px;
 }
 
 .generalInformation {
     color: black;	
 }
+
+#oerebAccordionConcernedTheme h4 {
+	font-size: 13px;
+}
+
+.oerebAccordionPanelConcernedTheme {
+	border: 1px solid #e0e0e0;
+    margin: -1px -1px 0px -1px !important;	
+}
+
+.oerebThemeContent {
+	color: black;
+	padding: 10px 15px 10px 15px;
+}
+
+/*
+.oerebAccordionPanelConcernedTheme {
+    margin-top: 0px !important;
+}
+*/
 
 #errorModal p {
 	text-align: left;

@@ -15,6 +15,7 @@ import org.dominokit.domino.ui.chips.Chip;
 import org.dominokit.domino.ui.collapsible.Accordion;
 import org.dominokit.domino.ui.collapsible.AccordionPanel;
 import org.dominokit.domino.ui.collapsible.Collapsible;
+import org.dominokit.domino.ui.collapsible.Collapsible.HideCompletedHandler;
 import org.dominokit.domino.ui.collapsible.Collapsible.ShowCompletedHandler;
 import org.dominokit.domino.ui.dialogs.MessageDialog;
 import org.dominokit.domino.ui.dropdown.DropDownMenu;
@@ -503,12 +504,10 @@ public class AppEntryPoint implements EntryPoint {
                     // geheftet (was mir noch egal wäre) aber ich schaffe das drag n droppen 
                     // nicht, was ich in diesem Fall notwendig fände.
                     DivElement overlay = Js.cast(popupElement);
-                    
                     OverlayOptions overlayOptions = OLFactory.createOptions();
                     overlayOptions.setElement(overlay);
                     overlayOptions.setPosition(event.getCoordinate());
                     overlayOptions.setOffset(OLFactory.createPixel(0, 0));
-                    
                     realEstatePopup = new Overlay(overlayOptions);
                     map.addOverlay(realEstatePopup);
                 } else if (egridList.size() > 1) {
@@ -650,8 +649,8 @@ public class AppEntryPoint implements EntryPoint {
                         .get();
 
                 HTMLElement tabsPanel = TabsPanel.create().setId("resultTabs")
-                    .setBackgroundColor(Color.WHITE)
-                    .setColor(Color.BLUE)
+                    .setBackgroundColor(Color.BLUE)
+                    .setColor(Color.WHITE)
                     .appendChild(tabCadastre)
                     .appendChild(tabLandRegister.appendChild(span().textContent("N/A")))
                     .appendChild(tabPlr)
@@ -790,10 +789,14 @@ public class AppEntryPoint implements EntryPoint {
         {
             Button pdfBtn = Button.create(Icons.ALL.file_pdf_box_outline_mdi())
                 .setContent("PDF")
-                .setBackground(Color.LIGHT_BLUE)
+//                .setBackground(Color.LIGHT_BLUE)
+                .setBackground(Color.WHITE)
                 .style()
+                .setColor("#2196F3")
                 .setPadding("5px 5px 5px 0px;")
                 .setMinWidth(px.of(120)).get();
+            
+            pdfBtn.setTooltip(messages.resultPDFTooltip());
                     
             pdfBtn.addClickListener(event -> {
                 Window.open(realEstateDPR.getOerebPdfExtractUrl(), "_blank", null);
@@ -809,7 +812,7 @@ public class AppEntryPoint implements EntryPoint {
         // TODO: eventuell brauche ich das gar nicht. 
         // Drei einzelne Accordions?
         Accordion oerebAccordion = Accordion.create()
-                .setHeaderBackground(Color.GREY_LIGHTEN_2)
+                .setHeaderBackground(Color.GREY_LIGHTEN_4)
                 .style()
                 .setMarginTop("20px")
                 .get();
@@ -823,6 +826,7 @@ public class AppEntryPoint implements EntryPoint {
 //            oerebAccordion.appendChild(oerebAccordionPanelConcernedTheme);
 
             AccordionPanel oerebAccordionPanelConcernedTheme = AccordionPanel.create(messages.concernedThemes());
+            oerebAccordionPanelConcernedTheme.elevate(0);
             oerebAccordionPanelConcernedTheme.css("oerebAccordionPanelTheme");
             DominoElement<HTMLDivElement> oerebAccordionPanelConcernedThemeHeaderElement = oerebAccordionPanelConcernedTheme.getHeaderElement();
             oerebAccordionPanelConcernedThemeHeaderElement.addCss("oerebAccordionPanelHeaderElement");
@@ -835,22 +839,15 @@ public class AppEntryPoint implements EntryPoint {
                     .setTextAlign("center").get();
             oerebAccordionPanelConcernedThemeHeaderElement.appendChild(span().css("oerebAccordionPanelHeaderChip").add(chip));
             
-            List<String> concernedThemeItems = realEstateDPR.getOerebConcernedThemes().stream().map(ConcernedTheme::getName).collect(Collectors.toList());
-            ListGroup<String> listGroup = ListGroup.<String>create()
-                    .setBordered(false)
-                    .setItemRenderer((listGroup1, listItem) -> {
-                        listItem.appendChild(div()
-                                .css(Styles.padding_10)
-                                .css("themeList")
-                                .add(span().textContent(listItem.getValue())));                        
-                    })
-                    .setItems(concernedThemeItems);
-            oerebAccordionPanelConcernedTheme.setContent(listGroup);
             oerebAccordion.appendChild(oerebAccordionPanelConcernedTheme);
 
-            oerebAccordionPanelConcernedTheme.addEventListener(EventType.click, new EventListener() {
+            //TODO
+            // Event listener nur auf dem Header Element. Ansonsten schliesst es sich 
+            // auch wenn ich auf einen Sub-Panel klicke.
+            oerebAccordionPanelConcernedTheme.getHeaderElement().addEventListener(EventType.click, new EventListener() {
                 @Override
                 public void handleEvent(Event evt) {
+                    console.log("Betroffene Themen Panel Header clicked.");
                     if (!oerebAccordionPanelConcernedThemeState) {
                         oerebAccordionPanelConcernedTheme.show();
                         oerebAccordionPanelConcernedThemeState = true;
@@ -860,6 +857,119 @@ public class AppEntryPoint implements EntryPoint {
                     }            
                 }
             });  
+            
+            Accordion accordion = Accordion.create()
+                    .setId("oerebAccordionConcernedTheme")
+                    .setHeaderBackground(Color.WHITE);
+            
+            if (realEstateDPR.getOerebConcernedThemes().size() > 0) {
+                for (ConcernedTheme theme : realEstateDPR.getOerebConcernedThemes()) {
+                     
+                    Image wmsLayer = createOerebWmsLayer(theme.getReferenceWMS());
+                    map.addLayer(wmsLayer);
+
+                    // Cannot use the code since all subthemes share the same code.
+                    String layerId = theme.getReferenceWMS().getLayers();
+                    oerebWmsLayers.add(layerId);                    
+                    
+                    /*
+                    * Wegen des unterschiedlichen Umgangs mit Subthemen wird
+                    * es ein klein wenig kompliziert...
+                    * Falls wir nur SO unterstützen, wäre es einfacher.
+                    */
+                    String panelTitle;
+                    if (theme.getSubtheme() != null && !theme.getSubtheme().isEmpty()) {
+                        if (!theme.getSubtheme().substring(0, 2).equals("ch")) {
+                            panelTitle = theme.getName() + " - " + theme.getSubtheme();
+                        } else {
+                            panelTitle = theme.getName();
+                        }
+                    } else {
+                        panelTitle = theme.getName();
+                    }
+//                 
+                    
+                    AccordionPanel accordionPanel = AccordionPanel.create(panelTitle).css("oerebAccordionPanelConcernedTheme");
+                    accordionPanel.setContent(div().css("oerebThemeContent").textContent(theme.getReferenceWMS().getLayers()));
+                    accordionPanel.elevate(0);
+                    accordionPanel.setId(layerId);
+                    
+                    accordionPanel.addShowListener(new ShowCompletedHandler() {
+                        @Override
+                        public void onShown() {
+                            console.log("inner accordion panel clicked (onShown)");
+                            Image wmsLayer = (Image) getMapLayerById(layerId);
+                            wmsLayer.setVisible(true); 
+                        } 
+                    });
+                    
+                    accordionPanel.addHideListener(new HideCompletedHandler() {
+                        @Override
+                        public void onHidden() {
+                            console.log("inner accordion panel clicked (onHidden)");
+                            Image wmsLayer = (Image) getMapLayerById(layerId);
+                            wmsLayer.setVisible(false); 
+                        } 
+                    });
+                    
+                    
+                    accordion.appendChild(accordionPanel);
+                }
+                
+                
+                // Handle visibility of oereb wms layers.
+                // Show them only if oereb tab is selected.
+                accordion.addEventListener(EventType.click, new EventListener() {
+                    @Override
+                    public void handleEvent(Event evt) {
+                        
+                    }
+                });
+                
+                
+                
+//              oerebInnerCollapsibleConcernedTheme.addExpandHandler(event -> {
+//                  expandedOerebLayerId = event.getTarget().getId();
+//                  if (resultTab.getTabIndex() == 2) {
+//                      for (String layerId : oerebWmsLayers) {
+//                          Image wmsLayer = (Image) getMapLayerById(layerId);
+//                          if (layerId.equalsIgnoreCase(expandedOerebLayerId)) {
+//                              wmsLayer.setVisible(true);
+//                          } else {
+//                              wmsLayer.setVisible(false);
+//                          }
+//                      }
+////                    MaterialCollapsibleItem item = event.getTarget();
+////                    MaterialCollapsibleHeader header = item.getHeader();
+////                    List<Widget> children = header.getChildrenList();
+////                    for (Widget child : children) {
+////                        if (child instanceof gwt.material.design.client.ui.MaterialLink) {
+////                            MaterialLink link = (MaterialLink) child;
+////                            link.setIconType(IconType.EXPAND_LESS);
+////                        }
+////                    }
+//                  }
+//              });
+//
+//              oerebInnerCollapsibleConcernedTheme.addCollapseHandler(event -> {
+//                  expandedOerebLayerId = null;
+//                  Image wmsLayer = (Image) getMapLayerById(event.getTarget().getId());
+//                  wmsLayer.setVisible(false);
+////                MaterialCollapsibleItem item = event.getTarget();
+////                MaterialCollapsibleHeader header = item.getHeader();
+////                List<Widget> children = header.getChildrenList();
+////                for (Widget child : children) {
+////                    if (child instanceof gwt.material.design.client.ui.MaterialLink) {
+////                        MaterialLink link = (MaterialLink) child;
+////                        link.setIconType(IconType.EXPAND_MORE);
+////                    }
+////                }
+//              });
+                
+                
+                oerebAccordionPanelConcernedTheme.appendChild(accordion);
+            }
+            
             
             
             
@@ -1329,6 +1439,7 @@ public class AppEntryPoint implements EntryPoint {
         {
             AccordionPanel oerebAccordionPanelNotConcernedTheme = AccordionPanel.create(messages.notConcernedThemes());
             oerebAccordionPanelNotConcernedTheme.css("oerebAccordionPanelTheme");
+            oerebAccordionPanelNotConcernedTheme.elevate(0);            
             DominoElement<HTMLDivElement> oerebAccordionPanelNotConcernedThemeHeaderElement = oerebAccordionPanelNotConcernedTheme.getHeaderElement();
             oerebAccordionPanelNotConcernedThemeHeaderElement.addCss("oerebAccordionPanelHeaderElement");
             
@@ -1430,7 +1541,8 @@ public class AppEntryPoint implements EntryPoint {
 
         {
             AccordionPanel oerebAccordionPanelThemesWithoutData = AccordionPanel.create(messages.themesWithoutData());
-            oerebAccordionPanelThemesWithoutData.css("oerebAccordionPanelTheme");            
+            oerebAccordionPanelThemesWithoutData.css("oerebAccordionPanelTheme");  
+            oerebAccordionPanelThemesWithoutData.elevate(0);       
             DominoElement<HTMLDivElement> oerebAccordionPanelThemesWithoutDataElement = oerebAccordionPanelThemesWithoutData.getHeaderElement();
             oerebAccordionPanelThemesWithoutDataElement.addCss("oerebAccordionPanelHeaderElement");
             
@@ -1534,6 +1646,7 @@ public class AppEntryPoint implements EntryPoint {
         {
             AccordionPanel oerebAccordionPanelGeneralInformation = AccordionPanel.create(messages.generalInformation());
             oerebAccordionPanelGeneralInformation.css("oerebAccordionPanelTheme");            
+            oerebAccordionPanelGeneralInformation.elevate(0);
             DominoElement<HTMLDivElement> oerebAccordionPanelNotConcernedThemeHeaderElement = oerebAccordionPanelGeneralInformation.getHeaderElement();
             oerebAccordionPanelNotConcernedThemeHeaderElement.addCss("oerebAccordionPanelHeaderElement");
             
@@ -1801,7 +1914,6 @@ public class AppEntryPoint implements EntryPoint {
             wmsLayer.setOpacity(referenceWms.getLayerOpacity());
         }
         // wmsLayer.setZIndex(referenceWms.getLayerIndex());
-
         return wmsLayer;
     }
 
