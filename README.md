@@ -32,9 +32,6 @@ Build fat jar and docker image:
 BUILD_NUMBER=9999 mvn package
 ```
 
-
-
-
 ## Run 
 ```
 docker run -p 9090:8080 sogis/grundstuecksinformation-client
