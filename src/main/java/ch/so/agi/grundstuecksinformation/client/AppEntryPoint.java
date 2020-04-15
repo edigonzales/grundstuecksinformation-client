@@ -155,6 +155,8 @@ public class AppEntryPoint implements EntryPoint {
     // List with all oereb wms layer that will be added to the ol3 map
     // and removed from it afterwards.
     private ArrayList<String> oerebWmsLayers = new ArrayList<String>();
+    
+    private HashMap<String, Boolean> innerOerebPanelStateMap = new HashMap<String, Boolean>();
 
     public void onModuleLoad() {
         settingsService.settingsServer(new AsyncCallback<SettingsResponse>() {
@@ -330,7 +332,9 @@ public class AppEntryPoint implements EntryPoint {
         oerebAccordionPanelConcernedThemeState = false;
         oerebAccordionPanelNotConcernedThemeState = false;
         oerebAccordionPanelThemesWithoutDataState = false;
-        oerebAccordionPanelGeneralInformationState = false;        
+        oerebAccordionPanelGeneralInformationState = false;   
+        
+        innerOerebPanelStateMap.clear();
     }
 
     private void sendCoordinateToServer(String XY, MapBrowserEvent event) {
@@ -687,6 +691,8 @@ public class AppEntryPoint implements EntryPoint {
                     String layerId = theme.getReferenceWMS().getLayers();
                     oerebWmsLayers.add(layerId);                    
                     
+                    innerOerebPanelStateMap.put(layerId, false);
+                    
                     /*
                     * Wegen des unterschiedlichen Umgangs mit Subthemen wird
                     * es ein klein wenig kompliziert...
@@ -720,6 +726,7 @@ public class AppEntryPoint implements EntryPoint {
                         public void onHidden() {
                             Image wmsLayer = (Image) getMapLayerById(layerId);
                             wmsLayer.setVisible(false); 
+                            innerOerebPanelStateMap.put(accordionPanel.getId(), false);
                         } 
                     });
                     
@@ -728,6 +735,16 @@ public class AppEntryPoint implements EntryPoint {
                     accordionPanel.addEventListener(EventType.click, new EventListener() {
                         @Override
                         public void handleEvent(Event evt) {
+                            console.log("vorher: " + accordionPanel.getId() + " " + innerOerebPanelStateMap.get(accordionPanel.getId()));
+                            if (innerOerebPanelStateMap.get(accordionPanel.getId())) {
+                                innerOerebPanelStateMap.put(accordionPanel.getId(), false);
+                                accordionPanel.hide();
+                            } else {
+                                innerOerebPanelStateMap.put(accordionPanel.getId(), true);
+                                accordionPanel.show();
+                            }
+                            console.log("nachher: " + accordionPanel.getId() + " " + innerOerebPanelStateMap.get(accordionPanel.getId()));
+
                             evt.stopPropagation();
                         }
                     });
