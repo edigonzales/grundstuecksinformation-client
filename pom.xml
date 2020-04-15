@@ -191,7 +191,7 @@
 								<argument>build</argument>
 								<argument>.</argument>
 								<argument>-t</argument>
-								<argument>sogis/grundstuecksinformation-client:1.0.${env.BUILD_NUMBER}</argument>
+								<argument>sogis/grundstuecksinformation-client:1.1.${env.BUILD_NUMBER}</argument>
 								<argument>-t</argument>
 								<argument>sogis/grundstuecksinformation-client:latest</argument>
 								<argument>--build-arg</argument>
@@ -219,7 +219,7 @@
 								<argument>build</argument>
 								<argument>.</argument>
 								<argument>-t</argument>
-								<argument>sogis/grundstuecksinformation-client:1.0.${env.BUILD_NUMBER}</argument>
+								<argument>sogis/grundstuecksinformation-client:1.1.${env.BUILD_NUMBER}</argument>
 								<argument>-t</argument>
 								<argument>sogis/grundstuecksinformation-client:latest</argument>
 								<argument>--build-arg</argument>
