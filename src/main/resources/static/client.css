@@ -1,41 +1,24 @@
-body /*, html*/ {
+body {
     margin: 0px;
     padding: 0px;
-    background: #fafafa; /* #f5f5f5 */
-    font-family: Barlow, 'IBM Plex Sans', sans-serif;    
-    /*font-size: 16px;*/
-    /*height:100%;*/    
+    background: #fafafa; 
 }
 
 body, div {
-    /*font-family: 'Barlow Semi Condensed', Barlow, sans-serif;   
-    font-family: 'IBM Plex Sans', sans-serif;   
-    font-family: 'IBM Plex Sans Condensed', sans-serif;*/   
-    font-family: Roboto, sans-serif;   
-    /*font-family: 'Roboto Condensed', sans-serif;*/
-    color: rgba(0, 0, 0, 0.87);  
-    /*font-size: 16px;*/
+    font-family: 'Fira Sans', sans-serif;   
+}
+
+.waitMe {
+	background: rgba(255, 255, 255, 0.7) !important;
 }
 
 #map {
     height: 100%;
 }
 
-/* This is a bit a hack... */
-/* Color and opacity while loading... */
-body .black{
-    background-color: rgba(255, 255, 255, 0.75) !important;
-    opacity: 0.9 !important;
-}
-
-#infoButton {
-    position: absolute !important;
-    top: 20px !important;
-    right: 20px !important;
-}
-
 #searchCard {
-    background-color: #fafafa; /* GREY_LIGHTEN_5 */
+    background-color: white;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
     position: absolute;
     margin-top: 0px;
     margin-left: 0px;
@@ -48,26 +31,42 @@ body .black{
     max-width: calc(100% - 30px);
 }
 
-#searchCardContent {
-    padding: 15px;
+#logoDiv {
+	padding: 10px;
 }
 
-.suggestPopupContent {
-    cursor: pointer !important;
+#suggestBoxDiv {
+	padding: 10px;
 }
 
-#logoColumn {
-    margin: 0px;
-    padding: 0px;
-    text-align: left;
+#realEstatePopup {
+	position: absolute;
+	width: 300px;
+	font-size: 16px;
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);	
 }
 
-#searchRow {
-    margin-bottom: 2px;
+#realEstatePopupHeader {
+	padding: 10px;
+	font-weight: bold;
+	width: 100%;
+	color: white;
+	background-color: #2196F3 
+}
+
+#realEstatePopupClose {
+    float: right;
+}
+
+.realEstatePopupRow {
+	padding: 5px 10px 5px 10px;
+	width: 100%;
+	background-color: white;
 }
 
 #resultCard {
-    background-color: #fafafa; /* GREY_LIGHTEN_5 */
+    background-color: white; 
+    box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16), 0 2px 10px 0 rgba(0,0,0,0.12);
     transition: height 0.5s;
     position: absolute;
     margin-top: 0px;
@@ -94,8 +93,12 @@ body .black{
     background-image: linear-gradient(rgba(250, 250, 250, 0) 0%, rgba(250, 250, 250, 1) 100%);
 }
 
+#resultDiv {
+	background-color: white;
+}
+
 #resultHeaderRow {
-    background-color: #fafafa; /* GREY_LIGHTEN_5 */
+    background-color: white; /*#fafafa;*/ /* GREY_LIGHTEN_5 */
     margin-bottom: 5px;
     position: sticky;
     top: 0px;
@@ -105,427 +108,167 @@ body .black{
     height: 58px;
 }
 
-#resultParcelColumn {
+#resultParcelSpan {
     margin: 0px;
-    padding: 0px !important;
-    font-size: 18px;
-    font-weight: 700;
-    height: 58px;
-    line-height: 58px;    
-}
-
-#resultButtonColumn {
-    padding: 0px !important;
-    text-align: right;
-    height: 58px;
-    line-height: 58px;
-}
-
-#deleteExtractButtonColumn {
     padding: 0px;
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 58px;
+    display: inline-block; /* needed for setting width of span element */    
+    width: 70%; /* Zeilenumbrüche mit line-height sind schlecht. Eventuell mit den Prozenten spielen, damit es im Bedarfsfall nicht allzu schlecht aussieht. */     
 }
 
-#deleteExtractButton {
-    background-color: #ef5350; /* RED_LIGHTEN_1 */
+#closeExtractButton {
+    line-height: 58px; 
 }
 
-#minmaxExtractButton {
-    background-color: #ef5350; /* RED_LIGHTEN_1 */
+#expandExtractButton {
+    line-height: 58px; 
 }
 
-#tabRow {
-    margin-bottom: 0px !important;
-    martin-top: 0px !important;
+#resultButtonSpan {
+    margin: 0px;
+    padding: 0px;
+    line-height: 58px;
+    text-align: right;
+    display: inline-block;
+    width: 30%;     
 }
 
-#tabHeaderColumn {
-    padding: 0px !important;    
-} 
-
-#resultTab {
-    /*background-color: #aed634 !important;*/
-    font-size: 14px !important;
+#resultTabs div.flex-layout {
+    justify-content: center;
+    /*color: #2196F3;*/
 }
 
-.resultColumn {
-    padding: 15px 0px 0px 0px !important;    
+.cadastralSurveyingInfoKey {
+    font-weight: 600;
+    display: inline-block; /* needed for setting width of span element */    
+    width: 40%;
+}
+
+.fontSemiBold {
+	font-weight: 600;
 }
 
 .fakeColumn {
-    padding: 0px !important;
+    padding: 15px 0px 0px 0px;
     border-bottom: 1px #bdbdbd solid;
 }
 
-.mt15 {
-    margin: 15px 0px 0px 0px !important;
-
-}
-
-.cadastralSurveyingInfoHeader {
-    padding: 0px !important;
-    margin: 15px 0px 0px 0px !important;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.cadastralSurveyingInfoKeyColumn {
-    padding: 0px !important;
-    margin: 0px !important;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.cadastralSurveyingInfoValueColumn {
-    padding: 0px !important;
-    margin: 0px !important;
-    font-size: 14px;
-    font-weight: 400;
-}
-
-.cadastralSurveyingInfoHeaderSmall {
-    padding: 0px !important;
-    margin-right: 0px !important;
-    font-size: 12px;
-}   
-
-.textRight {
-    text-align: right !important;
-}
-
-.landCoverShareKeyColumn {
-    padding: 0px !important;
-    margin: 0px !important;
-    font-size: 14px;
-    font-weight: 400;
-}
-
-.landCoverShareValueColumn {
-    padding: 0px !important;
-    margin: 0px !important;
-    font-size: 14px;
-    font-weight: 400;
-    text-align: right;
-}
-
-.buildingColumn {
-    padding: 0px !important;
-    margin: 0px 0px 10px 0px !important;
-    font-size: 14px;
-    font-weight: 400;
-}
-
-#plrPdfButtonColumn {
-    padding: 0px !important;
-    font-size: 14px;
-    font-weight: 700;   
+/* Damit die Farbe des Textes immer gleich ist und nicht aufgrund der Hintergrundfarbe
+ * automagisch ändert */
+.panel-title>a, .panel-title>small, .panel-title>.small, .panel-title>small>a, .panel-title>.small>a {
+    color: black !important;
 }
 
 
-/* */
-#pdfButtonColumn {
-    padding: 0px;
-    text-align: right;
+div.panel.oerebAccordionPanelTheme {
+	margin-top: 20px !important;
 }
 
-#pdfButton {
-    background-color: #ef5350; /* RED_LIGHTEN_1 */
+div.oerebAccordionPanelTheme h4 {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
 }
 
-#generalInfoRow {
-    margin-bottom: 10px;    
+.panel-body {
+	padding: 0px;
 }
 
-.headerInfoColumn {
-    margin: 0px;
-    padding: 0px !important;
-    font-size: 18px;
-    font-weight: 700;
+.panel-group {
+    margin-bottom: -1px !important;
 }
 
-.infoRow {
-    margin: 0px !important;
+.oerebAccordionPanelHeaderElement h4.panel-title {
+    display: inline-block; 
+    width: 80%;
 }
 
-.infoKeyColumn {
-    margin: 0px !important;
-    padding: 0px !important;
-    font-size: 16px;
-    font-weight: 700;
+.oerebAccordionPanelHeaderChip {
+    display: inline-block;
+    width: 20%;
+	text-align: right;
+	color: black;
 }
 
-.infoValueColumn {
-    margin: 0px !important;
-    padding: 0px !important;
-    font-size: 16px;
-    font-weight: 400;
+.oerebAccordionPanelHeaderChip div.chip-value {
+	text-align:center;
 }
 
-.plrTopLevelCollapsible {
-    background-color: #fafafa; /* GREY_LIGHTEN_5 */
-    margin-top: 25px;   
+.oerebAccordionPanelTheme {
+	border: 1px solid #e0e0e0;
+    margin: 0px 0px 0px 0px;
+} 
+
+.oerebAccordionPanelTheme h4 {
+    font-weight: 600;
 }
 
-.plrCollapsibleThemeHeader {
-    background-color: #eeeeee !important; /* GREY_LIGHTEN_3 */
+.oerebAccordionPanelTheme ul {
+    margin-bottom: 0px !important; 
+} 
+
+.themeList {	
+    border: 1px solid #e0e0e0;
+    margin: -1px -1px 0px -1px;
 }
 
-.collapsibleThemeHeaderRow {
-    margin-bottom: 0px !important;
+.generalInformation {
+    color: black;	
 }
 
-.collapsibleThemeColumnLeft {
-    margin: 0px !important;
-    padding: 0px !important;
+#oerebAccordionConcernedTheme h4 {
+	font-size: 13px;
 }
 
-.collapsibleThemeColumnRight {
-    margin: 0px !important;
-    padding: 0px !important;
-    text-align: right;
+.oerebAccordionPanelConcernedTheme {
+	border: 1px solid #e0e0e0;
+    margin: -1px -1px 0px -1px !important;	
 }
 
-.collapsibleThemesHeaderLink {
-    font-weight: 700;
-    font-size: 16px;
-    color: #000000 !important;
+div.oerebAccordionPanelConcernedTheme h4 {
+	padding-top: 5px !important;
+	padding-bottom: 5px !important;
 }
 
-.collapsibleThemesHeaderChip {
-    margin: 0px;
-    background-color: #bdbdbd !important; /* GREY_LIGHTEN_1 */
+.oerebThemeContent {
+	color: black;
+	padding: 10px 15px 10px 15px;
 }
 
-.concernedThemeCollapsible {
-    background-color: #eeeeee !important; /* GREY_LIGHTEN_3 */
-    margin-top: 0px !important;
-    margin-bottom: 0px !important;
-    border: 0px !important; 
+p.slide-container {
+	margin-bottom: 0px !important;
 }
 
-.collapsibleThemeLayerHeader {
-    background-color: #f5f5f5 !important; /* GREY_LIGHTEN_4 */
-    line-height: 18px;
-    display: table;
-    width: 100%;
-    height: 45px;   
-        
-    overflow: hidden !important;
+.restrictionRow {
+    padding: 5px 0px 5px 0px;	
 }
 
-.helperParent {
-    border: 0px;
-    display: table-cell;
-    vertical-align: middle;
-    
-    /*
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden !important;
-    */    
-}
-
-.collapsibleThemeLayerLink {
-    font-weight: bold;
-    font-size: 13px;
-    color: black; 
-    border: 0px;
-    /*font-family: 'Barlow Semi Condensed';*/
-    
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden !important;
-    display:inline-block;
-    
-    max-width: 430px;    
-}
-
-a.collapsibleThemeLayerLink:hover {
-    font-weight: bold;
-    font-size: 13px;
-    color: #d32f2f; /* RED_DARKEN_2 */ 
-    border: 0px;
-}
-
-.collapsibleThemeLayerBody {
-    background-color: white !important;
-    padding: 5px 15px 5px 15px !important;  
-}
-
-.opacitySliderRow {
-    margin-bottom: 0px !important;
-}
-
-.opacitySlider {
-    padding: 0px !important;
-}
-
-/* Bug? */
-.range-field .progress-container {
-    z-index: 0 !important;
-}
-
-input[type="range"] {
-    z-index: 2 !important;
-}
-
-.opacitySliderRowLeft {
-    font-size: 14px;
-    padding: 15px 0px 0px 0px !important;    
-}
-
-.layerInfoHeaderRow {
-    padding: 10px 0px 0px 0px !important;
-    border-bottom: 0px #bdbdbd solid;
-    border-top: 1px #bdbdbd solid;
-    /*margin-top: 15px !important;*/
-    margin-bottom: 5px !important;  
-}
-      
-.layerTypeColumn {
-    padding: 0px !important;
-    margin-right: 0px !important;
-    font-size: 12px;
-}   
-
-.layerSymbolColumn {
-    padding: 0px !important;
-    margin-right: 0px !important;
-    text-align: right;  
-}
-
-.layerShareColumn {
-    text-align: right;
-    padding: 0px !important;    
-}
-                 
-.layerPercentColumn {
-    text-align: right;
-    padding: 0px !important;    
-}        
-
-.layerLegendRow {
-    border-top: 1px #bdbdbd solid;
-    margin-bottom: 10px !important;
-        
-    /*
-    display:inline-block;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden !important;
-    */        
-}         
-
-.layerLegendColumn {
-    padding-top: 5px !important;
-    padding-bottom: 0px !important;
-    padding-left: 0px !important;
-    margin-right: 0px !important;
-    font-size: 14px;
-}    
 
 .resultLink {
-    color: #d32f2f; /* RED_DARKEN_2 */ 
+    color: #2196F3; 
 }
 
 a.resultLink:hover {
-    color: #d32f2f; /* RED_DARKEN_2 */ 
+    color: #2196F3;
     text-decoration: underline !important;
 }  
 
 a.resultLink:visited {
-    color: #d32f2f; /* RED_DARKEN_2 */ 
+    color: #2196F3; 
     text-decoration: underline !important;
-}    
+}  
 
-.documentsHeaderRow {
-    margin-bottom: 5px !important;
-    font-size: 14px;
-    font-weight: 700;
+#errorModal p {
+	text-align: left;
 }
 
-.documentRow {
-    margin-bottom: 0px !important;
-    font-size: 14px;    
+/* Weil Firefox Scrollbars hat, fehlt plötzlich Platz und
+ * die Tabs gehen kaputt. */
+.nav>li>a {
+	padding-left: 0px !important;
+	padding-right: 0px !important;
 }
-
-.lawRow {
-    margin-bottom: 5px !important;
-    font-size: 14px;    
-}
-
-.hintRow {
-    margin-bottom: 5px !important;
-    font-size: 14px;    
-}
-
-.documentAdditionalInfoRow {
-    margin-bottom: 10px !important;
-    font-size: 12px;    
-}
-
-.notConcernedThemesLabel {
-    font-size: 14px;
-}
-
-.withoutDataThemesLabel {
-    font-size: 14px;
-}
-
-.collapsibleGeneralInformationBody {
-    background-color: white !important;
-    font-size: 14px;
-    padding: 5px 15px 5px 15px !important;
-}
-
-#dummyButton {
-    position: absolute;
-    top: 40px;
-    right: 40px;    
-}
-
-::placeholder {
-    /*color: #ff8a80 !important;*/
-    color: #9e9e9e !important;
-    /*color: black !important;*/
-    font-size: 16px;
-    font-family: Roboto !important;
-}   
-.gwt-Label {
-    color: black;   
-}
-.gwt-HTML {
-    color: black;   
-}        
-ul.multiValueSuggestBox-list {
-    /*border-bottom: 1px solid #455a64 !important;*/
-    /*background-color: #eeeeee !important;*/
-    margin-bottom: 0px !important;
-}
-ul.multiValueSuggestBox-list li input {
-    width: 400px !important;
-}
-
-.multiValueSuggestBox-token {
-    background-color: #FF0000 !important;
-    visibility: hidden !important;
-    width: 0px !important;
-    height: 0px !important;
-    margin: 0px !important;
-    padding: 0px !imporant;
-}
-
-.card {
-    margin-bottom: 0px !important;
-    /*margin-top: 0px !important;*/
-}
-.range-field {
-    padding: 15px 0px 0px 0px !important;
-}
-
-input[type=range] {
-    margin: 0px !important;
-}
-
 
 ::-webkit-scrollbar {
     width: 0px;  /* Remove scrollbar space */

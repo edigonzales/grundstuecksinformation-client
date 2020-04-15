@@ -214,8 +214,9 @@ public class MapPresets {
         viewOptions.setResolutions(new double[] { 4000.0, 2000.0, 1000.0, 500.0, 250.0, 100.0, 50.0, 20.0, 10.0, 5.0, 2.5, 1.0, 0.5, 0.25, 0.1 });
         View view = new View(viewOptions);
         Coordinate centerCoordinate = new Coordinate(2616491, 1240287);
-        //Coordinate centerCoordinate = new Coordinate(2600593,1215639); // Messen
+//        Coordinate centerCoordinate = new Coordinate(2600593,1215639); // Messen
 //        Coordinate centerCoordinate = new Coordinate(2600470,1215425); // Messen
+//        Coordinate centerCoordinate = new Coordinate(2626873,1241448); // Egerkingen 1293 
 
         view.setCenter(centerCoordinate);
         view.setZoom(6);
