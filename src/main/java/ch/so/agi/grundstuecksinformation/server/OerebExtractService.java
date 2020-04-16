@@ -202,34 +202,9 @@ public class OerebExtractService {
             // 'groupingBy' kann nicht verwendet werden, weil das eine Liste pro Artcode
             // zurückliefert.
             // Später werden dem vereinfachten Restriction-Objekt mehr Infos hinzugefügt.
-            // FIXME: Auch hier besteht das Problem, dass 'nur' über den
-            // TypeCode gruppiert wird. Das reicht nicht immer.
-            Map<String, Restriction> restrictionsMap = xmlRestrictions
-                    .stream()
-                    .filter(distinctByKey(RestrictionOnLandownershipType::getTypeCode))
-                    .map(r -> {
-                        Restriction restriction = new Restriction();
-                        restriction.setInformation(getLocalisedText(r.getInformation(), DE));
-                        restriction.setTypeCode(r.getTypeCode());
-                        if (r.getSymbol() != null) {
-                            String encodedImage = Base64.encode(r.getSymbol());
-                            encodedImage = "data:image/png;base64," + encodedImage;
-                            restriction.setSymbol(encodedImage);
-                        } else if (r.getSymbolRef() != null) {
-                            try {
-                                String symbolUrl = URLDecoder.decode(r.getSymbolRef(), StandardCharsets.UTF_8.toString());
-                                restriction.setSymbolRef(symbolUrl);
-                            } catch (UnsupportedEncodingException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        return restriction;
-                    })
-                    .collect(Collectors.toMap(Restriction::getTypeCode, Function.identity()));
-            logger.debug("Typcode/SimpleRestriction-Map: " + restrictionsMap.toString());
-            
-            
-            Map<TypeTuple, Restriction> restrictionsMapTypeTuple = xmlRestrictions
+            // TODO: Neu wird mit TypeCode und TypeCodeListe gruppiert. Das sollte jetzt
+            // hinkommen (Egerkingen GB-Nr. 1293).            
+            Map<TypeTuple, Restriction> restrictionsMap = xmlRestrictions
                     .stream()
                     .filter(distinctByKey(r -> {
                         return new TypeTuple(r.getTypeCode(), r.getTypeCodelist());
@@ -256,47 +231,30 @@ public class OerebExtractService {
                     .collect(Collectors.toMap(r -> {
                         return new TypeTuple(r.getTypeCode(), r.getTypeCodeList());
                     }, Function.identity()));
-
-            logger.info("*********: " + restrictionsMapTypeTuple.toString());
+            logger.debug("*********: " + restrictionsMap.toString());
             
-            
-            // Entweder ist es ne gute Idee und würde vielleicht auch auf Clientseite übersichtlicher
-            // und logischer werden oder es ist scheisse.
-            
-   
-            // Die Shares müssen dann auch über die TypeTuples gehen!
-            // Ebenso alles was sonst an den TypeCode alleine angehängt ist...
-            
-                
-
             // Die Summe der sogenannten Shares (Fläche(prozent)/Länge/Anzahl Punkte) pro
             // Typecode.
-            Map<TypeTuple, Integer> sumAreaShareTypeTuple = xmlRestrictions
+            Map<TypeTuple, Integer> sumAreaShare = xmlRestrictions
                     .stream()
                     .filter(r -> r.getAreaShare() != null)
                     .collect(Collectors.groupingBy(r -> {return new TypeTuple(r.getTypeCode(), r.getTypeCodelist());}, Collectors.summingInt(r -> r.getAreaShare())));
 
-            Map<String, Integer> sumAreaShare = xmlRestrictions
-                    .stream()
-                    .filter(r -> r.getAreaShare() != null)
-                    .collect(Collectors.groupingBy(r -> r.getTypeCode(), Collectors.summingInt(r -> r.getAreaShare())));
-
-            Map<String, Integer> sumLengthShare = xmlRestrictions
+            Map<TypeTuple, Integer> sumLengthShare = xmlRestrictions
                     .stream()
                     .filter(r -> r.getLengthShare() != null)
-                    .collect(Collectors.groupingBy(r -> r.getTypeCode(), Collectors.summingInt(r -> r.getLengthShare())));
+                    .collect(Collectors.groupingBy(r -> {return new TypeTuple(r.getTypeCode(), r.getTypeCodelist());}, Collectors.summingInt(r -> r.getLengthShare())));
 
-            Map<String, Integer> sumNrOfPoints = xmlRestrictions
+            Map<TypeTuple, Integer> sumNrOfPoints = xmlRestrictions
                     .stream()
                     .filter(r -> r.getNrOfPoints() != null)
-                    .collect(Collectors.groupingBy(r -> r.getTypeCode(), Collectors.summingInt(r -> r.getNrOfPoints())));
+                    .collect(Collectors.groupingBy(r -> {return new TypeTuple(r.getTypeCode(), r.getTypeCodelist());}, Collectors.summingInt(r -> r.getNrOfPoints())));
 
-            Map<String, Double> sumAreaPercentShare = xmlRestrictions
+            Map<TypeTuple, Double> sumAreaPercentShare = xmlRestrictions
                     .stream()
                     .filter(r -> r.getPartInPercent() != null)
-                    .collect(Collectors.groupingBy(r -> r.getTypeCode(), Collectors.summingDouble(r -> r.getPartInPercent().doubleValue())));
+                    .collect(Collectors.groupingBy(r -> {return new TypeTuple(r.getTypeCode(), r.getTypeCodelist());}, Collectors.summingDouble(r -> r.getPartInPercent().doubleValue())));
 
-            logger.debug("sumAreaShareTypeTuple: " + sumAreaShareTypeTuple.toString());
             logger.debug("sumAreaShare: " + sumAreaShare.toString());
             logger.debug("sumLengthShare: " + sumLengthShare.toString());
             logger.debug("sumNrOfPoints: " + sumNrOfPoints.toString());
@@ -306,37 +264,20 @@ public class OerebExtractService {
             // OEREB-Objekt zugewiesen. Dieses wird in einer Liste
             // von vereinfachten OEREB-Objekten eingefügt. Eine solche definitive Liste
             // gibt es pro ConcernedTheme.
-            List<Restriction> restrictionsListTypeTuple = new ArrayList<Restriction>();
-            for (Map.Entry<TypeTuple, Restriction> restrictionEntryTypeTuple : restrictionsMapTypeTuple.entrySet()) {
-                TypeTuple typeTuple = restrictionEntryTypeTuple.getKey();
-
-                logger.info(typeTuple.toString());
-                
-                if (sumAreaShareTypeTuple.get(typeTuple) != null) {
-                    logger.info("***fu");
-                    restrictionEntryTypeTuple.getValue().setAreaShare(sumAreaShareTypeTuple.get(typeTuple));
-                }
-                restrictionsListTypeTuple.add(restrictionEntryTypeTuple.getValue());
-            }
-            logger.info("restrictionsListTypeTuple: " + restrictionsListTypeTuple.get(0).getAreaShare());
-
-            
-            
-            
             List<Restriction> restrictionsList = new ArrayList<Restriction>();
-            for (Map.Entry<String, Restriction> restrictionEntry : restrictionsMap.entrySet()) {
-                String typeCode = restrictionEntry.getKey();
-                if (sumAreaShare.get(typeCode) != null) {
-                    restrictionEntry.getValue().setAreaShare(sumAreaShare.get(typeCode));
+            for (Map.Entry<TypeTuple, Restriction> restrictionEntry : restrictionsMap.entrySet()) {
+                TypeTuple typeTuple = restrictionEntry.getKey();
+                if (sumAreaShare.get(typeTuple) != null) {
+                    restrictionEntry.getValue().setAreaShare(sumAreaShare.get(typeTuple));
                 }
-                if (sumLengthShare.get(typeCode) != null) {
-                    restrictionEntry.getValue().setLengthShare(sumLengthShare.get(typeCode));
+                if (sumLengthShare.get(typeTuple) != null) {
+                    restrictionEntry.getValue().setLengthShare(sumLengthShare.get(typeTuple));
                 }
-                if (sumNrOfPoints.get(typeCode) != null) {
-                    restrictionEntry.getValue().setNrOfPoints(sumNrOfPoints.get(typeCode));
+                if (sumNrOfPoints.get(typeTuple) != null) {
+                    restrictionEntry.getValue().setNrOfPoints(sumNrOfPoints.get(typeTuple));
                 }
-                if (sumAreaPercentShare.get(typeCode) != null) {
-                    restrictionEntry.getValue().setPartInPercent(sumAreaPercentShare.get(typeCode));
+                if (sumAreaPercentShare.get(typeTuple) != null) {
+                    restrictionEntry.getValue().setPartInPercent(sumAreaPercentShare.get(typeTuple));
                 }
                 restrictionsList.add(restrictionEntry.getValue());
             }
