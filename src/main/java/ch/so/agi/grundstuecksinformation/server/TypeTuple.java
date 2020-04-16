@@ -11,6 +11,14 @@ public class TypeTuple {
         this.typeCodeList = typeCodeList;
     }
 
+    public String getTypeCode() {
+        return typeCode;
+    }
+
+    public void setTypeCode(String typeCode) {
+        this.typeCode = typeCode;
+    }
+
     public String getTypeCodeList() {
         return typeCodeList;
     }

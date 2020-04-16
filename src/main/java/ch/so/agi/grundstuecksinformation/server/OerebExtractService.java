@@ -271,6 +271,11 @@ public class OerebExtractService {
 
             // Die Summe der sogenannten Shares (Fläche(prozent)/Länge/Anzahl Punkte) pro
             // Typecode.
+            Map<TypeTuple, Integer> sumAreaShareTypeTuple = xmlRestrictions
+                    .stream()
+                    .filter(r -> r.getAreaShare() != null)
+                    .collect(Collectors.groupingBy(r -> {return new TypeTuple(r.getTypeCode(), r.getTypeCodelist());}, Collectors.summingInt(r -> r.getAreaShare())));
+
             Map<String, Integer> sumAreaShare = xmlRestrictions
                     .stream()
                     .filter(r -> r.getAreaShare() != null)
@@ -291,6 +296,7 @@ public class OerebExtractService {
                     .filter(r -> r.getPartInPercent() != null)
                     .collect(Collectors.groupingBy(r -> r.getTypeCode(), Collectors.summingDouble(r -> r.getPartInPercent().doubleValue())));
 
+            logger.debug("sumAreaShareTypeTuple: " + sumAreaShareTypeTuple.toString());
             logger.debug("sumAreaShare: " + sumAreaShare.toString());
             logger.debug("sumLengthShare: " + sumLengthShare.toString());
             logger.debug("sumNrOfPoints: " + sumNrOfPoints.toString());
@@ -300,6 +306,23 @@ public class OerebExtractService {
             // OEREB-Objekt zugewiesen. Dieses wird in einer Liste
             // von vereinfachten OEREB-Objekten eingefügt. Eine solche definitive Liste
             // gibt es pro ConcernedTheme.
+            List<Restriction> restrictionsListTypeTuple = new ArrayList<Restriction>();
+            for (Map.Entry<TypeTuple, Restriction> restrictionEntryTypeTuple : restrictionsMapTypeTuple.entrySet()) {
+                TypeTuple typeTuple = restrictionEntryTypeTuple.getKey();
+
+                logger.info(typeTuple.toString());
+                
+                if (sumAreaShareTypeTuple.get(typeTuple) != null) {
+                    logger.info("***fu");
+                    restrictionEntryTypeTuple.getValue().setAreaShare(sumAreaShareTypeTuple.get(typeTuple));
+                }
+                restrictionsListTypeTuple.add(restrictionEntryTypeTuple.getValue());
+            }
+            logger.info("restrictionsListTypeTuple: " + restrictionsListTypeTuple.get(0).getAreaShare());
+
+            
+            
+            
             List<Restriction> restrictionsList = new ArrayList<Restriction>();
             for (Map.Entry<String, Restriction> restrictionEntry : restrictionsMap.entrySet()) {
                 String typeCode = restrictionEntry.getKey();
