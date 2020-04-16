@@ -19,6 +19,7 @@ import ch.ehi.oereb.schemas.oereb._1_0.extractdata.MultilingualTextType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.MultilingualUriType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.RealEstateDPRType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.RestrictionOnLandownershipType;
+import ch.so.agi.grundstuecksinformation.shared.models.AbstractTheme;
 import ch.so.agi.grundstuecksinformation.shared.models.ConcernedTheme;
 import ch.so.agi.grundstuecksinformation.shared.models.Document;
 import ch.so.agi.grundstuecksinformation.shared.models.Egrid;
@@ -41,6 +42,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +71,18 @@ public class OerebExtractService {
 
     private static final LanguageCodeType DE = LanguageCodeType.DE;
 
+    // Sortierung Kanton Solothurn
+    private List<String> themesOrderingList = Stream.of(
+            // "LandUsePlans",
+            "ch.SO.NutzungsplanungGrundnutzung", "ch.SO.NutzungsplanungUeberlagernd",
+            "ch.SO.NutzungsplanungSondernutzungsplaene", "ch.SO.Baulinien", "MotorwaysProjectPlaningZones",
+            "MotorwaysBuildingLines", "RailwaysProjectPlanningZones", "RailwaysBuildingLines",
+            "AirportsProjectPlanningZones", "AirportsBuildingLines", "AirportsSecurityZonePlans", "ContaminatedSites",
+            "ContaminatedMilitarySites", "ContaminatedCivilAviationSites", "ContaminatedPublicTransportSites",
+            "GroundwaterProtectionZones", "GroundwaterProtectionSites", "NoiseSensitivityLevels", "ForestPerimeters",
+            "ForestDistanceLines", "ch.SO.Einzelschutz")
+            .collect(Collectors.toList());
+
     Map<String, String> realEstateTypesMap = Stream.of(new String[][] {
         { "Distinct_and_permanent_rights.BuildingRight", "Baurecht" }, 
         { "RealEstate", "Liegenschaft" }, 
@@ -78,7 +92,7 @@ public class OerebExtractService {
     public RealEstateDPR getExtract(Egrid egrid, RealEstateDPR realEstateDPR) throws IOException {     
         // FIXME: Kann man vereinfachen.
         File xmlFile;
-        if (egrid.getOerebServiceBaseUrl() != null) {
+        if (egrid.getOerebServiceBaseUrl() != null) { // request by map click
             xmlFile = Files.createTempFile("oereb_extract_", ".xml").toFile();
             URL url = new URL(egrid.getOerebServiceBaseUrl() + "extract/reduced/xml/geometry/" + egrid.getEgrid());
             logger.debug("extract url: " + url.toString());
@@ -95,7 +109,7 @@ public class OerebExtractService {
             java.nio.file.Files.copy(initialStream, xmlFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             initialStream.close();
             logger.info("File downloaded: " + xmlFile.getAbsolutePath());  
-        } else {
+        } else { // request by search
             HttpURLConnection connection = null;
             int responseCode = 0;
             for (String baseUrl : Consts.OEREB_SERVICE_BASE_URL) {
@@ -133,8 +147,8 @@ public class OerebExtractService {
                     return themeWithoutData;
                 })
                 .collect(collectingAndThen(toList(), ArrayList<ThemeWithoutData>::new));
-        // TODO: 'Generic' sorting of themes... including possible subthemes?!
-        //themesWithoutData.sort(compare);
+         //TODO: Sortierung nur für Kanton SO:
+        themesWithoutData.sort(compare);
         
         logger.debug("===========Not concerned themes===========");
         ArrayList<NotConcernedTheme> notConcernedThemes = xmlExtract.getNotConcernedTheme()
@@ -151,8 +165,8 @@ public class OerebExtractService {
                     return notConcernedTheme;
                 })
                 .collect(collectingAndThen(toList(), ArrayList<NotConcernedTheme>::new));
-        // TODO: 'Generic' sorting of themes... including possible subthemes?!
-        //notConcernedThemes.sort(compare);
+        // TODO: Sortierung nur für Kanton SO.
+        notConcernedThemes.sort(compare);
         logger.debug("===========Not concerned themes===========");
  
         /*
@@ -234,7 +248,7 @@ public class OerebExtractService {
             logger.debug("*********: " + restrictionsMap.toString());
             
             // Die Summe der sogenannten Shares (Fläche(prozent)/Länge/Anzahl Punkte) pro
-            // Typecode.
+            // Typecode/TypcodeList-Tupel.
             Map<TypeTuple, Integer> sumAreaShare = xmlRestrictions
                     .stream()
                     .filter(r -> r.getAreaShare() != null)
@@ -443,7 +457,7 @@ public class OerebExtractService {
             logger.debug("distinct laws: " + distinctLawsList.toString());
             logger.debug("distinct hints: " + distinctHintsList.toString());
             
-            // WMS: Muss auseinandergenommen werden, damit man im Client mit OL3 arbeiten kann.
+            // WMS: Muss auseinandergenommen werden, damit man im Client mit ol3 arbeiten kann.
             double layerOpacity = xmlRestrictions.get(0).getMap().getLayerOpacity();
             int layerIndex = xmlRestrictions.get(0).getMap().getLayerIndex();
             String wmsUrl = xmlRestrictions.get(0).getMap().getReferenceWMS();
@@ -506,8 +520,8 @@ public class OerebExtractService {
 
             logger.debug("---------------------------------------------");
         }
-        // TODO: 'Generic' sorting of themes... including possible subthemes?!        
-        //concernedThemesList.sort(compare);        
+        // TODO: Sorting funktioniert nur für Kanton SO.     
+        concernedThemesList.sort(compare);        
         logger.debug("===========Concerned themes===========");
         
         RealEstateDPRType xmlRealEstateDPR = xmlExtract.getRealEstate();
@@ -547,6 +561,24 @@ public class OerebExtractService {
 
         return realEstateDPR;
     }
+    
+    
+    Comparator<AbstractTheme> compare = new Comparator<AbstractTheme>() {
+        public int compare(AbstractTheme t1, AbstractTheme t2) {
+            if (t1.getSubtheme() != null && t2.getSubtheme() == null) {
+                return themesOrderingList.indexOf(t1.getSubtheme()) - themesOrderingList.indexOf(t2.getCode());
+            }
+
+            if (t2.getSubtheme() != null && t1.getSubtheme() == null) {
+                return themesOrderingList.indexOf(t1.getCode()) - themesOrderingList.indexOf(t2.getSubtheme());
+            }
+
+            if (t1.getSubtheme() != null && t2.getSubtheme() != null) {
+                return themesOrderingList.indexOf(t1.getSubtheme()) - themesOrderingList.indexOf(t2.getSubtheme());
+            }
+            return themesOrderingList.indexOf(t1.getCode()) - themesOrderingList.indexOf(t2.getCode());
+        }
+    };
     
     private static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
         Map<Object, Boolean> map = new ConcurrentHashMap<>();
