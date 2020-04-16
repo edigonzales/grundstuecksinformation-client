@@ -663,13 +663,19 @@ public class AppEntryPoint implements EntryPoint {
             // auch wenn ich auf einen Sub-Panel klicke.
             oerebAccordionPanelConcernedTheme.getHeaderElement().addEventListener(EventType.click, new EventListener() {
                 @Override
-                public void handleEvent(Event evt) {
+                public void handleEvent(Event evt) {                    
                     if (!oerebAccordionPanelConcernedThemeState) {
                         oerebAccordionPanelConcernedTheme.show();
                         oerebAccordionPanelConcernedThemeState = true;
                         oerebAccordionPanelNotConcernedThemeState = false;
                         oerebAccordionPanelThemesWithoutDataState = false;
                         oerebAccordionPanelGeneralInformationState = false;
+                        List<AccordionPanel> panels = oerebAccordion.getPanels();
+                        for (AccordionPanel panel : panels) {
+                            if(!panel.equals(oerebAccordionPanelConcernedTheme)) {
+                                panel.hide();
+                            }
+                        }                          
                     } else {
                         oerebAccordionPanelConcernedTheme.hide();
                         oerebAccordionPanelConcernedThemeState = false;
@@ -981,6 +987,12 @@ public class AppEntryPoint implements EntryPoint {
                         oerebAccordionPanelNotConcernedThemeState = true;
                         oerebAccordionPanelThemesWithoutDataState = false;
                         oerebAccordionPanelGeneralInformationState = false;
+                        List<AccordionPanel> panels = oerebAccordion.getPanels();
+                        for (AccordionPanel panel : panels) {
+                            if(!panel.equals(oerebAccordionPanelNotConcernedTheme)) {
+                                panel.hide();
+                            }
+                        }                        
                     } else {
                         oerebAccordionPanelNotConcernedTheme.hide();
                         oerebAccordionPanelNotConcernedThemeState = false;
@@ -1017,7 +1029,7 @@ public class AppEntryPoint implements EntryPoint {
             oerebAccordionPanelThemesWithoutData.setContent(listGroup);
             oerebAccordion.appendChild(oerebAccordionPanelThemesWithoutData);
 
-            oerebAccordionPanelThemesWithoutData.addEventListener(EventType.click, new EventListener() {
+            oerebAccordionPanelThemesWithoutData.getHeaderElement().addEventListener(EventType.click, new EventListener() {
                 @Override
                 public void handleEvent(Event evt) {
                     if (!oerebAccordionPanelThemesWithoutDataState) {
@@ -1026,6 +1038,12 @@ public class AppEntryPoint implements EntryPoint {
                         oerebAccordionPanelNotConcernedThemeState = false;
                         oerebAccordionPanelThemesWithoutDataState = true;
                         oerebAccordionPanelGeneralInformationState = false;
+                        List<AccordionPanel> panels = oerebAccordion.getPanels();
+                        for (AccordionPanel panel : panels) {
+                            if(!panel.equals(oerebAccordionPanelThemesWithoutData)) {
+                                panel.hide();
+                            }
+                        }
                     } else {
                         oerebAccordionPanelThemesWithoutData.hide();
                         oerebAccordionPanelThemesWithoutDataState = false;
@@ -1051,7 +1069,7 @@ public class AppEntryPoint implements EntryPoint {
             oerebAccordionPanelGeneralInformation.setContent(content);
             oerebAccordion.appendChild(oerebAccordionPanelGeneralInformation);
 
-            oerebAccordionPanelGeneralInformation.addEventListener(EventType.click, new EventListener() {
+            oerebAccordionPanelGeneralInformation.getHeaderElement().addEventListener(EventType.click, new EventListener() {
                 @Override
                 public void handleEvent(Event evt) {
                     if (!oerebAccordionPanelGeneralInformationState) {
@@ -1060,6 +1078,12 @@ public class AppEntryPoint implements EntryPoint {
                         oerebAccordionPanelNotConcernedThemeState = false;
                         oerebAccordionPanelThemesWithoutDataState = false;
                         oerebAccordionPanelGeneralInformationState = true;
+                        List<AccordionPanel> panels = oerebAccordion.getPanels();
+                        for (AccordionPanel panel : panels) {
+                            if(!panel.equals(oerebAccordionPanelGeneralInformation)) {
+                                panel.hide();
+                            }
+                        }
                     } else {
                         oerebAccordionPanelGeneralInformation.hide();
                         oerebAccordionPanelGeneralInformationState = false;
