@@ -2,7 +2,7 @@
 <!--<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.7.0//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.7.0/distro-source/core/src/gwt-module.dtd">-->
 <module rename-to="module1">
 	
-	<inherits name="com.google.gwt.user.User" />
+    <inherits name="com.google.gwt.user.User" />
     <!--<inherits name="com.google.gwt.user.theme.clean.Clean" />  -->	
     <inherits name="com.google.gwt.json.JSON" />
     <inherits name="com.google.gwt.i18n.I18N"/>
@@ -18,4 +18,7 @@
     <source path="shared" />
     <entry-point class="ch.so.agi.grundstuecksinformation.client.AppEntryPoint" />
  
+   <inherits name="com.google.gwt.core.Core" />
+   <add-linker name="direct_install" />
+
 </module>

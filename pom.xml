@@ -143,6 +143,8 @@
 						<configuration>
 							<moduleName>ch.so.agi.grundstuecksinformation.module1</moduleName>
 							<failOnError>true</failOnError>
+							<!-- https://stackoverflow.com/questions/6249916/gwt-obfuscation-crashes-ipad-safari-browser/7011016#7011016 -->
+							<!--<style>PRETTY</style>-->
 							<launcherDir>${project.build.directory}/classes/public</launcherDir>
 							<webappDirectory>${project.build.directory}/classes/public</webappDirectory>
 						</configuration>
