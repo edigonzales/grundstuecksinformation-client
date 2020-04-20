@@ -19,7 +19,7 @@ public class MainController {
     @GetMapping(value = "/opensearchdescription.xml", produces=MediaType.APPLICATION_XML_VALUE)
     public ResponseEntity<OpenSearchDescription> getOpenSearchDescription() {
         OpenSearchDescription openSearchDescription = new OpenSearchDescription();
-        openSearchDescription.setShortName("Grundstücksinformation - Suche");
+        openSearchDescription.setShortName("grundstuecksinformation.ch");
         openSearchDescription.setLongName("Grundstücksinformation - Suche");
         Image image = new Image();
         image.setType("image/x-icon");
