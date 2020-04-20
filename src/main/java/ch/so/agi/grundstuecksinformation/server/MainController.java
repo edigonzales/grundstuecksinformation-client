@@ -20,7 +20,7 @@ public class MainController {
     public ResponseEntity<OpenSearchDescription> getOpenSearchDescription() {
         OpenSearchDescription openSearchDescription = new OpenSearchDescription();
         openSearchDescription.setShortName("grundstuecksinformation.ch");
-        openSearchDescription.setLongName("Grundstücksinformation - Suche");
+        openSearchDescription.setLongName("grundstuecksinformation.ch");
         Image image = new Image();
         image.setType("image/x-icon");
         image.setWidth(BigInteger.valueOf(16));
@@ -38,21 +38,8 @@ public class MainController {
         suggestJsonUrl.setType("application/x-suggestions+json");
         suggestJsonUrl.setMethod("get");
         suggestJsonUrl.setTemplate(getHost() + "/api/search/suggestions?q={searchTerms}");
-//        suggestJsonUrl.setTemplate("http://ff.search.yahoo.com/gossip?output=fxjson&command={searchTerms}");
         openSearchDescription.getUrls().add(suggestJsonUrl);
-        
-//        Url suggestXmlUrl = new Url();
-//        suggestXmlUrl.setType("application/x-suggestions+xml");
-//        suggestXmlUrl.setMethod("get");
-//        suggestXmlUrl.setTemplate("https://de.wikipedia.org/w/api.php?action=opensearch&amp;format=xml&amp;search={searchTerms}");
-//        openSearchDescription.getUrls().add(suggestXmlUrl);
-        
-//        <Url type="text/html" method="get" template="https://de.wikipedia.org/w/index.php?title=Spezial:Suche&amp;search={searchTerms}"/>
-//        <Url type="application/x-suggestions+json" method="get" template="https://de.wikipedia.org/w/api.php?action=opensearch&amp;search={searchTerms}&amp;namespace=0"/>
-//        <Url type="application/x-suggestions+xml" method="get" template="https://de.wikipedia.org/w/api.php?action=opensearch&amp;format=xml&amp;search={searchTerms}&amp;namespace=0"/>
-        
-//        logger.info(ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString());
-        
+                
         return new ResponseEntity<OpenSearchDescription>(openSearchDescription, HttpStatus.OK);
     }
      

@@ -48,6 +48,9 @@ import static org.dominokit.domino.ui.style.Unit.px;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.DivElement;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.LinkElement;
+import com.google.gwt.dom.client.ScriptElement;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -120,6 +123,7 @@ public class AppEntryPoint implements EntryPoint {
 
     // Settings
     private String MY_VAR;
+    private String OPENSEARCH_DESCRIPTION_URL;
     private String SEARCH_SERVICE_URL = "https://api3.geo.admin.ch/rest/services/api/SearchServer?sr=2056&limit=15&type=locations&origins=address,parcel&searchText=";
 
     private String SUB_HEADER_FONT_SIZE = "16px";
@@ -176,6 +180,14 @@ public class AppEntryPoint implements EntryPoint {
     
     @SuppressWarnings("unchecked")
     private void init() {
+        Element head = com.google.gwt.dom.client.Document.get().getElementsByTagName("head").getItem(0);        
+        LinkElement opensearchdescription = com.google.gwt.dom.client.Document.get().createLinkElement();
+        opensearchdescription.setRel("search");
+        opensearchdescription.setType("application/opensearchdescription+xml");
+        opensearchdescription.setHref("http://grundstuecksinformation.ch/opensearchdescription.xml");
+        opensearchdescription.setTitle("Grundstücksinformationssuche");
+        head.appendChild(opensearchdescription);
+        
         Theme theme = new Theme(ColorScheme.BLUE);
         theme.apply();
 

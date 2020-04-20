@@ -19,6 +19,10 @@ public class SettingsServiceImpl extends RemoteServiceServlet implements Setting
 
     @Value("${app.myVar}")
     private String myVar;
+    
+    @Value("${app.opensearchDescriptionUrl}")
+    private String opensearchDescriptionUrl;
+
 
     @Override
     public void init() throws ServletException {
@@ -31,6 +35,7 @@ public class SettingsServiceImpl extends RemoteServiceServlet implements Setting
         HashMap<String,Object> settings = new HashMap<String,Object>();
         
         settings.put("MY_VAR", myVar);
+        settings.put("OPENSEARCH_DESCRIPTION_URL", opensearchDescriptionUrl);
 
         SettingsResponse response = new SettingsResponse();
         response.setSettings(settings);
