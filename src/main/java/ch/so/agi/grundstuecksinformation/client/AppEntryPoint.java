@@ -184,7 +184,7 @@ public class AppEntryPoint implements EntryPoint {
         LinkElement opensearchdescription = com.google.gwt.dom.client.Document.get().createLinkElement();
         opensearchdescription.setRel("search");
         opensearchdescription.setType("application/opensearchdescription+xml");
-        opensearchdescription.setHref("http://grundstuecksinformation.ch/opensearchdescription.xml");
+        opensearchdescription.setHref(OPENSEARCH_DESCRIPTION_URL);
         opensearchdescription.setTitle("Grundstücksinformationssuche");
         head.appendChild(opensearchdescription);
         
