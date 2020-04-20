@@ -173,6 +173,7 @@ public class AppEntryPoint implements EntryPoint {
             @Override
             public void onSuccess(SettingsResponse result) {
                 MY_VAR = (String) result.getSettings().get("MY_VAR");
+                OPENSEARCH_DESCRIPTION_URL = (String) result.getSettings().get("OPENSEARCH_DESCRIPTION_URL");
                 init();
             }
         });
