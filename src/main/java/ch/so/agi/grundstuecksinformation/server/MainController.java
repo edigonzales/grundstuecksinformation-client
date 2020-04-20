@@ -31,13 +31,13 @@ public class MainController {
         Url searchUrl = new Url();
         searchUrl.setType("text/html");
         searchUrl.setMethod("get");
-        searchUrl.setTemplate(getHost() + "/search?q={searchTerms}");
+        searchUrl.setTemplate(getHost() + "/api/search?q={searchTerms}");
         openSearchDescription.getUrls().add(searchUrl);
 
         Url suggestJsonUrl = new Url();
         suggestJsonUrl.setType("application/x-suggestions+json");
         suggestJsonUrl.setMethod("get");
-        suggestJsonUrl.setTemplate(getHost() + "/search/suggestions?q={searchTerms}");
+        suggestJsonUrl.setTemplate(getHost() + "/api/search/suggestions?q={searchTerms}");
 //        suggestJsonUrl.setTemplate("http://ff.search.yahoo.com/gossip?output=fxjson&command={searchTerms}");
         openSearchDescription.getUrls().add(suggestJsonUrl);
         
