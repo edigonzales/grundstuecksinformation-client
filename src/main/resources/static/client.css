@@ -52,6 +52,11 @@ sub {
 	padding: 10px;
 }
 
+.field-group input, .field-group textarea {
+	font-family: 'Fira Sans', sans-serif !important;   
+}
+
+
 #realEstatePopup {
 	position: absolute;
 	width: 300px;
