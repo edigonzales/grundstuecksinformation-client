@@ -1076,8 +1076,8 @@ public class AppEntryPoint implements EntryPoint {
             HTMLDivElement content = div().css(Styles.padding_10, "generalInformation")
                    .add(div().css("fontSemiBold").textContent("Katasterverantwortliche Stelle"))
                    .add(div().textContent(office.getName()))
-                   .add(div().textContent(office.getStreet() + office.getNumber()))
-                   .add(div().textContent(office.getPostalCode() + office.getCity())).element();
+                   .add(div().textContent(office.getStreet() + " " + office.getNumber()))
+                   .add(div().textContent(office.getPostalCode() + " " + office.getCity())).element();
             
             oerebAccordionPanelGeneralInformation.setContent(content);
             oerebAccordion.appendChild(oerebAccordionPanelGeneralInformation);
