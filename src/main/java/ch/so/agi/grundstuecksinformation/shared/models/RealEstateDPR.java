@@ -37,6 +37,20 @@ public class RealEstateDPR implements IsSerializable {
     
     private ArrayList<ConcernedTheme> oerebConcernedThemes;
     
+    private String cadastrePdfExtractUrl;
+    
+    private Office cadastreCadastreAuthority;
+
+    private Office cadastreLandRegisterOffice;
+
+    private Office cadastreSurveyorOffice;
+    
+    private ArrayList<String> localNames;
+    
+    private ArrayList<LandCoverShare> landCoverShares;
+    
+    private ArrayList<Building> buildings;
+    
     public String getRealEstateType() {
         return realEstateType;
     }
@@ -163,5 +177,61 @@ public class RealEstateDPR implements IsSerializable {
 
     public void setOerebConcernedThemes(ArrayList<ConcernedTheme> oerebConcernedThemes) {
         this.oerebConcernedThemes = oerebConcernedThemes;
+    }
+
+    public String getCadastrePdfExtractUrl() {
+        return cadastrePdfExtractUrl;
+    }
+
+    public void setCadastrePdfExtractUrl(String cadastrePdfExtractUrl) {
+        this.cadastrePdfExtractUrl = cadastrePdfExtractUrl;
+    }
+
+    public Office getCadastreCadastreAuthority() {
+        return cadastreCadastreAuthority;
+    }
+
+    public void setCadastreCadastreAuthority(Office cadastreCadastreAuthority) {
+        this.cadastreCadastreAuthority = cadastreCadastreAuthority;
+    }
+
+    public Office getCadastreLandRegisterOffice() {
+        return cadastreLandRegisterOffice;
+    }
+
+    public void setCadastreLandRegisterOffice(Office cadastreLandRegisterOffice) {
+        this.cadastreLandRegisterOffice = cadastreLandRegisterOffice;
+    }
+
+    public Office getCadastreSurveyorOffice() {
+        return cadastreSurveyorOffice;
+    }
+
+    public void setCadastreSurveyorOffice(Office cadastreSurveyorOffice) {
+        this.cadastreSurveyorOffice = cadastreSurveyorOffice;
+    }
+
+    public ArrayList<String> getLocalNames() {
+        return localNames;
+    }
+
+    public void setLocalNames(ArrayList<String> localNames) {
+        this.localNames = localNames;
+    }
+
+    public ArrayList<LandCoverShare> getLandCoverShares() {
+        return landCoverShares;
+    }
+
+    public void setLandCoverShares(ArrayList<LandCoverShare> landCoverShares) {
+        this.landCoverShares = landCoverShares;
+    }
+
+    public ArrayList<Building> getBuildings() {
+        return buildings;
+    }
+
+    public void setBuildings(ArrayList<Building> buildings) {
+        this.buildings = buildings;
     }
 }

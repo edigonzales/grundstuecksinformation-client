@@ -65,11 +65,15 @@ import ch.so.agi.grundstuecksinformation.shared.ExtractServiceAsync;
 import ch.so.agi.grundstuecksinformation.shared.SettingsResponse;
 import ch.so.agi.grundstuecksinformation.shared.SettingsService;
 import ch.so.agi.grundstuecksinformation.shared.SettingsServiceAsync;
+import ch.so.agi.grundstuecksinformation.shared.models.Building;
+import ch.so.agi.grundstuecksinformation.shared.models.BuildingEntry;
 import ch.so.agi.grundstuecksinformation.shared.models.ConcernedTheme;
 import ch.so.agi.grundstuecksinformation.shared.models.Document;
 import ch.so.agi.grundstuecksinformation.shared.models.Egrid;
+import ch.so.agi.grundstuecksinformation.shared.models.LandCoverShare;
 import ch.so.agi.grundstuecksinformation.shared.models.NotConcernedTheme;
 import ch.so.agi.grundstuecksinformation.shared.models.Office;
+import ch.so.agi.grundstuecksinformation.shared.models.PostalAddress;
 import ch.so.agi.grundstuecksinformation.shared.models.RealEstateDPR;
 import ch.so.agi.grundstuecksinformation.shared.models.ReferenceWMS;
 import ch.so.agi.grundstuecksinformation.shared.models.Restriction;
@@ -143,7 +147,8 @@ public class AppEntryPoint implements EntryPoint {
     private String REAL_ESTATE_VECTOR_FEATURE_ID = "real_estate_fid";
 
     private NumberFormat fmtDefault = NumberFormat.getDecimalFormat();
-    private NumberFormat fmtPercent = NumberFormat.getFormat("#0.0");
+    private NumberFormat fmtPercent = NumberFormat.getFormat("#,##0.0");
+    private NumberFormat fmtSquareMeter = NumberFormat.getFormat("#,##0");
 
     private Loader loader;
     private Map map;
@@ -701,7 +706,6 @@ public class AppEntryPoint implements EntryPoint {
         {
             Button pdfBtn = Button.create(Icons.ALL.file_pdf_box_outline_mdi())
                 .setContent("PDF")
-//                .setBackground(Color.LIGHT_BLUE)
                 .setBackground(Color.WHITE)
                 .elevate(0)
                 .style()
@@ -1191,9 +1195,31 @@ public class AppEntryPoint implements EntryPoint {
         String type = realEstateDPR.getRealEstateType();
         String municipality = realEstateDPR.getMunicipality();
         String subunitOfLandRegister = realEstateDPR.getSubunitOfLandRegister();
+        List<String> localNames = realEstateDPR.getLocalNames();
 
         HTMLDivElement div = div().element();
         
+        {
+            Button pdfBtn = Button.create(Icons.ALL.file_pdf_box_outline_mdi())
+                .setContent("PDF")
+                .setBackground(Color.WHITE)
+                .elevate(0)
+                .style()
+                .setColor("#ef5350")
+                .setBorder("1px #ef5350 solid")
+                .setPadding("5px 5px 5px 0px;")
+                .setMinWidth(px.of(120)).get();
+            
+            pdfBtn.setTooltip(messages.resultPDFTooltip());
+                    
+            pdfBtn.addClickListener(event -> {
+                Window.open(realEstateDPR.getCadastrePdfExtractUrl(), "_blank", null);
+            });
+                       
+            div.appendChild(pdfBtn.element());
+        }
+        
+        div.appendChild(addCadastralSurveyingContentKeyValue("&nbsp;", "&nbsp;"));
         div.appendChild(addCadastralSurveyingContentKeyValue("E-GRID:", egrid));
         div.appendChild(addCadastralSurveyingContentKeyValue("NBIdent:", new String(identnd == null ? "&ndash;" : identnd)));
         div.appendChild(addCadastralSurveyingContentKeyValue("&nbsp;", "&nbsp;"));
@@ -1203,11 +1229,17 @@ public class AppEntryPoint implements EntryPoint {
         div.appendChild(addCadastralSurveyingContentKeyValue("Gemeinde:", municipality));
         div.appendChild(addCadastralSurveyingContentKeyValue("Grundbuch:",  new String(subunitOfLandRegister == null ? "&ndash;" : subunitOfLandRegister)));
         div.appendChild(addCadastralSurveyingContentKeyValue("&nbsp;", "&nbsp;"));
-        //addCadastralSurveyingContentKeyValue(new Label("Flurnamen:"), new Label(String.join(", ", localNames)));
-        div.appendChild(addCadastralSurveyingContentKeyValue("Flurnamen:", "&ndash;"));
+        div.appendChild(addCadastralSurveyingContentKeyValue("Flurnamen:", String.join(", ", localNames)));
+        
+        div.appendChild(div().css("fakeColumn").element());
+        div.appendChild(addCadastralSurveyingContentBuildings(realEstateDPR.getBuildings()));
 
         div.appendChild(div().css("fakeColumn").element());
-        
+        div.appendChild(addCadastralSurveyingContentLandCoverShares(realEstateDPR.getLandCoverShares()));
+
+        div.appendChild(div().css("fakeColumn").element());
+        div.appendChild(addCadastralSurveyingContentOffices(realEstateDPR));
+
         return div;
     }
 
@@ -1325,7 +1357,136 @@ public class AppEntryPoint implements EntryPoint {
         row.appendChild(valueElement);
         return row;        
     }
+    
+    private HTMLElement addCadastralSurveyingContentBuildings(ArrayList<Building> buildings) {
+        HTMLDivElement div = div().element();
+        
+        Row buildingTitle = Row.create().appendChild(span().css("cadastralSurveyingInfoKey").style("padding-top:15px;").textContent("Gebäude"));
+        div.appendChild(buildingTitle.element());
+        
+        Row buildingHeaderRow = Row.create();
+        buildingHeaderRow.appendChild(Column.span3().style().setFontSize(SMALL_FONT_SIZE).get().setTextContent("EGID"));
+        buildingHeaderRow.appendChild(Column.span2().style().setFontSize(SMALL_FONT_SIZE).setTextAlign("right").get().setTextContent("Fläche"));
+//        buildingHeaderRow.appendChild(Column.span2().style().setFontSize(SMALL_FONT_SIZE).setTextAlign("left").get().setTextContent("projektiert"));
+//        buildingHeaderRow.appendChild(Column.span2().style().setFontSize(SMALL_FONT_SIZE).setTextAlign("left").get().setTextContent("unterirdisch"));
+        buildingHeaderRow.appendChild(Column.span7().style().setFontSize(SMALL_FONT_SIZE).setTextAlign("left").get().setTextContent("Adressen"));
+        div.appendChild(buildingHeaderRow.element());
+        
+        for (Building building: buildings) {
+            Row buildingRow = Row.create().css("buildingRow");
+            if (building.getEgid() != 0) {
+                buildingRow.appendChild(Column.span3().setTextContent(String.valueOf(building.getEgid())));
+            } else {
+                buildingRow.appendChild(Column.span3().appendChild(span().innerHtml(SafeHtmlUtils.fromTrustedString("&ndash;"))));
+            }
+            buildingRow.appendChild(Column.span2().style().setTextAlign("right").get().appendChild(span().innerHtml(SafeHtmlUtils.fromTrustedString(fmtSquareMeter.format(building.getArea()) + " m<sup>2</sup>"))));
 
+            List<BuildingEntry> entries = building.getBuildingEntries();
+            String allAddressesString = "";
+            for (int i=0; i<entries.size(); i++) {
+                PostalAddress address = entries.get(i).getPostalAddress();
+                if (address != null) {
+                    String addressString = address.getStreet() + " " + address.getNumber() + ", " + address.getPostalCode() + " " + address.getCity();
+                    if (i!=0) {
+                        allAddressesString += "<br>" + addressString;
+                    } else {
+                        allAddressesString += addressString;
+                    }
+                }
+            }
+            buildingRow.appendChild(Column.span7().appendChild(span().innerHtml(SafeHtmlUtils.fromTrustedString(allAddressesString))));
+            div.appendChild(buildingRow.element()); 
+        }
+        return div;
+    }
+    
+    private HTMLElement addCadastralSurveyingContentLandCoverShares(ArrayList<LandCoverShare> landCoverShares) {
+        HTMLDivElement div = div().element();
+
+        Row landCoverTitle = Row.create().appendChild(span().css("cadastralSurveyingInfoKey").style("padding-top:15px;").textContent("Bodenbedeckung"));
+        div.appendChild(landCoverTitle.element());
+        
+        double landCoverShareSum = 0.0;
+        for (LandCoverShare landCoverShare : landCoverShares) {
+            Row landCoverShareRow = Row.create().css("buildingRow");
+            landCoverShareRow.appendChild(Column.span4().setTextContent(landCoverShare.getTypeDescription()));
+            landCoverShareRow.appendChild(Column.span3().style().setTextAlign("right").get().appendChild(span().innerHtml(SafeHtmlUtils.fromTrustedString(fmtSquareMeter.format(landCoverShare.getArea()) + " m<sup>2</sup>"))));
+            div.appendChild(landCoverShareRow.element());
+            
+            landCoverShareSum += landCoverShare.getArea();
+        }
+        Row landCoverShareSumRow = Row.create().css("buildingRow");
+        landCoverShareSumRow.appendChild(Column.span4().appendChild(span().innerHtml(SafeHtmlUtils.fromTrustedString("<i>Total</i>"))));
+        landCoverShareSumRow.appendChild(Column.span3().style().setTextAlign("right").get().appendChild(span().innerHtml(SafeHtmlUtils.fromTrustedString("<i>"+fmtSquareMeter.format(landCoverShareSum) + " m<sup>2</sup></i>"))));
+        div.appendChild(landCoverShareSumRow.element());
+        
+        return div;
+    }
+
+    private HTMLElement addCadastralSurveyingContentOffices(RealEstateDPR realEstateDPR) {
+        HTMLDivElement div = div().element();
+        
+        {
+            Row landRegisterOfficeTitle = Row.create().appendChild(span().css("cadastralSurveyingInfoKey").style("padding-top:15px;").textContent("Grundbuchamt"));
+            div.appendChild(landRegisterOfficeTitle.element());
+
+            Row addressRow = Row.create().css("cadastreAddressRow");
+            Office landRegisterOffice = realEstateDPR.getCadastreLandRegisterOffice();
+            String name = landRegisterOffice.getName();
+            String street = landRegisterOffice.getStreet();
+            String number = landRegisterOffice.getNumber();
+            String postalCode = landRegisterOffice.getPostalCode();
+            String city = landRegisterOffice.getCity();
+            String web = landRegisterOffice.getOfficeAtWeb();
+            String email = landRegisterOffice.getEmail();
+            
+            String addressHtml = ""
+                    + name + "<br>"
+                    + street + " " + number + "<br>"
+                    + postalCode + " " + city + "<br>"
+                    + "<a class='resultLink' href=" + web + " target='_blank'>"+web+"</a><br>"
+                    + "<a class='resultLink' mailto=" + email + ">"+email+"</a>";
+            
+            addressRow.appendChild(Column.span12().style().setTextAlign("left").get().appendChild(span().innerHtml(SafeHtmlUtils.fromTrustedString(addressHtml))));
+            div.appendChild(addressRow.element());
+        }
+        
+        {
+            Row surveyorOfficeTitle = Row.create().appendChild(span().css("cadastralSurveyingInfoKey").style("padding-top:15px;").textContent("Nachführungsgeometer"));
+            div.appendChild(surveyorOfficeTitle.element());
+
+            Row addressRow = Row.create().css("cadastreAddressRow");
+            Office surveyorOffice = realEstateDPR.getCadastreSurveyorOffice();
+            String firstName = surveyorOffice.getFirstName();
+            String lastName = surveyorOffice.getLastName();
+            String name = surveyorOffice.getName();
+            String line1 = surveyorOffice.getLine1();
+            String street = surveyorOffice.getStreet();
+            String number = surveyorOffice.getNumber();
+            String postalCode = surveyorOffice.getPostalCode();
+            String city = surveyorOffice.getCity();
+            String web = surveyorOffice.getOfficeAtWeb();
+            String email = surveyorOffice.getEmail();
+            
+            String addressHtml = ""
+                    + firstName + " " + lastName + "<br>"
+                    + name + "<br>";
+            if (line1 != null) {
+                addressHtml += line1 + "<br>";
+            }
+            addressHtml += ""
+                    + street + " " + number + "<br>"
+                    + postalCode + " " + city + "<br>"
+                    + "<a class='resultLink' href=" + web + " target='_blank'>"+web+"</a><br>"
+                    + "<a class='resultLink' mailto=" + email + ">"+email+"</a>";
+            
+            addressRow.appendChild(Column.span12().style().setTextAlign("left").get().appendChild(span().innerHtml(SafeHtmlUtils.fromTrustedString(addressHtml))));
+            div.appendChild(addressRow.element());
+        }
+
+        return div;
+    }
+    
     // Create the vector layer for highlighting the
     // real estate.
     private ol.layer.Vector createRealEstateVectorLayer(String geometry) {

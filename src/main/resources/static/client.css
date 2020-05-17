@@ -263,7 +263,6 @@ p.slide-container {
     padding: 5px 0px 5px 0px;	
 }
 
-
 .resultLink {
     color: #ef5350;  
 }
@@ -277,6 +276,14 @@ a.resultLink:visited {
     color: #ef5350; 
     text-decoration: underline !important;
 }  
+
+.buildingRow {
+    padding: 2px 0px 2px 0px;   
+}
+
+.cadastreAddressRow {
+    padding: 1px 0px 1px 0px;
+}
 
 #errorModal p {
 	text-align: left;

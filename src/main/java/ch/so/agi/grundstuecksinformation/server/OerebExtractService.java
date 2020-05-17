@@ -20,7 +20,6 @@ import ch.ehi.oereb.schemas.oereb._1_0.extractdata.MultilingualTextType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.MultilingualUriType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.RealEstateDPRType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.RestrictionOnLandownershipType;
-import ch.so.agi.grundstuecksinformation.shared.EgridResponse;
 import ch.so.agi.grundstuecksinformation.shared.models.AbstractTheme;
 import ch.so.agi.grundstuecksinformation.shared.models.ConcernedTheme;
 import ch.so.agi.grundstuecksinformation.shared.models.Document;
@@ -109,6 +108,7 @@ public class OerebExtractService {
             // TODO
             // proper error handling
             logger.error("response code: {}", responseCode );
+            return realEstateDPR;
         } 
        
         File xmlFile = Files.createTempFile("oereb_extract_", ".xml").toFile();            
@@ -531,7 +531,6 @@ public class OerebExtractService {
         realEstateDPR.setOerebConcernedThemes(concernedThemesList);
         realEstateDPR.setRealEstateType(realEstateTypesMap.get(xmlRealEstateDPR.getType().value()));
         
-        //realEstateDPR.setOerebPdfExtractUrl(egrid.getOerebServiceBaseUrl() + "extract/reduced/pdf/geometry/" + egrid.getEgrid());
         realEstateDPR.setOerebPdfExtractUrl(oerebServiceUrl + "extract/reduced/pdf/" + egrid.getEgrid());
                 
         Office oerebCadastreAuthority = new Office();

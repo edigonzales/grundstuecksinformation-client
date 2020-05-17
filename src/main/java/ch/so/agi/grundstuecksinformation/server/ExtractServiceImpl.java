@@ -39,6 +39,9 @@ public class ExtractServiceImpl extends RemoteServiceServlet implements ExtractS
 
     @Autowired
     OerebExtractService oerebExtractService;
+    
+    @Autowired
+    CadastreExtractService cadastreExtractService;
 
     @Override
     public void init() throws ServletException {
@@ -50,8 +53,11 @@ public class ExtractServiceImpl extends RemoteServiceServlet implements ExtractS
     public ExtractResponse extractServer(Egrid egrid) throws IllegalArgumentException, IOException {
         logger.info("Oereb extract request for: " + egrid.getEgrid());
         
+        // TODO 
+        // proper error handling if one extract goes wrong
         RealEstateDPR realEstateDPR = new RealEstateDPR();
         oerebExtractService.getExtract(egrid, realEstateDPR);
+        cadastreExtractService.getExtract(egrid, realEstateDPR);
         
         ExtractResponse extractResponse = new ExtractResponse();
         extractResponse.setRealEstateDPR(realEstateDPR);

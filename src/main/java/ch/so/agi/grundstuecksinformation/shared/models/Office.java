@@ -14,6 +14,14 @@ public class Office implements IsSerializable {
     String postalCode;
     
     String city;
+    
+    String email;
+    
+    String lastName;
+    
+    String firstName;
+    
+    String line1;
 
     public String getName() {
         return name;
@@ -61,5 +69,37 @@ public class Office implements IsSerializable {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLine1() {
+        return line1;
+    }
+
+    public void setLine1(String line1) {
+        this.line1 = line1;
     }
 }
