@@ -1,6 +1,7 @@
 package ch.so.agi.grundstuecksinformation.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponents;
@@ -19,6 +20,7 @@ import ch.ehi.oereb.schemas.oereb._1_0.extractdata.MultilingualTextType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.MultilingualUriType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.RealEstateDPRType;
 import ch.ehi.oereb.schemas.oereb._1_0.extractdata.RestrictionOnLandownershipType;
+import ch.so.agi.grundstuecksinformation.shared.EgridResponse;
 import ch.so.agi.grundstuecksinformation.shared.models.AbstractTheme;
 import ch.so.agi.grundstuecksinformation.shared.models.ConcernedTheme;
 import ch.so.agi.grundstuecksinformation.shared.models.Document;
@@ -69,6 +71,9 @@ public class OerebExtractService {
     @Autowired
     Jaxb2Marshaller marshaller;
 
+    @Value("${app.oerebServiceUrl}")
+    private String oerebServiceUrl;
+
     private static final LanguageCodeType DE = LanguageCodeType.DE;
 
     // Sortierung Kanton Solothurn
@@ -89,51 +94,29 @@ public class OerebExtractService {
     })
     .collect(Collectors.toMap(data -> data[0], data -> data[1]));
 
-    public RealEstateDPR getExtract(Egrid egrid, RealEstateDPR realEstateDPR) throws IOException {     
-        // FIXME: Kann man vereinfachen.
-        File xmlFile;
-        //if (egrid.getOerebServiceBaseUrl() != null) { // request by map click
-        if (egrid != null) { // request by map click
-            xmlFile = Files.createTempFile("oereb_extract_", ".xml").toFile();
-            // TEMP
-            URL url = new URL(egrid.getEgrid() + "extract/reduced/xml/geometry/" + egrid.getEgrid());
-            logger.debug("extract url: " + url.toString());
-
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setRequestProperty("Accept", "application/xml");
-
-            if (connection.getResponseCode() != 200) {
-                throw new IOException(connection.getResponseMessage());
-            }
-            
-            InputStream initialStream = connection.getInputStream();
-            java.nio.file.Files.copy(initialStream, xmlFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            initialStream.close();
-            logger.info("File downloaded: " + xmlFile.getAbsolutePath());  
-        } else { // request by search
-            HttpURLConnection connection = null;
-            int responseCode = 0;
-            for (String baseUrl : Consts.OEREB_SERVICE_BASE_URL) {
-                URL url = new URL(baseUrl + "extract/reduced/xml/geometry/" + egrid.getEgrid());
-                logger.info(url.toString());
-                
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setRequestProperty("Accept", "application/xml");
-                responseCode = connection.getResponseCode();
-                if (responseCode == 200) {
-                    logger.info("Extract found: " + url.toString());
-                    break;
-                } 
-            }
-            xmlFile = Files.createTempFile("oereb_extract_", ".xml").toFile();            
-            InputStream initialStream = connection.getInputStream();
-            java.nio.file.Files.copy(initialStream, xmlFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            initialStream.close();
-            logger.info("File downloaded: " + xmlFile.getAbsolutePath());  
-        }
+    public RealEstateDPR getExtract(Egrid egrid, RealEstateDPR realEstateDPR) throws IOException {    
+        HttpURLConnection connection = null;
+        int responseCode = 0;
+        URL url = new URL(oerebServiceUrl + "extract/reduced/xml/geometry/" + egrid.getEgrid());
+        logger.info(url.toString());
         
+        connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setRequestProperty("Accept", "application/xml");
+        responseCode = connection.getResponseCode();
+        
+        if (responseCode != 200) {
+            // TODO
+            // proper error handling
+            logger.error("response code: {}", responseCode );
+        } 
+       
+        File xmlFile = Files.createTempFile("oereb_extract_", ".xml").toFile();            
+        InputStream initialStream = connection.getInputStream();
+        java.nio.file.Files.copy(initialStream, xmlFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        initialStream.close();
+        logger.info("File downloaded: " + xmlFile.getAbsolutePath());  
+
         StreamSource xmlSource = new StreamSource(xmlFile);
         GetExtractByIdResponse obj = (GetExtractByIdResponse) marshaller.unmarshal(xmlSource);
         ExtractType xmlExtract = obj.getValue().getExtract().getValue();
@@ -192,7 +175,7 @@ public class OerebExtractService {
          * Weil Kantone Subthemen völlig anders behandeln und verwenden, muss dem auch beim Verarbeiten
          * und Darstellen im Client Rechnung getragen werden.
          * Auf Serverseite muss die Kombination Theme.Text.Text + Subtheme gruppiert werden.
-         * Im Client für das Beschriften der Handorgeln wir geprüft, ob - falls vorhanden - das Subthema
+         * Im Client für das Beschriften der Handorgeln wird geprüft, ob - falls vorhanden - das Subthema
          * sprechend ist (Kanton Solothurn) oder ob es sich um den technischen Namen handelt (Kanton GL).
          */
         
@@ -218,7 +201,7 @@ public class OerebExtractService {
             // 'groupingBy' kann nicht verwendet werden, weil das eine Liste pro Artcode
             // zurückliefert.
             // Später werden dem vereinfachten Restriction-Objekt mehr Infos hinzugefügt.
-            // TODO: Neu wird mit TypeCode und TypeCodeListe gruppiert. Das sollte jetzt
+            // ACHTUNG: Neu wird mit TypeCode und TypeCodeListe gruppiert. Das sollte jetzt
             // hinkommen (Egerkingen GB-Nr. 1293).            
             Map<TypeTuple, Restriction> restrictionsMap = xmlRestrictions
                     .stream()
@@ -548,9 +531,8 @@ public class OerebExtractService {
         realEstateDPR.setOerebConcernedThemes(concernedThemesList);
         realEstateDPR.setRealEstateType(realEstateTypesMap.get(xmlRealEstateDPR.getType().value()));
         
-        // TODO: which one is correct (according spec)?
         //realEstateDPR.setOerebPdfExtractUrl(egrid.getOerebServiceBaseUrl() + "extract/reduced/pdf/geometry/" + egrid.getEgrid());
-//        realEstateDPR.setOerebPdfExtractUrl(egrid.getOerebServiceBaseUrl() + "extract/reduced/pdf/" + egrid.getEgrid());
+        realEstateDPR.setOerebPdfExtractUrl(oerebServiceUrl + "extract/reduced/pdf/" + egrid.getEgrid());
                 
         Office oerebCadastreAuthority = new Office();
         oerebCadastreAuthority.setName(getLocalisedText(xmlExtract.getPLRCadastreAuthority().getName(), DE));

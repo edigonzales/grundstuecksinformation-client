@@ -8,8 +8,6 @@ body, div {
     font-family: 'Fira Sans', sans-serif;   
 }
 
-
-
 sup, sub {
   vertical-align: baseline;
   position: relative;
@@ -69,11 +67,13 @@ sub {
 	font-weight: bold;
 	width: 100%;
 	color: white;
-	background-color: #2196F3 
+	background-color: #ef5350 
 }
 
 #realEstatePopupClose {
     float: right;
+    vertical-align:middle;
+    cursor: default;
 }
 
 .realEstatePopupRow {
@@ -265,16 +265,16 @@ p.slide-container {
 
 
 .resultLink {
-    color: #2196F3; 
+    color: #ef5350;  
 }
 
 a.resultLink:hover {
-    color: #2196F3;
+    color: #ef5350;
     text-decoration: underline !important;
 }  
 
 a.resultLink:visited {
-    color: #2196F3; 
+    color: #ef5350; 
     text-decoration: underline !important;
 }  
 

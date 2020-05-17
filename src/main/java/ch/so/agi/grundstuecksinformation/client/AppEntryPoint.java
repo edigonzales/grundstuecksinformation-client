@@ -456,7 +456,7 @@ public class AppEntryPoint implements EntryPoint {
                 if (egridList.size() > 1 && event != null) {
                     loader.stop();
 
-                    HTMLElement closeButton = span().add(Icons.ALL.close_mdi()).element();                    
+                    HTMLElement closeButton = span().add(Icons.ALL.close()).element();                    
                     HtmlContentBuilder popupBuilder = div().id("realEstatePopup");
                     popupBuilder.add(
                             div().id("realEstatePopupHeader")
@@ -470,20 +470,20 @@ public class AppEntryPoint implements EntryPoint {
                         String number = egridObj.getNumber();
                         egridMap.put(egrid, egridObj);
                         
-                        String label = new String(messages.realEstateAbbreviation() + ": " + number + " (unknown type...)");
+                        String label = new String(messages.realEstateAbbreviation() + ": " + number + " ("+egridObj.getType()+")");
                         HTMLDivElement row = div().id(egrid).css("realEstatePopupRow")
                                 .add(span().textContent(label)).element();
                         
                         bind(row, mouseover, event -> {
                             row.style.backgroundColor = "#efefef";
                             row.style.cursor = "pointer";
-                            // Since there is no geometry, we cannot highlight the real estate.
-//                          ol.layer.Vector vlayer = createRealEstateVectorLayer(feature.getGeometry());
-//                          map.addLayer(vlayer);
+                            ol.layer.Vector vlayer = createRealEstateVectorLayer(egridObj.getLimit());
+                            map.addLayer(vlayer);
                         });
 
                         bind(row, mouseout, event -> {
                             row.style.backgroundColor = "white";
+                            removeRealEstateVectorLayer();
                         });
                         
                         bind(row, click, event -> {
@@ -588,10 +588,10 @@ public class AppEntryPoint implements EntryPoint {
                 Button closeBtn = Button.createPrimary(Icons.ALL.clear())
                 .circle()
                 .setSize(ButtonSize.SMALL)
-                .setButtonType(StyleType.PRIMARY)
+                .setButtonType(StyleType.DANGER)
                 .setTooltip(messages.resultCloseTooltip())
                 .style()
-                .setMargin(px.of(3)).get();
+                .setMargin(px.of(3)).setBackgroundColor("#ef5350").get();
                 
                 closeBtn.addClickListener(event -> {
                    resetGui();
@@ -600,10 +600,10 @@ public class AppEntryPoint implements EntryPoint {
                 Button expandBtn = Button.createPrimary(Icons.ALL.remove())
                 .circle()
                 .setSize(ButtonSize.SMALL)
-                .setButtonType(StyleType.PRIMARY)
+                .setButtonType(StyleType.DANGER)
                 .setTooltip(messages.resultMinimizeTooltip())                
                 .style()
-                .setMargin(px.of(3)).get();
+                .setMargin(px.of(3)).setBackgroundColor("#ef5350").get();
                                 
                 expandBtn.addClickListener(event -> {
                     if (resultCard.offsetHeight > headerRow.offsetHeight) {
@@ -650,7 +650,7 @@ public class AppEntryPoint implements EntryPoint {
                         .get();
 
                 HTMLElement tabsPanel = TabsPanel.create().setId("resultTabs")
-                    .setBackgroundColor(Color.BLUE)
+                    .setBackgroundColor(Color.RED_LIGHTEN_1)
                     .setColor(Color.WHITE)
                     .appendChild(tabCadastre)
                     .appendChild(tabLandRegister.appendChild(span().textContent("N/A")))
@@ -705,8 +705,8 @@ public class AppEntryPoint implements EntryPoint {
                 .setBackground(Color.WHITE)
                 .elevate(0)
                 .style()
-                .setColor("#2196F3")
-                .setBorder("1px #2196F3 solid")
+                .setColor("#ef5350")
+                .setBorder("1px #ef5350 solid")
                 .setPadding("5px 5px 5px 0px;")
                 .setMinWidth(px.of(120)).get();
             
@@ -1362,6 +1362,11 @@ public class AppEntryPoint implements EntryPoint {
         vectorLayer.set(ID_ATTR_NAME, REAL_ESTATE_VECTOR_LAYER_ID);
 
         return vectorLayer;
+    }
+    
+    private void removeRealEstateVectorLayer() {
+        Base vlayer = getMapLayerById(REAL_ESTATE_VECTOR_LAYER_ID);
+        map.removeLayer(vlayer);
     }
 
     // Remove all WMS (= oereb concerned themes) layers and the
