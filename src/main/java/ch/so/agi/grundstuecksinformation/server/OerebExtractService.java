@@ -92,9 +92,11 @@ public class OerebExtractService {
     public RealEstateDPR getExtract(Egrid egrid, RealEstateDPR realEstateDPR) throws IOException {     
         // FIXME: Kann man vereinfachen.
         File xmlFile;
-        if (egrid.getOerebServiceBaseUrl() != null) { // request by map click
+        //if (egrid.getOerebServiceBaseUrl() != null) { // request by map click
+        if (egrid != null) { // request by map click
             xmlFile = Files.createTempFile("oereb_extract_", ".xml").toFile();
-            URL url = new URL(egrid.getOerebServiceBaseUrl() + "extract/reduced/xml/geometry/" + egrid.getEgrid());
+            // TEMP
+            URL url = new URL(egrid.getEgrid() + "extract/reduced/xml/geometry/" + egrid.getEgrid());
             logger.debug("extract url: " + url.toString());
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -548,7 +550,7 @@ public class OerebExtractService {
         
         // TODO: which one is correct (according spec)?
         //realEstateDPR.setOerebPdfExtractUrl(egrid.getOerebServiceBaseUrl() + "extract/reduced/pdf/geometry/" + egrid.getEgrid());
-        realEstateDPR.setOerebPdfExtractUrl(egrid.getOerebServiceBaseUrl() + "extract/reduced/pdf/" + egrid.getEgrid());
+//        realEstateDPR.setOerebPdfExtractUrl(egrid.getOerebServiceBaseUrl() + "extract/reduced/pdf/" + egrid.getEgrid());
                 
         Office oerebCadastreAuthority = new Office();
         oerebCadastreAuthority.setName(getLocalisedText(xmlExtract.getPLRCadastreAuthority().getName(), DE));

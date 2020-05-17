@@ -20,6 +20,7 @@ import org.dominokit.domino.ui.forms.SuggestBoxStore;
 import org.dominokit.domino.ui.forms.SuggestItem;
 import org.dominokit.domino.ui.grid.Column;
 import org.dominokit.domino.ui.grid.Row;
+import org.dominokit.domino.ui.icons.Icon;
 import org.dominokit.domino.ui.icons.Icons;
 import org.dominokit.domino.ui.lists.ListGroup;
 import org.dominokit.domino.ui.loaders.Loader;
@@ -83,6 +84,8 @@ import elemental2.dom.Event;
 import elemental2.dom.EventListener;
 import elemental2.dom.HTMLDivElement;
 import elemental2.dom.HTMLElement;
+import elemental2.dom.Headers;
+import elemental2.dom.RequestInit;
 import ol.Coordinate;
 import ol.Extent;
 import ol.Feature;
@@ -124,7 +127,10 @@ public class AppEntryPoint implements EntryPoint {
     // Settings
     private String MY_VAR;
     private String OPENSEARCH_DESCRIPTION_URL;
-    private String SEARCH_SERVICE_URL = "https://api3.geo.admin.ch/rest/services/api/SearchServer?sr=2056&limit=15&type=locations&origins=address,parcel&searchText=";
+    private String SEARCH_SERVICE_URL;
+    private String DATA_SERVICE_URL;
+    private String OEREB_SERVICE_URL;
+    private String CADASTRE_SERVICE_URL;
 
     private String SUB_HEADER_FONT_SIZE = "16px";
     private String BODY_FONT_SIZE = "14px";
@@ -174,6 +180,10 @@ public class AppEntryPoint implements EntryPoint {
             public void onSuccess(SettingsResponse result) {
                 MY_VAR = (String) result.getSettings().get("MY_VAR");
                 OPENSEARCH_DESCRIPTION_URL = (String) result.getSettings().get("OPENSEARCH_DESCRIPTION_URL");
+                SEARCH_SERVICE_URL = (String) result.getSettings().get("SEARCH_SERVICE_URL");
+                DATA_SERVICE_URL = (String) result.getSettings().get("DATA_SERVICE_URL");
+                OEREB_SERVICE_URL = (String) result.getSettings().get("OEREB_SERVICE_URL");
+                CADASTRE_SERVICE_URL = (String) result.getSettings().get("CADASTRE_SERVICE_URL");
                 init();
             }
         });
@@ -189,7 +199,7 @@ public class AppEntryPoint implements EntryPoint {
         opensearchdescription.setTitle("Grundstücksinformationssuche");
         head.appendChild(opensearchdescription);
         
-        Theme theme = new Theme(ColorScheme.BLUE);
+        Theme theme = new Theme(ColorScheme.RED);
         theme.apply();
 
         loader = Loader.create((HTMLElement) DomGlobal.document.body, LoaderEffect.ROTATION).setLoadingText(null);
@@ -213,9 +223,12 @@ public class AppEntryPoint implements EntryPoint {
                     return;
                 }
                 
-                // fetch(url, init) -> https://www.javadoc.io/doc/com.google.elemental2/elemental2-dom/1.0.0-RC1/elemental2/dom/RequestInit.html
-                // abort -> https://github.com/react4j/react4j-flux-challenge/blob/b9b28250fd3f954c690f874605f67e2a24a7274d/src/main/java/react4j/sithtracker/model/SithPlaceholder.java
-                DomGlobal.fetch(SEARCH_SERVICE_URL + value.trim().toLowerCase())
+                RequestInit requestInit = RequestInit.create();
+                Headers headers = new Headers();
+                headers.append("Content-Type", "application/x-www-form-urlencoded"); 
+                requestInit.setHeaders(headers);
+
+                DomGlobal.fetch(SEARCH_SERVICE_URL + value.trim().toLowerCase(), requestInit)
                 .then(response -> {
                     if (!response.ok) {
                         return null;
@@ -227,20 +240,35 @@ public class AppEntryPoint implements EntryPoint {
                     JsPropertyMap<?> parsed = Js.cast(Global.JSON.parse(json));
                     JsArray<?> results = Js.cast(parsed.get("results"));
                     for (int i = 0; i < results.length; i++) {
-                        JsPropertyMap<?> feature = Js.cast(results.getAt(i));
-                        JsPropertyMap<?> attrs = Js.cast(feature.get("attrs"));
-
-                        SearchResult searchResult = new SearchResult();
-                        searchResult.setLabel(((JsString) attrs.get("label")).normalize());
-                        searchResult.setOrigin(((JsString) attrs.get("origin")).normalize());
-                        searchResult.setBbox(((JsString) attrs.get("geom_st_box2d")).normalize());
-                        searchResult.setEasting(((JsNumber) attrs.get("y")).valueOf());
-                        searchResult.setNorthing(((JsNumber) attrs.get("x")).valueOf());
-                        
-//                      // TODO icon type depending on address and parcel ?
-                        SuggestItem<SearchResult> suggestItem = SuggestItem.create(searchResult, searchResult.getLabel(),
-                                Icons.ALL.place());
-                        suggestItems.add(suggestItem);
+                        JsPropertyMap<?> resultObj = Js.cast(results.getAt(i));
+                        if (resultObj.has("feature")) {
+                            JsPropertyMap feature = (JsPropertyMap) resultObj.get("feature");
+                            String display = ((JsString) feature.get("display")).normalize();
+                            String dataproductId = ((JsString) feature.get("dataproduct_id")).normalize();
+                            String idFieldName = ((JsString) feature.get("id_field_name")).normalize();
+                            int featureId = new Double(((JsNumber) feature.get("feature_id")).valueOf()).intValue();
+                            List<Double> bbox = ((JsArray) feature.get("bbox")).asList();
+ 
+                            SearchResult searchResult = new SearchResult();
+                            searchResult.setLabel(display);
+                            searchResult.setDataproductId(dataproductId);
+                            searchResult.setIdFieldName(idFieldName);
+                            searchResult.setFeatureId(featureId);
+                            searchResult.setBbox(bbox);
+                            searchResult.setType("feature");
+                            
+                            Icon icon;
+                            if (dataproductId.contains("gebaeudeadressen")) {
+                                icon = Icons.ALL.mail();
+                            } else if (dataproductId.contains("grundstueck")) {
+                                icon = Icons.ALL.home();
+                            } else {
+                                icon = Icons.ALL.place();
+                            }
+                            
+                            SuggestItem<SearchResult> suggestItem = SuggestItem.create(searchResult, searchResult.getLabel(), icon);
+                            suggestItems.add(suggestItem);
+                        }
                     }
                     suggestionsHandler.onSuggestionsReady(suggestItems);
                     return null;
@@ -265,6 +293,8 @@ public class AppEntryPoint implements EntryPoint {
         suggestBox.setIcon(Icons.ALL.search());
         suggestBox.getInputElement().setAttribute("autocomplete", "off");
         suggestBox.getInputElement().setAttribute("spellcheck", "false");
+        suggestBox.setFocusOnClose(false);
+        suggestBox.setFocusColor(Color.RED);
         DropDownMenu suggestionsMenu = suggestBox.getSuggestionsMenu();
         suggestionsMenu.setPosition(new DropDownPositionDown());
         
@@ -274,23 +304,69 @@ public class AppEntryPoint implements EntryPoint {
                 loader.stop();
                 resetGui();
 
+                RequestInit requestInit = RequestInit.create();
+                Headers headers = new Headers();
+                headers.append("Content-Type", "application/x-www-form-urlencoded"); 
+                requestInit.setHeaders(headers);
+
                 SuggestItem<SearchResult> item = (SuggestItem<SearchResult>) value;
                 SearchResult result = (SearchResult) item.getValue();
                 
-                String[] coords = result.getBbox().substring(4,result.getBbox().length()-1).split(",");
-                String[] coordLL = coords[0].split(" ");
-                String[] coordUR = coords[1].split(" ");
-                Extent extent = new Extent(Double.valueOf(coordLL[0]).doubleValue(), Double.valueOf(coordLL[1]).doubleValue(), 
-                Double.valueOf(coordUR[0]).doubleValue(), Double.valueOf(coordUR[1]).doubleValue());
+                // Grundstück: E-GRID beim Dataservice anfragen.
+                // Adresse: Aus der BBOX, d.h. der Koordinate des Eingangs das Grundstück filtern.
                 
-                double easting = Double.valueOf(result.getEasting()).doubleValue();
-                double northing = Double.valueOf(result.getNorthing()).doubleValue();
+                String searchUrl = null;
+                if (result.getDataproductId().equalsIgnoreCase("ch.so.agi.av.grundstuecke.rechtskraeftig")) {
+                    String dataproductId = result.getDataproductId();
+                    String idFieldName = result.getIdFieldName();
+                    String featureId = String.valueOf(result.getFeatureId());
+                    
+                    searchUrl = DATA_SERVICE_URL + dataproductId + "/?filter=[[\""+idFieldName+"\",\"=\","+featureId+"]]";
+                   
+                } else if (result.getDataproductId().equalsIgnoreCase("ch.so.agi.av.gebaeudeadressen.gebaeudeeingaenge")) {
+                    List<Double> bboxList = result.getBbox();
+                    String bbox = bboxList.stream().map(String::valueOf).collect(Collectors.joining(","));
+                    
+                    searchUrl = DATA_SERVICE_URL + "ch.so.agi.av.grundstuecke.rechtskraeftig/?bbox=" + bbox;
+                }
                 
-                Coordinate coordinate = new Coordinate(easting, northing);
-                sendCoordinateToServer(coordinate.toStringXY(3), null);
+                if (searchUrl == null) {
+                    // TODO -> Fehlermeldung im GUI
+                    console.error("should not reach here");
+                    return;
+                }
                 
-                // TODO: remove focus
-                // -> Tried a lot but failed. Ask the authors.
+                DomGlobal.fetch(searchUrl, requestInit)
+                .then(response -> {
+                    if (!response.ok) {
+                        return null;
+                    }
+                    return response.text();
+                })
+                .then(json -> {
+                    Feature[] features = (new GeoJson()).readFeatures(json);
+                    
+                    // Bei einer Adresssuche und anschliessender BBOX-Filterung der
+                    // Grundstücke können mehrere Resultate zurückgeliefert werden:
+                    // Eine Liegenschaft und 0 bis n SelbstRechte. In solchen Fällen
+                    // soll die Liegenschaft verwendet werden.
+                    for(int i=0; i<features.length; i++) {
+                        String art = (String) features[i].getProperties().get("art_txt");
+                        if (art.equalsIgnoreCase("Liegenschaft")) {
+                            String egrid = (String) features[i].getProperties().get("egrid");
+
+                            loader.start();
+
+                            Egrid egridObj = new Egrid();
+                            egridObj.setEgrid(egrid);
+                            sendEgridToServer(egridObj);
+                        }
+                    }
+                    return null;
+                }).catch_(error -> {
+                    console.log(error);
+                    return null;
+                });
             }
         });
         

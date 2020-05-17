@@ -6,8 +6,8 @@ public class Egrid implements IsSerializable {
     private String egrid;
     private String number;
     private String identDN;
+    private String type;
     private String limit;
-    private String oerebServiceBaseUrl;
     
     public String getEgrid() {
         return egrid;
@@ -27,16 +27,16 @@ public class Egrid implements IsSerializable {
     public void setIdentDN(String identDN) {
         this.identDN = identDN;
     }
+    public String getType() {
+        return type;
+    }
+    public void setType(String type) {
+        this.type = type;
+    }
     public String getLimit() {
         return limit;
     }
     public void setLimit(String limit) {
         this.limit = limit;
-    }
-    public String getOerebServiceBaseUrl() {
-        return oerebServiceBaseUrl;
-    }
-    public void setOerebServiceBaseUrl(String oerebServiceBaseUrl) {
-        this.oerebServiceBaseUrl = oerebServiceBaseUrl;
     }
 }

@@ -23,6 +23,17 @@ public class SettingsServiceImpl extends RemoteServiceServlet implements Setting
     @Value("${app.opensearchDescriptionUrl}")
     private String opensearchDescriptionUrl;
 
+    @Value("${app.searchServiceUrl}")
+    private String searchServiceUrl;
+
+    @Value("${app.dataServiceUrl}")
+    private String dataServiceUrl;
+
+    @Value("${app.oerebServiceUrl}")
+    private String oerebServiceUrl;
+
+    @Value("${app.cadastreServiceUrl}")
+    private String cadastreServiceUrl;
 
     @Override
     public void init() throws ServletException {
@@ -36,6 +47,10 @@ public class SettingsServiceImpl extends RemoteServiceServlet implements Setting
         
         settings.put("MY_VAR", myVar);
         settings.put("OPENSEARCH_DESCRIPTION_URL", opensearchDescriptionUrl);
+        settings.put("SEARCH_SERVICE_URL", searchServiceUrl);
+        settings.put("DATA_SERVICE_URL", dataServiceUrl);
+        settings.put("OEREB_SERVICE_URL", oerebServiceUrl);
+        settings.put("CADASTRE_SERVICE_URL", cadastreServiceUrl);
 
         SettingsResponse response = new SettingsResponse();
         response.setSettings(settings);
