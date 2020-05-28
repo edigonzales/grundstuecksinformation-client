@@ -77,10 +77,10 @@ public class EgridServiceImpl extends RemoteServiceServlet implements EgridServi
 
         StreamSource xmlSource = new StreamSource(xmlFile);
         GetEGRIDResponse obj = (GetEGRIDResponse) marshaller.unmarshal(xmlSource);
-        List<JAXBElement<?>> egridXmlList = obj.getEgridsAndLimitsAndStateOves();
+        List<JAXBElement<?>> egridXmlList = obj.getEGRIDSAndPlannedsAndLimits();
 
         List<Egrid> egridList = new ArrayList<Egrid>();
-        for (int i = 0; i < egridXmlList.size(); i = i + 6) {
+        for (int i = 0; i < egridXmlList.size(); i = i + 7) {
             Egrid egridObj = new Egrid();
             egridObj.setEgrid((String) egridXmlList.get(i).getValue());
             egridObj.setNumber((String) egridXmlList.get(i + 1).getValue());
@@ -93,6 +93,7 @@ public class EgridServiceImpl extends RemoteServiceServlet implements EgridServi
             }
             // TODO stateOf
             egridObj.setLimit((String) egridXmlList.get(i + 5).getValue());
+            egridObj.setPlanned((Boolean)egridXmlList.get(i + 6).getValue());
             egridList.add(egridObj);
         }
         

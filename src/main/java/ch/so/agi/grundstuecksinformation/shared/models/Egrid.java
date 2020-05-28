@@ -8,6 +8,7 @@ public class Egrid implements IsSerializable {
     private String identDN;
     private String type;
     private String limit;
+    private boolean planned;
     
     public String getEgrid() {
         return egrid;
@@ -38,5 +39,11 @@ public class Egrid implements IsSerializable {
     }
     public void setLimit(String limit) {
         this.limit = limit;
+    }
+    public boolean isPlanned() {
+        return planned;
+    }
+    public void setPlanned(boolean planned) {
+        this.planned = planned;
     }
 }
